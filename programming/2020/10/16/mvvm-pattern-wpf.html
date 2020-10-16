@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A survey of the MVVM pattern in WPF">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>MVVM Pattern in WPF - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item">
+          <h1 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h1>
+        </div>
+        <div class="list-group-item">
+          <h1>MVVM Pattern in WPF</h1>
+          
+          <p><i>October 16, 2020&mdash;A survey of the MVVM pattern in WPF</i></p>
+          
+          <p>
+  MVVM stands for <b>Model View View-Model</b>. It is a pattern for creating user
+  interfaces. It helps you separate your view and its behavior from the rest of
+  your application. With some discipline that means your application will be
+  easier to change over time.
+</p>
+<p>
+  <b>Model</b>&mdash;The model is basically everything except the view and its
+  behavior.
+</p>
+<p>
+  <b>View</b>&mdash;The user interface.
+</p>
+<p>
+  <b>View model</b>&mdash;The view's behavior.
+</p>
+<p>
+  WPF stands for <b>Windows Presentation Foundation</b>. It was created by
+  Microsoft in the late 2000s. It helps you create visual applications for
+  Windows using the .Net Framework.
+</p>
+<p>
+  WPF popularized the MVVM pattern, and the MVVM pattern is very natural to use
+  in WPF.
+</p>
+
+<h2>A little example</h2>
+<p>
+  Here's an example:
+</p>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="c">&lt;!-- View.xaml --&gt;</span>
+... (some boilerplate code goes here)
+<span class="nt">&lt;TextBlock</span> <span class="na">Text=</span><span class="s">"{Binding Message}"</span><span class="nt">/&gt;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// ViewModel.cs</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">ViewModel</span> <span class="p">:</span> <span class="n">INotifyPropertyChanged</span>
+<span class="p">{</span>
+  <span class="kt">string</span> <span class="n">_message</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="k">event</span> <span class="n">PropertyChangedEventHandler</span> <span class="n">PropertyChanged</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="kt">string</span> <span class="n">Message</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">=&gt;</span> <span class="n">_message</span><span class="p">;</span>
+    <span class="k">set</span>
+    <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">value</span> <span class="p">==</span> <span class="n">_message</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">;</span>
+      <span class="n">_message</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+      <span class="n">PropertyChanged</span><span class="p">?.</span><span class="nf">Invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="k">new</span> <span class="nf">PropertyChangedEventArgs</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">Message</span><span class="p">)));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// Model.cs</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Model</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="nf">GetMessageFromDatabaseAsync</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// Program.cs</span>
+<span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">model</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Model</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">viewModel</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ViewModel</span><span class="p">();</span>
+
+    <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+    <span class="p">{</span>
+      <span class="n">viewModel</span><span class="p">.</span><span class="n">Message</span> <span class="p">=</span> <span class="k">await</span> <span class="n">model</span><span class="p">.</span><span class="nf">GetMessageFromDatabaseAsync</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="kt">var</span> <span class="n">view</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">View</span><span class="p">();</span>
+    <span class="n">view</span><span class="p">.</span><span class="n">DataContext</span> <span class="p">=</span> <span class="n">viewModel</span><span class="p">;</span>
+    <span class="n">view</span><span class="p">.</span><span class="nf">ShowDialog</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>
+  Let's step through <code>Program.cs</code>
+  <ol>
+    <li>
+      The model is instantiated
+    </li>
+    <li>
+      The view model is instantiated
+    </li>
+    <li>
+      The view is instantiated, given the view model, and displayed to the user
+    </li>
+    <li>
+      Behind the scenes, the <code>{Binding Message}</code> has instructed WPF
+      to pay attention to the view model's <code>PropertyChanged</code> event,
+      especially when it raises an event with the name <code>"Message"</code>
+    </li>
+    <li>
+      In the background, some message is asynchronously acquired from the
+      database and assigned to the view model's <code>Message</code> property
+    </li>
+    <li>
+      When the view model's <code>Message</code> property is assigned it will
+      raise its <code>PropertyChanged</code> event
+    </li>
+    <li>
+      WPF notices the raised event and reads the <code>Message</code> property
+      from the view model and assigns it to the <code>Text</code> property of
+      the <code>TextBlock</code> in the view
+    </li>
+  </ol>
+</p>
+<p>
+  The end result is the message is shown on the screen.
+</p>
+<p>
+  That might seem kind of convoluted. Especially if you compare with this:
+</p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// Program.cs</span>
+<span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">textBlock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TextBlock</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">window</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Window</span>
+    <span class="p">{</span>
+      <span class="n">Content</span> <span class="p">=</span> <span class="n">textBlock</span>
+    <span class="p">};</span>
+    <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+    <span class="p">{</span>
+      <span class="kt">var</span> <span class="n">message</span> <span class="p">=</span> <span class="k">await</span> <span class="k">new</span> <span class="nf">Model</span><span class="p">().</span><span class="nf">GetMessageFromDatabaseAsync</span><span class="p">();</span>
+      <span class="n">textBlock</span><span class="p">.</span><span class="n">Dispatcher</span><span class="p">.</span><span class="nf">InvokeAsync</span><span class="p">(()</span> <span class="p">=&gt;</span>
+      <span class="p">{</span>
+        <span class="n">textBlock</span><span class="p">.</span><span class="n">Text</span> <span class="p">=</span> <span class="n">message</span><span class="p">;</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="n">window</span><span class="p">.</span><span class="nf">ShowDialog</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<p>
+  But I think with the next example you'll begin to see why the convolution is
+  worth it.
+</p>
+
+<h2>A bigger example</h2>
+<p>
+  Here's a more complicated example:
+</p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// BaseViewModel.cs</span>
+<span class="k">public</span> <span class="k">abstract</span> <span class="k">class</span> <span class="nc">BaseViewModel</span> <span class="p">:</span> <span class="n">INotifyPropertyChanged</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span> <span class="n">_properties</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;();</span>
+
+  <span class="k">public</span> <span class="k">event</span> <span class="n">PropertyChangedHandler</span> <span class="n">PropertyChanged</span><span class="p">;</span>
+
+  <span class="k">protected</span> <span class="n">T</span> <span class="n">Get</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;([</span><span class="n">CallerMemberName</span><span class="p">]</span> <span class="kt">string</span> <span class="n">propertyName</span> <span class="p">=</span> <span class="k">null</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Return the indicated property</span>
+  <span class="p">}</span>
+
+  <span class="k">protected</span> <span class="kt">bool</span> <span class="nf">Set</span><span class="p">(</span><span class="kt">object</span> <span class="k">value</span><span class="p">,</span> <span class="p">[</span><span class="n">CallerMemberName</span><span class="p">]</span> <span class="kt">string</span> <span class="n">propertyName</span> <span class="p">=</span> <span class="k">null</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Set the indicated property. Return true and raise the PropertyChanged</span>
+    <span class="c1">// event if the property has changed</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// ButtonViewModel</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">ButtonViewModel</span> <span class="p">:</span> <span class="n">BaseViewModel</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="n">ICommand</span> <span class="n">Command</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">=&gt;</span> <span class="n">Get</span><span class="p">&lt;</span><span class="n">ICommand</span><span class="p">&gt;();</span>
+    <span class="k">set</span> <span class="p">=&gt;</span> <span class="nf">Set</span><span class="p">(</span><span class="k">value</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="kt">string</span> <span class="n">Label</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">=&gt;</span> <span class="n">Get</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;();</span>
+    <span class="k">set</span> <span class="p">=&gt;</span> <span class="nf">Set</span><span class="p">(</span><span class="k">value</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// ViewModel.cs</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">ViewModel</span> <span class="p">:</span> <span class="n">BaseViewModel</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="nf">ViewModel</span><span class="p">(</span>
+    <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">people</span><span class="p">,</span>
+    <span class="n">Action</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">handleRatingFeedback</span><span class="p">,</span>
+    <span class="n">Action</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">handleFavoritePerson</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">RatingScale</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ObservableCollection</span><span class="p">(</span>
+      <span class="n">Enumerable</span>
+      <span class="p">.</span><span class="nf">Range</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">5</span><span class="p">)</span>
+      <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">rating</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="n">ButtonViewModel</span>
+      <span class="p">{</span>
+        <span class="n">Label</span> <span class="p">=</span> <span class="n">rating</span><span class="p">.</span><span class="nf">ToString</span><span class="p">(),</span>
+        <span class="n">Command</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ActionCommand</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">handleRatingFeedback</span><span class="p">(</span><span class="n">rating</span><span class="p">))</span>
+      <span class="p">})</span>
+    <span class="p">);</span>
+    <span class="n">People</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ObservableCollection</span><span class="p">(</span>
+      <span class="n">people</span>
+      <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">person</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="n">ButtonViewModel</span>
+      <span class="p">{</span>
+        <span class="n">Label</span> <span class="p">=</span> <span class="n">person</span><span class="p">,</span>
+        <span class="n">Command</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ActionCommand</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">handleFavoritePerson</span><span class="p">(</span><span class="n">person</span><span class="p">))</span>
+      <span class="p">})</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">ObservableCollection</span><span class="p">&lt;</span><span class="n">ButtonViewModel</span><span class="p">&gt;</span> <span class="n">RatingScale</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">public</span> <span class="n">ObservableCollection</span><span class="p">&lt;</span><span class="n">ButtonViewModel</span><span class="p">&gt;</span> <span class="n">People</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="c">&lt;!-- RowOfButtons.xaml --&gt;</span>
+... (some boilerplate code goes here)
+<span class="nt">&lt;ItemsControl</span> <span class="na">ItemsSource=</span><span class="s">"{Binding ButtonViewModels}"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;ItemsControl.ItemsPanel&gt;</span>
+    <span class="nt">&lt;ItemsPanelTemplate&gt;</span>
+      <span class="nt">&lt;StackPanel</span>
+        <span class="na">IsItemsHost =</span> <span class="s">"True"</span>
+        <span class="na">Orientation =</span> <span class="s">"Horizontal"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/ItemsPanelTemplate&gt;</span>
+  <span class="nt">&lt;/ItemsControl.ItemsPanel&gt;</span>
+  <span class="nt">&lt;ItemsControl.ItemTemplate&gt;</span>
+    <span class="nt">&lt;DataTemplate</span> <span class="na">DataType=</span><span class="s">"{x:Type ButtonViewModel}"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;Button</span>
+        <span class="na">Command=</span><span class="s">"{Binding Command}"</span>
+        <span class="na">Content=</span><span class="s">"{Binding Label}"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/DataTemplate&gt;</span>
+  <span class="nt">&lt;/ItemsControl.ItemTemplate&gt;</span>
+<span class="nt">&lt;/ItemsControl&gt;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="c">&lt;!-- View.xaml --&gt;</span>
+... (some boilerplate here)
+<span class="nt">&lt;StackPanel&gt;</span>
+  <span class="nt">&lt;TextBlock&gt;</span>How are we doing?<span class="nt">&lt;/TextBlock&gt;</span>
+  <span class="nt">&lt;RowOfButtons</span> <span class="na">DataContext=</span><span class="s">"{Binding RatingScale}"</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;TextBlock&gt;</span>Pick your favorite person:<span class="nt">&lt;/TextBlock&gt;</span>
+  <span class="nt">&lt;RowOfButtons</span> <span class="na">DataContext=</span><span class="s">"{Binding People}"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/StackPanel&gt;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// Model.cs</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Model</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">StoreRatingAsync</span><span class="p">(</span><span class="kt">int</span> <span class="n">rating</span><span class="p">);</span>
+  <span class="k">public</span> <span class="kt">string</span><span class="p">[]</span> <span class="nf">GetPeople</span><span class="p">();</span>
+  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">StoreFavoritePersonAsync</span><span class="p">(</span><span class="kt">string</span> <span class="n">person</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// Program.cs</span>
+<span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">model</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Model</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">people</span> <span class="p">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">GetPeople</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">viewModel</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ViewModel</span><span class="p">(</span>
+      <span class="n">people</span><span class="p">,</span>
+      <span class="k">async</span> <span class="n">rating</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="n">model</span><span class="p">.</span><span class="nf">StoreRatingAsync</span><span class="p">(</span><span class="n">rating</span><span class="p">),</span>
+      <span class="k">async</span> <span class="n">person</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="n">model</span><span class="p">.</span><span class="nf">StoreFavoritePersonAsync</span><span class="p">(</span><span class="n">person</span><span class="p">)</span>
+    <span class="p">);</span>
+    <span class="kt">var</span> <span class="n">view</span> <span class="p">=</span> <span class="k">new</span> <span class="n">View</span>
+    <span class="p">{</span>
+      <span class="n">DataContext</span> <span class="p">=</span> <span class="n">viewModel</span>
+    <span class="p">};</span>
+    <span class="n">view</span><span class="p">.</span><span class="nf">ShowDialog</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<p>
+  Let's compare it to WPF without MVVM:
+</p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// Program.cs</span>
+<span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">model</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Model</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">ratingsStack</span> <span class="p">=</span> <span class="k">new</span> <span class="n">StackPanel</span>
+    <span class="p">{</span>
+      <span class="n">Orientation</span> <span class="p">=</span> <span class="n">Horizontal</span>
+    <span class="p">};</span>
+    <span class="n">ratingsStack</span><span class="p">.</span><span class="n">Children</span><span class="p">.</span><span class="nf">AddRange</span><span class="p">(</span>
+      <span class="n">Enumerable</span>
+      <span class="p">.</span><span class="nf">Range</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">5</span><span class="p">)</span>
+      <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">rating</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="n">Button</span>
+      <span class="p">{</span>
+        <span class="n">Command</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ActionCommand</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="n">model</span><span class="p">.</span><span class="nf">StoreRatingAsync</span><span class="p">(</span><span class="n">rating</span><span class="p">)),</span>
+        <span class="n">Content</span> <span class="p">=</span> <span class="n">rating</span><span class="p">.</span><span class="nf">ToString</span><span class="p">()</span>
+      <span class="p">})</span>
+    <span class="p">);</span>
+    <span class="kt">var</span> <span class="n">peopleStack</span> <span class="p">=</span> <span class="k">new</span> <span class="n">StackPanel</span>
+    <span class="p">{</span>
+      <span class="n">Orientation</span> <span class="p">=</span> <span class="n">Horizontal</span>
+    <span class="p">};</span>
+    <span class="n">peopleStack</span><span class="p">.</span><span class="n">Children</span><span class="p">.</span><span class="nf">AddRange</span><span class="p">(</span>
+      <span class="n">model</span>
+      <span class="p">.</span><span class="nf">GetPeople</span><span class="p">()</span>
+      <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">person</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="n">Button</span>
+      <span class="p">{</span>
+        <span class="n">Command</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ActionCommand</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="n">model</span><span class="p">.</span><span class="nf">StoreFavoritePersonAsync</span><span class="p">(</span><span class="n">person</span><span class="p">)),</span>
+        <span class="n">Content</span> <span class="p">=</span> <span class="n">person</span>
+      <span class="p">})</span>
+    <span class="p">);</span>
+    <span class="kt">var</span> <span class="n">view</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Window</span>
+    <span class="p">{</span>
+      <span class="n">Content</span> <span class="p">=</span> <span class="k">new</span> <span class="n">StackPanel</span>
+      <span class="p">{</span>
+        <span class="n">Children</span> <span class="p">=</span>
+        <span class="p">{</span>
+          <span class="k">new</span> <span class="n">TextBlock</span>
+          <span class="p">{</span>
+            <span class="n">Text</span> <span class="p">=</span> <span class="s">"How are we doing?"</span>
+          <span class="p">},</span>
+          <span class="n">ratingsStack</span><span class="p">,</span>
+          <span class="k">new</span> <span class="n">TextBlock</span>
+          <span class="p">{</span>
+            <span class="n">Text</span> <span class="p">=</span> <span class="s">"Pick your favorite person:"</span>
+          <span class="p">},</span>
+          <span class="n">peopleStack</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">view</span><span class="p">.</span><span class="nf">ShowDialog</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+<p>
+  Again, I think the non-MVVM way is simpler in this case. But that's not all...
+</p>
+
+<h3>Add some styling</h3>
+<p>
+  Now let's change the label colors. In the MVVM version we'll change our views:
+</p>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="c">&lt;!-- RowOfButtons.xaml --&gt;</span>
+...
+<span class="nt">&lt;DataTemplate</span> <span class="na">DataType=</span><span class="s">"{x:Type ButtonViewModel}"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;Button</span> <span class="na">Command=</span><span class="s">"{Binding Command}"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;TextBlock</span>
+      <span class="na">Foreground=</span><span class="s">"Green"</span>
+      <span class="na">Text=</span><span class="s">"{Binding Label}"</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/Button&gt;</span>
+<span class="nt">&lt;/DataTemplate&gt;</span>
+...</code></pre></figure>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="c">&lt;!-- View.xaml --&gt;</span>
+...
+<span class="nt">&lt;TextBlock</span> <span class="na">Foreground=</span><span class="s">"Red"</span><span class="nt">&gt;</span>How are we doing?<span class="nt">&lt;/TextBlock&gt;</span>
+...
+<span class="nt">&lt;TextBlock</span> <span class="na">Foreground=</span><span class="s">"Blue"</span><span class="nt">&gt;</span>Pick your favorite person:<span class="nt">&lt;/TextBlock&gt;</span>
+...</code></pre></figure>
+<p>
+  And in the non-MVVM version we'll change the code that generates the UI
+  components:
+</p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// Program.cs</span>
+<span class="p">...</span>
+<span class="n">ratingsStack</span><span class="p">.</span><span class="n">Children</span><span class="p">.</span><span class="nf">AddRange</span><span class="p">(</span>
+  <span class="n">Enumerable</span>
+  <span class="p">.</span><span class="nf">Range</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">5</span><span class="p">)</span>
+  <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">rating</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="n">Button</span>
+  <span class="p">{</span>
+    <span class="n">Command</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ActionCommand</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="n">model</span><span class="p">.</span><span class="nf">StoreRatingAsync</span><span class="p">(</span><span class="n">rating</span><span class="p">)),</span>
+    <span class="n">Content</span> <span class="p">=</span> <span class="k">new</span> <span class="n">TextBlock</span>
+    <span class="p">{</span>
+      <span class="n">Foreground</span> <span class="p">=</span> <span class="n">Brushes</span><span class="p">.</span><span class="n">Green</span><span class="p">,</span>
+      <span class="n">Text</span> <span class="p">=</span> <span class="n">rating</span><span class="p">.</span><span class="nf">ToString</span><span class="p">()</span>
+    <span class="p">}</span>
+  <span class="p">})</span>
+<span class="p">);</span>
+<span class="p">...</span>
+<span class="n">peopleStack</span><span class="p">.</span><span class="n">Children</span><span class="p">.</span><span class="nf">AddRange</span><span class="p">(</span>
+  <span class="n">model</span>
+  <span class="p">.</span><span class="nf">GetPeople</span><span class="p">()</span>
+  <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">person</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="n">Button</span>
+  <span class="p">{</span>
+    <span class="n">Command</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ActionCommand</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="n">model</span><span class="p">.</span><span class="nf">StoreFavoritePersonAsync</span><span class="p">(</span><span class="n">person</span><span class="p">)),</span>
+    <span class="n">Content</span> <span class="p">=</span> <span class="k">new</span> <span class="n">TextBlock</span>
+    <span class="p">{</span>
+      <span class="n">Foreground</span> <span class="p">=</span> <span class="n">Brushes</span><span class="p">.</span><span class="n">Green</span><span class="p">,</span>
+      <span class="n">Text</span> <span class="p">=</span> <span class="n">rating</span><span class="p">.</span><span class="nf">ToString</span><span class="p">()</span>
+    <span class="p">}</span>
+  <span class="p">})</span>
+<span class="p">);</span>
+<span class="p">...</span>
+<span class="k">new</span> <span class="n">TextBlock</span>
+<span class="p">{</span>
+  <span class="n">Foreground</span> <span class="p">=</span> <span class="n">Brushes</span><span class="p">.</span><span class="n">Red</span><span class="p">,</span>
+  <span class="n">Text</span> <span class="p">=</span> <span class="s">"How are we doing?"</span>
+<span class="p">},</span>
+<span class="p">...</span>
+<span class="k">new</span> <span class="n">TextBlock</span>
+<span class="p">{</span>
+  <span class="n">Brushes</span><span class="p">.</span><span class="n">Blue</span><span class="p">,</span>
+  <span class="n">Text</span> <span class="p">=</span> <span class="s">"Pick your favorite person:"</span>
+<span class="p">},</span>
+<span class="p">...</span></code></pre></figure>
+<p>
+  Did you catch that? In the MVVM version our changes were quite isolated. We
+  only changed views. We didn't change view models, nor did we alter the model,
+  nor did we alter how the view, view model, and model are wired together. The
+  chances are quite small that we introduced a bug in how data is read from or
+  stored to the model. We also probably didn't accidentally mess up what happens
+  when you click on your favorite person. <b>The advantage is our changes were
+  very isolated.</b>
+</p>
+<p>
+  But in the non-MVVM version we had to change code in close proximity to
+  completely unrelated things. Simple changes like changing the labels' colors
+  were introduced immediately next to the code that manipulates the model.
+</p>
+<p>
+  Have you ever experienced an application that's stuck with a decades-old UI
+  because its maintainers don't have the time to fish through the tangled mess
+  of UI styling and business logic? Have you ever experienced an application
+  that broke after its maintainers changed colors or layout? Those kinds of
+  things happen less often with MVVM.
+</p>
+
+<h3>
+  MVVM is not the only way
+</h3>
+<p>
+  Now that we recognize the dangers of mixing UI concerns with other
+  responsibilities you can probably imagine various ways to separate those
+  things. And you can probably imagine ways to separate those things <i>without
+  using MVVM</i>. And that's fine.
+</p>
+
+<h2>
+  The point
+</h2>
+<p>
+  The point is MVVM is a disciplined way (not <i>the</i> disciplined way) to
+  isolate UI concerns.
+</p>
+<p>
+  The downsides of the MVVM pattern in WPF include:
+</p>
+<ul>
+  <li>Lots of boilerplate code</li>
+  <li>Sometimes you have to take a pretty indirect path</li>
+  <li>WPF's binding mechanism isn't the fastest thing out there</li>
+</ul>
+<p>
+  But it brings all the benefits of separating concerns.
+</p>
+
+<i>
+  Disclaimer&mdash;the code on this page will not compile. It's inspirational
+  pseudocode that I wrote off the cuff.
+</i>
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2020
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

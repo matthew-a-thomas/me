@@ -1,5 +1,10 @@
 {
     "editor.detectIndentation": false,
     "editor.rulers": [80, 120],
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "cSpell.words": [
+      "MVVM",
+      "endhighlight",
+      "pseudocode"
+    ]
 }

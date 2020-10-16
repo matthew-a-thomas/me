@@ -1,0 +1,478 @@
+---
+title: MVVM Pattern in WPF
+category: programming
+description: A survey of the MVVM pattern in WPF
+---
+<p>
+  MVVM stands for <b>Model View View-Model</b>. It is a pattern for creating user
+  interfaces. It helps you separate your view and its behavior from the rest of
+  your application. With some discipline that means your application will be
+  easier to change over time.
+</p>
+<p>
+  <b>Model</b>&mdash;The model is basically everything except the view and its
+  behavior.
+</p>
+<p>
+  <b>View</b>&mdash;The user interface.
+</p>
+<p>
+  <b>View model</b>&mdash;The view's behavior.
+</p>
+<p>
+  WPF stands for <b>Windows Presentation Foundation</b>. It was created by
+  Microsoft in the late 2000s. It helps you create visual applications for
+  Windows using the .Net Framework.
+</p>
+<p>
+  WPF popularized the MVVM pattern, and the MVVM pattern is very natural to use
+  in WPF.
+</p>
+
+<h2>A little example</h2>
+<p>
+  Here's an example:
+</p>
+{% highlight xml %}
+<!-- View.xaml -->
+... (some boilerplate code goes here)
+<TextBlock Text="{Binding Message}"/>
+{% endhighlight %}
+{% highlight csharp %}
+// ViewModel.cs
+public class ViewModel : INotifyPropertyChanged
+{
+  string _message;
+
+  public event PropertyChangedEventHandler PropertyChanged;
+
+  public string Message
+  {
+    get => _message;
+    set
+    {
+      if (value == _message)
+        return;
+      _message = value;
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Message)));
+    }
+  }
+}
+{% endhighlight %}
+{% highlight csharp %}
+// Model.cs
+public class Model
+{
+  public async Task<string> GetMessageFromDatabaseAsync() { ... }
+}
+{% endhighlight %}
+{% highlight csharp %}
+// Program.cs
+class Program
+{
+  static void Main()
+  {
+    var model = new Model();
+    var viewModel = new ViewModel();
+
+    Task.Run(async () =>
+    {
+      viewModel.Message = await model.GetMessageFromDatabaseAsync();
+    });
+
+    var view = new View();
+    view.DataContext = viewModel;
+    view.ShowDialog();
+  }
+}
+{% endhighlight %}
+
+<p>
+  Let's step through <code>Program.cs</code>
+  <ol>
+    <li>
+      The model is instantiated
+    </li>
+    <li>
+      The view model is instantiated
+    </li>
+    <li>
+      The view is instantiated, given the view model, and displayed to the user
+    </li>
+    <li>
+      Behind the scenes, the <code>{Binding Message}</code> has instructed WPF
+      to pay attention to the view model's <code>PropertyChanged</code> event,
+      especially when it raises an event with the name <code>"Message"</code>
+    </li>
+    <li>
+      In the background, some message is asynchronously acquired from the
+      database and assigned to the view model's <code>Message</code> property
+    </li>
+    <li>
+      When the view model's <code>Message</code> property is assigned it will
+      raise its <code>PropertyChanged</code> event
+    </li>
+    <li>
+      WPF notices the raised event and reads the <code>Message</code> property
+      from the view model and assigns it to the <code>Text</code> property of
+      the <code>TextBlock</code> in the view
+    </li>
+  </ol>
+</p>
+<p>
+  The end result is the message is shown on the screen.
+</p>
+<p>
+  That might seem kind of convoluted. Especially if you compare with this:
+</p>
+{% highlight csharp %}
+// Program.cs
+class Program
+{
+  static void Main()
+  {
+    var textBlock = new TextBlock();
+    var window = new Window
+    {
+      Content = textBlock
+    };
+    Task.Run(async () =>
+    {
+      var message = await new Model().GetMessageFromDatabaseAsync();
+      textBlock.Dispatcher.InvokeAsync(() =>
+      {
+        textBlock.Text = message;
+      });
+    });
+    window.ShowDialog();
+  }
+}
+{% endhighlight %}
+<p>
+  But I think with the next example you'll begin to see why the convolution is
+  worth it.
+</p>
+
+<h2>A bigger example</h2>
+<p>
+  Here's a more complicated example:
+</p>
+{% highlight csharp %}
+// BaseViewModel.cs
+public abstract class BaseViewModel : INotifyPropertyChanged
+{
+  readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
+
+  public event PropertyChangedHandler PropertyChanged;
+
+  protected T Get<T>([CallerMemberName] string propertyName = null)
+  {
+    // Return the indicated property
+  }
+
+  protected bool Set(object value, [CallerMemberName] string propertyName = null)
+  {
+    // Set the indicated property. Return true and raise the PropertyChanged
+    // event if the property has changed
+  }
+}
+{% endhighlight %}
+{% highlight csharp %}
+// ButtonViewModel
+public class ButtonViewModel : BaseViewModel
+{
+  public ICommand Command
+  {
+    get => Get<ICommand>();
+    set => Set(value);
+  }
+
+  public string Label
+  {
+    get => Get<string>();
+    set => Set(value);
+  }
+}
+{% endhighlight %}
+{% highlight csharp %}
+// ViewModel.cs
+public class ViewModel : BaseViewModel
+{
+  public ViewModel(
+    IEnumerable<string> people,
+    Action<int> handleRatingFeedback,
+    Action<string> handleFavoritePerson)
+  {
+    RatingScale = new ObservableCollection(
+      Enumerable
+      .Range(1, 5)
+      .Select(rating => new ButtonViewModel
+      {
+        Label = rating.ToString(),
+        Command = new ActionCommand(() => handleRatingFeedback(rating))
+      })
+    );
+    People = new ObservableCollection(
+      people
+      .Select(person => new ButtonViewModel
+      {
+        Label = person,
+        Command = new ActionCommand(() => handleFavoritePerson(person))
+      })
+    );
+  }
+
+  public ObservableCollection<ButtonViewModel> RatingScale { get; }
+  public ObservableCollection<ButtonViewModel> People { get; }
+}
+{% endhighlight %}
+{% highlight xml %}
+<!-- RowOfButtons.xaml -->
+... (some boilerplate code goes here)
+<ItemsControl ItemsSource="{Binding ButtonViewModels}">
+  <ItemsControl.ItemsPanel>
+    <ItemsPanelTemplate>
+      <StackPanel
+        IsItemsHost = "True"
+        Orientation = "Horizontal"/>
+    </ItemsPanelTemplate>
+  </ItemsControl.ItemsPanel>
+  <ItemsControl.ItemTemplate>
+    <DataTemplate DataType="{x:Type ButtonViewModel}">
+      <Button
+        Command="{Binding Command}"
+        Content="{Binding Label}"/>
+    </DataTemplate>
+  </ItemsControl.ItemTemplate>
+</ItemsControl>
+{% endhighlight %}
+{% highlight xml %}
+<!-- View.xaml -->
+... (some boilerplate here)
+<StackPanel>
+  <TextBlock>How are we doing?</TextBlock>
+  <RowOfButtons DataContext="{Binding RatingScale}"/>
+  <TextBlock>Pick your favorite person:</TextBlock>
+  <RowOfButtons DataContext="{Binding People}"/>
+</StackPanel>
+{% endhighlight %}
+{% highlight csharp %}
+// Model.cs
+public class Model
+{
+  public async Task StoreRatingAsync(int rating);
+  public string[] GetPeople();
+  public async Task StoreFavoritePersonAsync(string person);
+}
+{% endhighlight %}
+{% highlight csharp %}
+// Program.cs
+class Program
+{
+  static void Main()
+  {
+    var model = new Model();
+    var people = model.GetPeople();
+    var viewModel = new ViewModel(
+      people,
+      async rating => await model.StoreRatingAsync(rating),
+      async person => await model.StoreFavoritePersonAsync(person)
+    );
+    var view = new View
+    {
+      DataContext = viewModel
+    };
+    view.ShowDialog();
+  }
+}
+{% endhighlight %}
+<p>
+  Let's compare it to WPF without MVVM:
+</p>
+{% highlight csharp %}
+// Program.cs
+class Program
+{
+  static void Main()
+  {
+    var model = new Model();
+    var ratingsStack = new StackPanel
+    {
+      Orientation = Horizontal
+    };
+    ratingsStack.Children.AddRange(
+      Enumerable
+      .Range(1, 5)
+      .Select(rating => new Button
+      {
+        Command = new ActionCommand(async () => await model.StoreRatingAsync(rating)),
+        Content = rating.ToString()
+      })
+    );
+    var peopleStack = new StackPanel
+    {
+      Orientation = Horizontal
+    };
+    peopleStack.Children.AddRange(
+      model
+      .GetPeople()
+      .Select(person => new Button
+      {
+        Command = new ActionCommand(async () => await model.StoreFavoritePersonAsync(person)),
+        Content = person
+      })
+    );
+    var view = new Window
+    {
+      Content = new StackPanel
+      {
+        Children =
+        {
+          new TextBlock
+          {
+            Text = "How are we doing?"
+          },
+          ratingsStack,
+          new TextBlock
+          {
+            Text = "Pick your favorite person:"
+          },
+          peopleStack
+        }
+      }
+    }
+    view.ShowDialog();
+  }
+}
+{% endhighlight %}
+<p>
+  Again, I think the non-MVVM way is simpler in this case. But that's not all...
+</p>
+
+<h3>Add some styling</h3>
+<p>
+  Now let's change the label colors. In the MVVM version we'll change our views:
+</p>
+{% highlight xml %}
+<!-- RowOfButtons.xaml -->
+...
+<DataTemplate DataType="{x:Type ButtonViewModel}">
+  <Button Command="{Binding Command}">
+    <TextBlock
+      Foreground="Green"
+      Text="{Binding Label}"/>
+  </Button>
+</DataTemplate>
+...
+{% endhighlight %}
+{% highlight xml %}
+<!-- View.xaml -->
+...
+<TextBlock Foreground="Red">How are we doing?</TextBlock>
+...
+<TextBlock Foreground="Blue">Pick your favorite person:</TextBlock>
+...
+{% endhighlight %}
+<p>
+  And in the non-MVVM version we'll change the code that generates the UI
+  components:
+</p>
+{% highlight csharp %}
+// Program.cs
+...
+ratingsStack.Children.AddRange(
+  Enumerable
+  .Range(1, 5)
+  .Select(rating => new Button
+  {
+    Command = new ActionCommand(async () => await model.StoreRatingAsync(rating)),
+    Content = new TextBlock
+    {
+      Foreground = Brushes.Green,
+      Text = rating.ToString()
+    }
+  })
+);
+...
+peopleStack.Children.AddRange(
+  model
+  .GetPeople()
+  .Select(person => new Button
+  {
+    Command = new ActionCommand(async () => await model.StoreFavoritePersonAsync(person)),
+    Content = new TextBlock
+    {
+      Foreground = Brushes.Green,
+      Text = rating.ToString()
+    }
+  })
+);
+...
+new TextBlock
+{
+  Foreground = Brushes.Red,
+  Text = "How are we doing?"
+},
+...
+new TextBlock
+{
+  Brushes.Blue,
+  Text = "Pick your favorite person:"
+},
+...
+{% endhighlight %}
+<p>
+  Did you catch that? In the MVVM version our changes were quite isolated. We
+  only changed views. We didn't change view models, nor did we alter the model,
+  nor did we alter how the view, view model, and model are wired together. The
+  chances are quite small that we introduced a bug in how data is read from or
+  stored to the model. We also probably didn't accidentally mess up what happens
+  when you click on your favorite person. <b>The advantage is our changes were
+  very isolated.</b>
+</p>
+<p>
+  But in the non-MVVM version we had to change code in close proximity to
+  completely unrelated things. Simple changes like changing the labels' colors
+  were introduced immediately next to the code that manipulates the model.
+</p>
+<p>
+  Have you ever experienced an application that's stuck with a decades-old UI
+  because its maintainers don't have the time to fish through the tangled mess
+  of UI styling and business logic? Have you ever experienced an application
+  that broke after its maintainers changed colors or layout? Those kinds of
+  things happen less often with MVVM.
+</p>
+
+<h3>
+  MVVM is not the only way
+</h3>
+<p>
+  Now that we recognize the dangers of mixing UI concerns with other
+  responsibilities you can probably imagine various ways to separate those
+  things. And you can probably imagine ways to separate those things <i>without
+  using MVVM</i>. And that's fine.
+</p>
+
+<h2>
+  The point
+</h2>
+<p>
+  The point is MVVM is a disciplined way (not <i>the</i> disciplined way) to
+  isolate UI concerns.
+</p>
+<p>
+  The downsides of the MVVM pattern in WPF include:
+</p>
+<ul>
+  <li>Lots of boilerplate code</li>
+  <li>Sometimes you have to take a pretty indirect path</li>
+  <li>WPF's binding mechanism isn't the fastest thing out there</li>
+</ul>
+<p>
+  But it brings all the benefits of separating concerns.
+</p>
+
+<i>
+  Disclaimer&mdash;the code on this page will not compile. It's inspirational
+  pseudocode that I wrote off the cuff.
+</i>

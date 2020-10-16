@@ -27,9 +27,6 @@ collections:
     output: true
     permalink: :name
     sort_by: order
-  testimonials:
-    output: false
-    sort_by: order
 
 defaults:
   -
@@ -37,11 +34,11 @@ defaults:
       path: ""
     values:
       layout: "default"
-      description: Reaching our neighbors with the Gospel
 
 exclude:
   - README.md
   - LICENSE
+  - submodules
 
 sass:
   sass_dir: assets/css
@@ -49,3 +46,5 @@ sass:
 
 plugins:
   - jekyll-redirect-from
+
+excerpt_separator: ""

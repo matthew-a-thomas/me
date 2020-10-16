@@ -1,3 +1,5 @@
+@import "../submodules/jekyll-pygments-themes/github";
+
 $font-family-base: 'Merriweather', serif;
 $font-weight-normal: 300;
 $headings-font-family: 'Raleway', sans-serif;
@@ -5,6 +7,9 @@ $headings-font-weight: 700;
 @import "../../_sass/bootstrap/bootstrap";
 b {
   font-weight: 700;
+}
+figure {
+  border: 1px solid black;
 }
 h1, h2, h3, h4, h5, h6 {
   text-align: left;
@@ -30,10 +35,6 @@ html {
     color: $primary;
     margin: -$btn-border-width;
   }
-}
-ol, ul {
-  padding-left: 0;
-  list-style-position: outside;
 }
 ul {
   list-style-type: disc;

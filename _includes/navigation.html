@@ -1,0 +1,34 @@
+<!-- Nav for large screens -->
+<div class="d-none d-lg-block">
+  <ul class="nav nav-pills justify-content-center">
+    {% for pg in site.pages %}
+    <li class="nav-item">
+      <a class="nav-link{% if page.url == pg.url %} active{% endif %}" href="{{ pg.url }}">
+        {{ pg.title }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Nav for smaller screens -->
+<div class="d-lg-none">
+  <div class="d-flex justify-content-between">
+    <div class="dropdown">
+      <a class="btn btn-lg btn-outline-primary" href="{{ page.url }}" role="button" id="navDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="material-icons align-text-bottom">menu</i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navDropdownMenuLink">
+        {% for pg in site.pages %}
+        <a class="dropdown-item{% if page.url == pg.url %} active{% endif %}" href="{{ pg.url }}">
+          {{ pg.title }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <h1 style="flex-grow: 1;" class="text-center">
+      {{ page.title }}
+    </h1>
+  </div>
+</div>

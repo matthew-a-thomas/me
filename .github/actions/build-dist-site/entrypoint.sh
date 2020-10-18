@@ -13,7 +13,7 @@ REMOTE_REPO="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSIT
 
 # We need to clone the repo here.
 # Remember, our Docker container is practically pristine at this point
-git clone $REMOTE_REPO repo
+git clone $REMOTE_REPO repo --recurse-submodules
 git clone $REMOTE_REPO repo/_site -b gh-pages
 cd repo
 

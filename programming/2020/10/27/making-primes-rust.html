@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="The scenic route to generating prime numbers with Rust">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Making Prime Numbers in Rust - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item">
+          <h1 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h1>
+        </div>
+        <div class="list-group-item">
+          <h1>Making Prime Numbers in Rust</h1>
+          
+          <p><i>October 27, 2020&mdash;The scenic route to generating prime numbers with Rust</i></p>
+          
+          <p>A prime number can only be evenly divided by itself (and by the number one). The
+first few prime numbers are:</p>
+
+<ul>
+  <li>2</li>
+  <li>3</li>
+  <li>5</li>
+  <li>7</li>
+  <li>11</li>
+</ul>
+
+<p>Two is the only even prime number, just like three is the only prime number that
+is a multiple of three, five is the only prime number that is a multiple of
+five, and so on.</p>
+
+<p>Recall that the modulo operator “%” tells you the remainder after
+division. For example:</p>
+
+\[10 \% 3 = 1\]
+
+<p>Because ten divided by three has a remainder of one.</p>
+
+<p>Eight is not prime because it is an even multiple of two (the remainder after
+dividing eight by two is zero):</p>
+
+\[8 \% 2 = 0\]
+
+<h2 id="table">Table</h2>
+
+<p>With that in mind, here’s one way to figure out the first few prime numbers:</p>
+
+<div class="table-responsive">
+
+<table>
+  <thead>
+    <tr>
+      <th>Number</th>
+      <th>%2</th>
+      <th>%3</th>
+      <th>%4</th>
+      <th>%5</th>
+      <th>%6</th>
+      <th>%7</th>
+      <th>%8</th>
+      <th>%9</th>
+      <th>%10</th>
+      <th>%11</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2</td>
+      <td>0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1</td>
+      <td>0</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>4</td>
+      <td>4</td>
+      <td>4</td>
+      <td>4</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>1</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>5</td>
+      <td>5</td>
+      <td>5</td>
+      <td>5</td>
+      <td>5</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>6</td>
+      <td>6</td>
+      <td>6</td>
+      <td>6</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>7</td>
+      <td>7</td>
+      <td>7</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>8</td>
+      <td>8</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>9</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>0</td>
+      <td>4</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>1</td>
+      <td>5</td>
+      <td>4</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+<p>Don’t be intimidated by that large table. Think about the row for the number six
+for a moment:</p>
+
+<div class="table-responsive">
+
+<table>
+  <thead>
+    <tr>
+      <th>Number</th>
+      <th>%2</th>
+      <th>%3</th>
+      <th>%4</th>
+      <th>%5</th>
+      <th>%6</th>
+      <th>%7</th>
+      <th>%8</th>
+      <th>%9</th>
+      <th>%10</th>
+      <th>%11</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>6</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>6</td>
+      <td>6</td>
+      <td>6</td>
+      <td>6</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+<p>This means six is evenly divided by two, three, and six. Dividing six by any
+other number leaves a remainder. So the first thing I want to point out is the
+zeros indicate which numbers six is a multiple of.</p>
+
+<p>So to figure out which numbers are primes, just count the zeros in each row. Any
+row with only a single zero is a prime number. From the table above:</p>
+
+<ul>
+  <li>2</li>
+  <li>3</li>
+  <li>5</li>
+  <li>7</li>
+  <li>11</li>
+</ul>
+
+<h2 id="sieve">Sieve</h2>
+
+<p>We can also use something called a sieve to find prime numbers. I’ll explain how
+the
+<a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" target="_blank">Sieve of Eratosthenes</a>
+works.</p>
+
+<p>First, make a list of numbers (starting with two):</p>
+
+<ul>
+  <li>2</li>
+  <li>3</li>
+  <li>4</li>
+  <li>5</li>
+  <li>6</li>
+  <li>7</li>
+  <li>8</li>
+  <li>9</li>
+  <li>10</li>
+  <li>11</li>
+  <li>12</li>
+  <li>13</li>
+  <li>14</li>
+  <li>15</li>
+  <li>16</li>
+  <li>17</li>
+  <li>18</li>
+  <li>19</li>
+  <li>20</li>
+  <li>21</li>
+  <li>22</li>
+  <li>23</li>
+  <li>24</li>
+  <li>25</li>
+</ul>
+
+<p>Now start with two and remove all the multiples of two from the rest of the
+list. Make sure to leave the number two. That gives:</p>
+
+<ul>
+  <li>2</li>
+  <li>3</li>
+  <li>5</li>
+  <li>7</li>
+  <li>9</li>
+  <li>11</li>
+  <li>13</li>
+  <li>15</li>
+  <li>17</li>
+  <li>19</li>
+  <li>21</li>
+  <li>23</li>
+  <li>25</li>
+</ul>
+
+<p>Move on to the next number in the list and do the same thing. So let’s remove
+all the multiples of three. That leaves this list:</p>
+
+<ul>
+  <li>2</li>
+  <li>3</li>
+  <li>5</li>
+  <li>7</li>
+  <li>11</li>
+  <li>13</li>
+  <li>17</li>
+  <li>19</li>
+  <li>23</li>
+  <li>25</li>
+</ul>
+
+<p>Keep doing that. When you’re done you’ll have a list of prime numbers:</p>
+
+<ul>
+  <li>2</li>
+  <li>3</li>
+  <li>5</li>
+  <li>7</li>
+  <li>11</li>
+  <li>13</li>
+  <li>17</li>
+  <li>19</li>
+  <li>23</li>
+</ul>
+
+<h2 id="shortcut">Shortcut</h2>
+
+<p>There’s a shortcut we can take with both the table and the sieve. I’ll explain
+it in terms of the table. I hope this will make sense.</p>
+
+<p>Think about the numbers 24, 25, and 31. Here’s how their rows in the above table
+would look:</p>
+
+<div class="table-responsive">
+
+<table>
+  <thead>
+    <tr>
+      <th>Number</th>
+      <th>%2</th>
+      <th>%3</th>
+      <th>%4</th>
+      <th>%5</th>
+      <th>%6</th>
+      <th>%7</th>
+      <th>%8</th>
+      <th>%9</th>
+      <th>%10</th>
+      <th>%11</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>24</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>4</td>
+      <td>0</td>
+      <td>3</td>
+      <td>0</td>
+      <td>6</td>
+      <td>4</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>1</td>
+      <td>7</td>
+      <td>5</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3</td>
+      <td>7</td>
+      <td>4</td>
+      <td>1</td>
+      <td>9</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+<p>It’s clear that 24 and 25 aren’t prime numbers because both of them have at
+least one zero in addition to the one we’d get if we divided those numbers by
+themselves. It wasn’t necessary to continue to find remainders of either number
+after we found the first zero. And luckily the zeros happened pretty early.</p>
+
+<p>But what about 31? How many columns do we need to determine if 31 is prime?</p>
+
+<p>Recall that every number is a multiple of its square root. If you divide any
+number by its square root then you’ll be left with its square root exactly.</p>
+
+<p>For example, if we divide 25 by five then we’re left with five (its square
+root).</p>
+
+<p>Also, if you divide a number by another number larger than its square root
+you’ll be left with a number smaller than its square root.</p>
+
+<p>For example, if we divide 25 by six (which is larger than five, its square root)
+then we’re left with four and one sixth (which is less than its square root).</p>
+
+<p>Furthermore if a number is an even multiple of one number then it’s also an even
+multiple of another number.</p>
+
+<p>For example, 24 is two times twelve, three times eight, or four times six.</p>
+
+<p>All this taken together means we don’t have to worry about anything larger than
+a number’s square root. If a number is not prime then it will be a multiple of
+at least one number less than or equal to its square root.</p>
+
+<p>The square root of 31 is ~5.57. That means our table doesn’t need columns for
+the numbers greater than five. Since we calculated remainders up through five
+and there were no zeros then we know 31 is prime.</p>
+
+<p>This also applies to the sieve method. If you start with this list:</p>
+
+<ul>
+  <li>2</li>
+  <li>3</li>
+  <li>4</li>
+  <li>5</li>
+  <li>6</li>
+  <li>7</li>
+  <li>8</li>
+  <li>9</li>
+  <li>10</li>
+  <li>11</li>
+  <li>12</li>
+  <li>13</li>
+  <li>14</li>
+  <li>15</li>
+  <li>16</li>
+  <li>17</li>
+  <li>18</li>
+  <li>19</li>
+  <li>20</li>
+  <li>21</li>
+  <li>22</li>
+  <li>23</li>
+  <li>24</li>
+  <li>25</li>
+</ul>
+
+<p>…then you can stop after you remove all the multiples of five, because the
+square root of the largest number in the list is five.</p>
+
+<p>All the multiples of six will have been crossed out as multiples of two.</p>
+
+<p>All the multiples of seven will have been crossed out as well. Fourteen is a
+multiple of two. 21 is a multiple of three.</p>
+
+<p>All the multiples of eight will have been crossed out as multiples of two.</p>
+
+<p>All the multiples of nine will have been crossed out as multiples of three.</p>
+
+<p>All the multiples of ten will have been crossed out as multiples of two.</p>
+
+<p>All the multiples of eleven will have been crossed out as well. 22 is a multiple
+of two.</p>
+
+<p>And so on. I hope you get the picture.</p>
+
+<h2 id="generator">Generator</h2>
+
+<p>The disadvantage of both the table and the sieve is you have to know the largest
+prime number you want to find. What if you want to continue finding prime
+numbers after that?</p>
+
+<p>Well it’s not too difficult to extend the sieve idea into a prime number
+generator. Let me explain the algorithm.</p>
+
+<p>It centers on a list to which we’ll add prime numbers in order as we find them.
+That list starts with the number two.</p>
+
+\[\text{Primes} = (2)\]
+
+<p>We know that the number three is prime because it is not an even multiple of any
+of the numbers in our prime numbers list. We don’t have to check any of the
+prime numbers larger than the square root of three, so we don’t even have to
+check it against the number two. So we add three to the list.</p>
+
+\[\text{Primes} = (2, 3)\]
+
+<p>We know that the number four is not prime because it’s an even multiple of a
+number in our prime numbers list (it’s an even multiple of two). So we move on.</p>
+
+<p>Five is prime because it isn’t a multiple of two. Again we don’t have to check
+it against three because three is larger than the square root of five. So we add
+five to the list.</p>
+
+\[\text{Primes} = (2, 3, 5)\]
+
+<p>Six is not prime because it’s a multiple of two.</p>
+
+<p>Seven is prime because it’s not a multiple of two.</p>
+
+\[\text{Primes} = (2, 3, 5, 7)\]
+
+<p>Eight is not prime because it’s a multiple of two.</p>
+
+<p>Nine is not prime because it’s a multiple of three. Again we don’t have to
+divide it by five or seven because those are both larger than the square root of
+nine.</p>
+
+<p>Ten is not prime because it’s a multiple of two.</p>
+
+<p>Eleven is prime because it’s not a multiple of two or of three.</p>
+
+\[\text{Primes} = (2, 3, 5, 7, 11)\]
+
+<p>Repeat as long as you want.</p>
+
+<h2 id="rust">Rust</h2>
+
+<p>Let’s make the prime number generator in
+<a href="https://www.rust-lang.org/" target="_blank">Rust</a>. Here it is:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">PrimeGenerator</span> <span class="p">{</span>
+  <span class="n">primes</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="n">candidate</span><span class="p">:</span> <span class="nb">usize</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">PrimeGenerator</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">new</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
+    <span class="n">Self</span> <span class="p">{</span>
+      <span class="n">primes</span><span class="p">:</span> <span class="nd">vec!</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+      <span class="n">candidate</span><span class="p">:</span> <span class="mi">2u</span><span class="n">size</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">fn</span> <span class="nf">next</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
+    <span class="k">loop</span> <span class="p">{</span>
+      <span class="k">let</span> <span class="n">candidate</span> <span class="o">=</span> <span class="k">self</span><span class="py">.candidate</span><span class="p">;</span>
+      <span class="k">self</span><span class="py">.candidate</span> <span class="o">=</span> <span class="n">candidate</span> <span class="o">+</span> <span class="mi">1u</span><span class="n">size</span><span class="p">;</span>
+      <span class="k">for</span> <span class="n">prime</span> <span class="n">in</span> <span class="k">self</span><span class="py">.primes</span><span class="nf">.iter</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">quotient</span> <span class="o">=</span> <span class="n">candidate</span> <span class="o">/</span> <span class="n">prime</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">candidate</span> <span class="o">%</span> <span class="n">prime</span><span class="p">;</span>
+        <span class="k">if</span> <span class="n">quotient</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">prime</span> <span class="p">{</span>
+          <span class="c">// We have run out of primes to search and candidate passed all the</span>
+          <span class="c">// tests. It's prime!</span>
+          <span class="k">self</span><span class="py">.primes</span><span class="nf">.push</span><span class="p">(</span><span class="n">candidate</span><span class="p">);</span>
+          <span class="k">return</span> <span class="n">candidate</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+          <span class="k">break</span><span class="p">;</span> <span class="c">// candidate is a multiple of a prime</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nd">println!</span><span class="p">(</span><span class="s">"Here are the first ten primes:"</span><span class="p">);</span>
+  <span class="k">let</span> <span class="k">mut</span> <span class="n">generator</span> <span class="o">=</span> <span class="nn">PrimeGenerator</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+  <span class="k">for</span> <span class="mi">_</span> <span class="n">in</span> <span class="mi">0</span><span class="o">..</span><span class="mi">10</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">prime</span> <span class="o">=</span> <span class="n">generator</span><span class="nf">.next</span><span class="p">();</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">prime</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Here’s the output:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Here are the first ten primes:
+2
+3
+5
+7
+11
+13
+17
+19
+23
+29
+</code></pre></div></div>
+
+<p>This doesn’t work in <code class="highlighter-rouge">[no_std]</code> because the list of primes is stored on the
+heap. Heapless collections do exist but I think that’s out of the scope of this
+tour.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2020
+  </p>
+  <p>
+    Comments will be coming soon!
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

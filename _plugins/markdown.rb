@@ -1,3 +1,4 @@
+# https://stackoverflow.com/a/18529624/3063273
 module Jekyll
   class MarkdownBlock < Liquid::Block
     def initialize(tag_name, text, tokens)

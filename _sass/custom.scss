@@ -5,7 +5,7 @@ $font-weight-normal: 300;
 $headings-font-family: 'Raleway', sans-serif;
 $headings-font-weight: 700;
 @import "../../_sass/bootstrap/bootstrap";
-b {
+b, strong {
   font-weight: 700;
 }
 h1, h2, h3, h4, h5, h6 {

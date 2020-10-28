@@ -1,4 +1,84 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-10-27T17:02:56+00:00</updated><id>/feed.xml</id><entry><title type="html">Making Prime Numbers in Rust</title><link href="/programming/2020/10/27/making-primes-rust.html" rel="alternate" type="text/html" title="Making Prime Numbers in Rust" /><published>2020-10-27T00:00:00+00:00</published><updated>2020-10-27T00:00:00+00:00</updated><id>/programming/2020/10/27/making-primes-rust</id><content type="html" xml:base="/programming/2020/10/27/making-primes-rust.html">&lt;p&gt;A prime number can only be evenly divided by itself (and by the number one). The
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-10-28T21:21:03+00:00</updated><id>/feed.xml</id><entry><title type="html">Paradoxes, Contradictions, and the Bible</title><link href="/bible/2020/10/28/paradoxes-contradictions-bible.html" rel="alternate" type="text/html" title="Paradoxes, Contradictions, and the Bible" /><published>2020-10-28T00:00:00+00:00</published><updated>2020-10-28T00:00:00+00:00</updated><id>/bible/2020/10/28/paradoxes-contradictions-bible</id><content type="html" xml:base="/bible/2020/10/28/paradoxes-contradictions-bible.html">&lt;p&gt;A contradiction is when two mutually exclusive things are both said to be true
+at the same time in the same sense. For example, it’s a contradiction to say
+“this spot on the ball is red and not blue” and “the same spot
+on the ball is blue and not red” about the same spot on the same ball at
+the same time in the same way. They are mutually exclusive statements and
+there’s a contradiction.&lt;/p&gt;
+
+&lt;p&gt;Contradictions are very useful. You can make
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Proof_by_contradiction#Examples&quot; target=&quot;_blank&quot;&gt;proofs by contradiction&lt;/a&gt;.
+You can also find contradictions within the framework of certain philosophies
+which prove them to be wrong. Contradictions are very powerful things.&lt;/p&gt;
+
+&lt;p&gt;A paradox is when there appears to be a contradiction but in fact there isn’t
+&lt;em&gt;necessarily&lt;/em&gt; one. For example, it is paradoxical for one person to say
+“the ball is red” and another person to say “the ball is
+blue” about the same ball at the same. But perhaps the ball is painted
+white and the one person is shining a red light on it from one side while the
+other person is shining a blue light on it from the other side. The one person
+said it was red &lt;em&gt;in a sense&lt;/em&gt; while the other person said it was blue &lt;em&gt;in a
+different sense&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Paradoxes aren’t very strong. A paradox might leave you feeling uneasy that you
+don’t understand something, but that’s all.&lt;/p&gt;
+
+&lt;p&gt;Notice how I proved that the paradox wasn’t a contradiction. All I had to do was
+give a single possible explanation of how the paradox could be resolved. It
+wasn’t necessary for me to prove that the possible explanation was real. It’s
+much easier than that. All I had to do was give a &lt;em&gt;possible&lt;/em&gt; explanation.&lt;/p&gt;
+
+&lt;p&gt;So contradictions can be difficult to establish, and it is often easy to knock
+supposed contradictions down to mere paradoxes.&lt;/p&gt;
+
+&lt;h2 id=&quot;in-the-bible&quot;&gt;In the Bible&lt;/h2&gt;
+
+&lt;p&gt;Many people claim to have found many contradictions in the Bible. That often
+leads to discussing the reliability of the Bible. But I haven’t come across one
+yet that really is a contradiction. I’m not bragging (I want to trust in Jesus
+alone, not in my own confidence). Instead I have found that what many are
+calling contradictions are only paradoxes.&lt;/p&gt;
+
+&lt;p&gt;Here are some examples:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Peter denied Jesus once before and twice after the rooster crowed
+&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Mark 14:30&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Mark 14:30&lt;/a&gt;;
+&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Mark 14:66-72&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Mark 14:66-72&lt;/a&gt;.
+Peter denied Jesus three times before the rooster crowed
+&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Luke 22:34&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Luke 22:34&lt;/a&gt;;
+&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Luke 22:54-62&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Luke 22:54-62&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;There is only one God &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Deuteronomy 6:4&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Deuteronomy 6:4&lt;/a&gt;;
+&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Isaiah 44:6&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Isaiah 44:6&lt;/a&gt;.
+Jesus is God &lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 1:1&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 1:1&lt;/a&gt;. The Holy Spirit is
+God &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Acts 5:3-4&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Acts 5:3-4&lt;/a&gt;. The Father is God
+&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Philippians 1:2&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Philippians 1:2&lt;/a&gt;. Jesus is not the Holy
+Spirit &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 3:16&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 3:16&lt;/a&gt;. Jesus is not the Father
+&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 3:17&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 3:17&lt;/a&gt;. The Holy Spirit is not the
+Father &lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 14:26&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 14:26&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Jesus said his contemporary generation would not pass away until He came
+again &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 24:30-34&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 24:30-34&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;But these are only paradoxes. Here are some possible explanations:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Perhaps “when the rooster crows” is an idiom that meant different
+things to the different original audiences. Each of the gospels were written
+to different audiences. Therefore it’s possible that the gospel writers used
+an idiom in a peculiar way familiar to their audience, similar to
+&lt;a href=&quot;https://apologeticspress.org/apcontent.aspx?category=6&amp;amp;article=759#ctl00_cphPage_BblQuesContent_lblContentAuthors:~:text=A%20family%20of%20three%20went%20to,claim%20that%20Ricky%20had%20contradicted%20himself.&quot; target=&quot;_blank&quot;&gt;this idea&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Perhaps there is a single divine being and three distinct divine persons.
+That would mean that God is one in a different way than He is three.
+Therefore it is possible that God can be one (in a sense) at the same time He
+is three (in another sense)&lt;/li&gt;
+  &lt;li&gt;Perhaps Jesus figuratively returned in judgment in 70 A.D. by sending the
+Roman armies that sacked Jerusalem&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
+
+&lt;p&gt;Don’t be quick to think you’ve found a contradiction in the Bible. You probably
+only have a paradox.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">Making Prime Numbers in Rust</title><link href="/programming/2020/10/27/making-primes-rust.html" rel="alternate" type="text/html" title="Making Prime Numbers in Rust" /><published>2020-10-27T00:00:00+00:00</published><updated>2020-10-27T00:00:00+00:00</updated><id>/programming/2020/10/27/making-primes-rust</id><content type="html" xml:base="/programming/2020/10/27/making-primes-rust.html">&lt;p&gt;A prime number can only be evenly divided by itself (and by the number one). The
 first few prime numbers are:&lt;/p&gt;
 
 &lt;ul&gt;

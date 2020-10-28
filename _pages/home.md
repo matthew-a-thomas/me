@@ -1,5 +1,4 @@
 ---
-order: 1
 permalink: /
 description: Matt's personal website
 ---

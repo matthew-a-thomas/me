@@ -1,5 +1,4 @@
 ---
-order: 2
 title: About
 description: About this website
 ---

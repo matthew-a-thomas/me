@@ -26,7 +26,6 @@ collections:
   pages:
     output: true
     permalink: :name
-    sort_by: order
 
 defaults:
   -

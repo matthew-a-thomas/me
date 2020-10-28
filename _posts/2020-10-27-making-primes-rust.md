@@ -2,6 +2,7 @@
 title: Making Prime Numbers in Rust
 category: programming
 description: The scenic route to generating prime numbers with Rust
+comments: 2
 ---
 A prime number can only be evenly divided by itself (and by the number one). The
 first few prime numbers are:

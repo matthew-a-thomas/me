@@ -19,11 +19,11 @@ which prove them to be wrong. Contradictions are very powerful things.
 A paradox is when there appears to be a contradiction but in fact there isn't
 _necessarily_ one. For example, it is paradoxical for one person to say
 &ldquo;the ball is red&rdquo; and another person to say &ldquo;the ball is
-blue&rdquo; about the same ball at the same. But perhaps the ball is painted
-white and the one person is shining a red light on it from one side while the
-other person is shining a blue light on it from the other side. The one person
-said it was red _in a sense_ while the other person said it was blue _in a
-different sense_.
+blue&rdquo; about the same ball at the same time. But perhaps the ball is
+painted white and the one person is shining a red light on it from one side
+while the other person is shining a blue light on it from the other side. The
+one person said it was red _in a sense_ while the other person said it was blue
+_in a different sense_.
 
 Paradoxes aren't very strong. A paradox might leave you feeling uneasy that you
 don't understand something, but that's all.

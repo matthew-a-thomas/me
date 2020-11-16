@@ -8,6 +8,10 @@ $headings-font-weight: 700;
 b, strong {
   font-weight: 700;
 }
+blockquote {
+  border-left: 0.1px solid $secondary;
+  padding-left: 1em;
+}
 h1, h2, h3, h4, h5, h6 {
   text-align: left;
 }

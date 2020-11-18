@@ -1,5 +1,5 @@
 ---
-title: "Justification in the Bible: a contradiction?"
+title: "Justification in the Bible: a Contradiction?"
 category: bible
 description: "James vs Paul"
 comments: 4

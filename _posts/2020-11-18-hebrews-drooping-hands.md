@@ -2,6 +2,7 @@
 title: "Lift Your Drooping Hands"
 category: bible
 description: "A look in the neighborhood of Hebrews 12:12"
+comments: 6
 ---
 
 Let's look at {% include verse.html verse="Hebrews 11:39–12:17" %}. It begins

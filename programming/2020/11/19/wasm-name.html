@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Is it for the web? Is it assembly?">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>WebAssembly's Name - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h1 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h1>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>WebAssembly's Name</h1>
+          
+          
+          <p><i>November 19, 2020&mdash;Is it for the web? Is it assembly?</i></p>
+          
+          <p>Here’s what <a href="https://webassembly.org/" target="_blank">WebAssembly</a> has to say
+about itself:</p>
+
+<blockquote>
+  <p>WebAssembly (abbreviated Wasm) is a binary instruction format for a
+  stack-based virtual machine. Wasm is designed as a portable compilation target
+  for programming languages, enabling deployment on the web for client and
+  server applications.</p>
+</blockquote>
+
+<p>I’ve been learning WASM recently. I think I’m coming out of the
+<a href="https://www.gartner.com/en/research/methodologies/gartner-hype-cycle" target="_blank">Trough of Disillusionment</a>.
+Let me explain why.</p>
+
+<h2 id="hype-its-not-just-web">Hype: it’s not just web!</h2>
+
+<p>First, you need to understand that
+<a href="https://webassembly.org/docs/non-web/" target="_blank">it isn’t limited to just the internet</a>:</p>
+
+<blockquote>
+  <p>While WebAssembly is designed to run on the Web, it is also desirable for it
+  to be able to execute well in other environments, including everything from
+  minimal shells for testing to full-blown application environments e.g. on
+  servers in datacenters, on IoT devices, or mobile/desktop apps. It may even be
+  desirable to execute WebAssembly embedded within larger programs.</p>
+</blockquote>
+
+<p>Right now with very little effort (thanks to
+<a href="https://github.com/bytecodealliance/wasmtime" target="_blank">two</a>
+<a href="https://github.com/wasmerio/wasmer" target="_blank">libraries</a>
+alone) you can run WASM programs <em>in</em> all these languages:</p>
+
+<ul>
+  <li>C</li>
+  <li>C++</li>
+  <li>C#</li>
+  <li>Elixir</li>
+  <li>Go</li>
+  <li>Java</li>
+  <li>JavaScript (both inside and outside of a browser)</li>
+  <li>PHP</li>
+  <li>Postgres</li>
+  <li>Python</li>
+  <li>R</li>
+  <li>Ruby</li>
+  <li>Rust</li>
+</ul>
+
+<p>And right now you can compile/convert
+<a href="https://github.com/appcypher/awesome-wasm-langs" target="_blank">all these languages and more</a>
+into WASM:</p>
+
+<ul>
+  <li>C</li>
+  <li>C++</li>
+  <li>C#</li>
+  <li>COBOL</li>
+  <li>Go</li>
+  <li>Rust</li>
+  <li>TypeScript</li>
+</ul>
+
+<p>WASM is pretty flexible. It has provisions for interacting with the host
+environment but it isn’t overly opinionated about it. There’s a way to call
+host-provided functions (called “imports”). This has enabled the WebAssembly
+System Interface (WASI) spec, which is basically a pared-down set of POSIX
+functions.</p>
+
+<p>Solomon Hykes, the co-founder of Docker,
+<a href="https://twitter.com/solomonstre/status/1111004913222324225" target="_blank">said this about WASM+WASI</a>:</p>
+
+<blockquote>
+  <p>If WASM+WASI existed in 2008, we wouldn’t have needed to created (sic) Docker.
+  That’s how important it is. Webassembly on the server is the future of
+  computing. A standardized system interface was the missing link. Let’s hope
+  WASI is up to the task!</p>
+</blockquote>
+
+<p>Let me say that again: WASM (plus a spec for some imported functions) can do
+everything that Docker does.</p>
+
+<p>These are all Good Things™. These kinds of things make me <em>very</em> excited
+as a programmer.</p>
+
+<p>But something fishy is going on. Because it’s called <em>Web</em> Assembly.</p>
+
+<h2 id="reality-it-reeks-of-internet">Reality: it reeks of internet</h2>
+
+<p><a href="https://www.w3.org/groups/wg/wasm/participants" target="_blank">These are some of the people paying for its development</a>:</p>
+
+<ul>
+  <li>W3C</li>
+  <li>Google</li>
+  <li>Facebook</li>
+  <li>Apple</li>
+  <li>Microsoft</li>
+</ul>
+
+<p>What do all of these big-name organizations have in common? The internet.</p>
+
+<p>Now to be fair those aren’t the only organizations involved. But…</p>
+
+<p>WASM is opinionated about function calls. It’s clear that function calls were
+designed in the context of C/C++ and <em>JavaScript</em>.</p>
+
+<p>There is a lot of momentum pushing to additionally implement reference types.
+And not just reference types but even <em>null</em>. And not just that but they are
+pushing for <em>garbage collection instructions</em>. It’s clear from reading the
+designers’ comments online that the driving force behind these things is again
+<em>JavaScript</em>.</p>
+
+<p>There is interest in expanding support so that more languages can be compiled to
+WASM, but it’s clear the goal is always to get those languages to run <em>in a
+browser</em>.</p>
+
+<p>So which is it? Is it for the web or not?</p>
+
+<p>Why don’t they just save garbage collection and reference graphs for a layer
+built on top of WASM? Because they want GC languages to be able to run in
+today’s internet browsers with minimal delay.</p>
+
+<p>If I want to host WASM programs for purposes completely unrelated to the
+internet, how long do you think it’ll be before I’m forced to introduce internet
+concepts into the programs, or into the host? It won’t be long until WASM hosts
+will have to have garbage collection. Is garbage collection universal outside
+the internet? No. Is it universal to JavaScript? Yes.</p>
+
+<h2 id="reality-it-isnt-assembly">Reality: it isn’t assembly</h2>
+
+<p>I don’t know of a single assembly language that:</p>
+
+<ul>
+  <li>Has garbage collection instructions</li>
+  <li>Has nullable reference types</li>
+  <li>Forces structured control flow</li>
+</ul>
+
+<p>Now I might be wrong. There might be other “assembly” languages with those
+things. But those things certainly don’t sound like
+“<a href="https://webassembly.org/" target="_blank">common hardware capabilities</a>”.</p>
+
+<blockquote>
+  <p>WebAssembly aims to execute at native speed by taking advantage of <strong>common
+  hardware capabilities</strong> available on a wide range of platforms.</p>
+</blockquote>
+
+<p>So why did they call it Web <em>Assembly</em>?</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>Coming out of the Trough of Disillusionment implies I’ve crested the Peak of
+Inflated Expectations. So what was I expecting?</p>
+
+<p>I was expecting the One Language to Rule Them All. I was expecting a universal
+assembly language.</p>
+
+<p>WASM just isn’t what I was hoping for.</p>
+
+<p>Is it good for running programs in today’s internet browsers? Sure. But I think
+it is being influenced too much by today’s internet technologies. And we all
+know how fast the internet changes.</p>
+
+<p>So I’d stick to the web for WebAssembly.</p>
+
+          
+          <hr/>
+<p>
+  Would you like to share your thoughts? Join the discussion here:
+</p>
+<p>
+  <a href="https://github.com/matthew-a-thomas/me/issues/7" target="_blank">https://github.com/matthew-a-thomas/me/issues/7</a>
+</p>
+          
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2020&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

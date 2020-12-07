@@ -2,6 +2,7 @@
 title: "What Doesn't Create a Marriage?"
 category: bible
 description: "According to the Bible, of course"
+comments: 9
 ---
 
 Is a marriage certificate necessary? Is a marriage only valid in a church? Does

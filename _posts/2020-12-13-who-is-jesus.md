@@ -205,6 +205,25 @@ This is what John saw in {% include verse.html verse="Revelation 5" %}:
   and ever!” And the four living creatures said, “Amen!” and the elders fell
   down and worshiped.
 
+And it isn't idolatrous to worship Jesus because He is...
+
+## God incarnate
+
+{% include verse.html verse="John 1:1&ndash;3" %} and
+{% include verse.html verse="John 1:14&ndash;18" %} say:
+
+> In the beginning was the Word, and the Word was with God, and the Word was
+  God. He was in the beginning with God. All things were made through him, and
+  without him was not any thing made that was made.
+
+> And the Word became flesh and dwelt among us, and we have seen his glory,
+  glory as of the only Son from the Father, full of grace and truth. (John bore
+  witness about him, and cried out, “This was he of whom I said, ‘He who comes
+  after me ranks before me, because he was before me.’”) For from his fullness
+  we have all received, grace upon grace. For the law was given through Moses;
+  grace and truth came through Jesus Christ. No one has ever seen God; the only
+  God, who is at the Father’s side, he has made him known.
+
 ## The point
 
 Jesus is he of whom it was said in

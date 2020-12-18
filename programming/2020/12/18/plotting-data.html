@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="And doing it quickly">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Plotting Data - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h1 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h1>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Plotting Data</h1>
+          
+          
+          <p><i>December 18, 2020&mdash;And doing it quickly</i></p>
+          
+          <p>There are a couple of things that can make a line graph on the computer run
+really slow. It can take a while to get all the data points, and it can take a
+while to draw them all.</p>
+
+<p>I’m going to talk about how to draw them as quickly as possible.</p>
+
+<h2 id="the-scenario">The scenario</h2>
+
+<p>Let’s say you have have ten million data points tracing out the below curve and
+you want to render the window in red.</p>
+
+<p><img src="/assets/img/plotting-data/data-with-window.png" alt="Data points with window" class="img-fluid" /></p>
+
+<p>Millions of data points take a <em>long</em> time to draw. And it’s such a simple
+shape. Surely it can be done more quickly?</p>
+
+<h3 id="details-and-a-caveat">Details and a caveat</h3>
+
+<p>Now is a good time to mention a caveat. But I need to explain something first.</p>
+
+<p>Keep in mind there are two coordinate systems. One of them is in the data, and
+the other is on the screen. The data coordinate system is application specific.
+The screen coordinate system is the location of pixels on the physical screen.</p>
+
+<p>The place where the rendered plot will land on the screen is called the
+<strong>viewport</strong>. It’s a rectangle in the screen coordinate system.</p>
+
+<p>The place in the data that shows up in the viewport we’ll call the
+<strong>data window</strong>. It’s also a rectangle but in the data coordinate system.</p>
+
+<p>So the red box above is the data window.</p>
+
+<p>The caveat is: for the rest of this article I’m going to pretend like the data
+and screen coordinate systems are the same. It’s easier for me but the point
+should be the same.</p>
+
+<h3 id="parallelism">Parallelism</h3>
+
+<p>A quick note about parallelism: if you have the opportunity to render in
+parallel then that’s great. But I’m going to ignore parallelism because the
+lessons in this article will also apply to it.</p>
+
+<h3 id="drawing-api">Drawing API</h3>
+
+<p>We’re going to need a drawing API. Here it is:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">interface</span> <span class="nc">IDrawing</span>
+<span class="p">{</span>
+  <span class="k">void</span> <span class="nf">MoveTo</span><span class="p">(</span><span class="n">Point</span> <span class="n">point</span><span class="p">);</span>
+  <span class="k">void</span> <span class="nf">LineTo</span><span class="p">(</span><span class="n">Point</span> <span class="n">point</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>You call <code class="highlighter-rouge">MoveTo</code> to start the drawing at some <code class="highlighter-rouge">point</code> (which is given in screen
+coordinates). Then you call <code class="highlighter-rouge">LineTo</code> to draw from the previous location to a
+given <code class="highlighter-rouge">point</code> (again given in screen coordinates).</p>
+
+<p>So to draw a 200x100 pixel rectangle you could do this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">void</span> <span class="nf">DrawRectangle</span><span class="p">(</span><span class="n">IDrawing</span> <span class="n">drawing</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="k">new</span> <span class="nf">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">));</span>
+  <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="k">new</span> <span class="nf">Point</span><span class="p">(</span><span class="m">200</span><span class="p">,</span> <span class="m">0</span><span class="p">));</span>
+  <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="k">new</span> <span class="nf">Point</span><span class="p">(</span><span class="m">200</span><span class="p">,</span> <span class="m">100</span><span class="p">));</span>
+  <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="k">new</span> <span class="nf">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">100</span><span class="p">));</span>
+  <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="k">new</span> <span class="nf">Point</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="naive-approach">Naive approach</h2>
+
+<p>This will draw all the data points:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">void</span> <span class="nf">DrawData</span><span class="p">(</span><span class="n">IDrawing</span> <span class="n">drawing</span><span class="p">,</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Point</span><span class="p">&gt;</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">point</span> <span class="k">in</span> <span class="n">data</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">isFirstPoint</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+      <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>It works. There’s nothing <em>incorrect</em> about this. So it’s better than something
+that doesn’t work.</p>
+
+<p>But this will be really slow when you have tons of data because it takes a lot
+longer to draw the pixels on the screen than it does to loop through the data.</p>
+
+<p>Can we do better?</p>
+
+<h2 id="reduce-horizontal-density-of-data-points">Reduce horizontal density of data points</h2>
+
+<p>The first thing that people usually think of is to skip over data points that
+don’t advance very far in a horizontal direction. They usually pick the positive
+horizontal direction because their data increases in that direction. But I’ll
+show code that handles both horizontal directions.</p>
+
+<p>This code does that:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">void</span> <span class="nf">DrawData</span><span class="p">(</span><span class="n">IDrawing</span> <span class="n">drawing</span><span class="p">,</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Point</span><span class="p">&gt;</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="k">const</span> <span class="kt">double</span> <span class="n">minDiscernableDifference</span> <span class="p">=</span> <span class="m">1.0</span><span class="p">;</span>
+  <span class="n">Point</span> <span class="n">lastPoint</span> <span class="p">=</span> <span class="k">default</span><span class="p">;</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">point</span> <span class="k">in</span> <span class="n">data</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">isFirstPoint</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+      <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+      <span class="n">lastPoint</span> <span class="p">=</span> <span class="n">point</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">point</span><span class="p">.</span><span class="n">X</span> <span class="p">-</span> <span class="n">lastPoint</span><span class="p">.</span><span class="n">X</span><span class="p">)</span> <span class="p">&gt;=</span> <span class="n">minDiscernableDifference</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+      <span class="n">lastPoint</span> <span class="p">=</span> <span class="n">point</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="problems">Problems</h3>
+
+<p><strong>Unlimited potential for data loss</strong>. Here are some data points and whether
+they’ll be chosen or ignored by this algorithm:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>X</th>
+      <th>Y</th>
+      <th>Displayed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>0.9</td>
+      <td>10000</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>1.9</td>
+      <td>10000</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>2.9</td>
+      <td>10000</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>3.9</td>
+      <td>10000</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>4.9</td>
+      <td>10000</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In other words what will be rendered is a straight line. There’s no limit to how
+large (in the Y direction) the ignored coordinates can be.</p>
+
+<p><strong>Shimmer</strong>. And guess what happens when you zoom in a little bit:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>X</th>
+      <th>Y</th>
+      <th>Displayed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>1.0</td>
+      <td>10000</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>1.1</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>2.1</td>
+      <td>10000</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>2.2</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>3.2</td>
+      <td>10000</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>3.3</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>4.3</td>
+      <td>10000</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>4.4</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>5.4</td>
+      <td>10000</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>5.5</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Now you get a really jagged line.</p>
+
+<p>And depending on the situation it can flash really quickly back and forth
+between the two. It isn’t very pretty.</p>
+
+<h2 id="reduce-horizontal-and-vertical-density-of-data-points">Reduce horizontal and vertical density of data points</h2>
+
+<p>Both of those problems can be alleviated by comparing both X <em>and Y</em>
+coordinates, which is what most people try next.</p>
+
+<p>Something like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">void</span> <span class="nf">DrawData</span><span class="p">(</span><span class="n">IDrawing</span> <span class="n">drawing</span><span class="p">,</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Point</span><span class="p">&gt;</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="k">const</span> <span class="kt">double</span> <span class="n">minDiscernableDifference</span> <span class="p">=</span> <span class="m">1.0</span><span class="p">;</span>
+  <span class="n">Point</span> <span class="n">lastPoint</span> <span class="p">=</span> <span class="k">default</span><span class="p">;</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">point</span> <span class="k">in</span> <span class="n">data</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">isFirstPoint</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+      <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+      <span class="n">lastPoint</span> <span class="p">=</span> <span class="n">point</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">point</span> <span class="p">-</span> <span class="n">lastPoint</span><span class="p">).</span><span class="n">Length</span> <span class="p">&gt;=</span> <span class="n">minDiscernableDifference</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+      <span class="n">lastPoint</span> <span class="p">=</span> <span class="n">point</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now anytime a point is sufficiently distant from the previous point <em>in any
+direction</em> it’ll show up on the screen. No more shimmer and no more data loss.</p>
+
+<p>But it’s still not perfect.</p>
+
+<h3 id="problems-1">Problems</h3>
+
+<p>These are actually problems with the previous approaches too, but…</p>
+
+<p><strong>Straight lines have too many points</strong>. Here’s how some data points in a
+straight line will be handled:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>X</th>
+      <th>Y</th>
+      <th>Displayed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>That’s a lot more lines on the screen than this visually indistinguishable
+equivalent:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>X</th>
+      <th>Y</th>
+      <th>Displayed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Congested zig zags stay congested</strong>. Here’s how some other data points in a
+bunch of tight zig zags will be handled:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>X</th>
+      <th>Y</th>
+      <th>Displayed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>1000</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>1000</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>1000</td>
+      <td>✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>That’s a lot more lines on the screen than this visually indistinguishable
+equivalent:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>X</th>
+      <th>Y</th>
+      <th>Displayed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✓</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>1000</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>1000</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>✗</td>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>1000</td>
+      <td>✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="rectangles-and-bounding-boxes">Rectangles and bounding boxes</h2>
+
+<p>I used the phrase “visually indistinguishable equivalent”. What does it mean? It
+means we want to find the most simplified version of the data points that will
+look just the same. It turns out this is a good goal.</p>
+
+<p>By looking at the problem from this perspective you can see why all the previous
+strategies weren’t the best. Neither the naive approach nor the
+horizontal+vertical density reduction approach were the most simplified. And the
+horizontal density reduction approach isn’t visually identical.</p>
+
+<p>One thing that helps to get a much more simplified version (while still being
+visually identical) is to think in terms of rectangles and bounding boxes.</p>
+
+<p>Each line segment is just like a skinny rectangle on the screen (lines at an
+angle are the same as skinny rectangles tilted at an angle). And a bounding box
+is just a rectangle that’s wide and long enough to contain some line segments
+(it can also be tilted at an angle).</p>
+
+<p>So a single line segment will be visually indistinguishable from a group of line
+segments if the bounding box around the group of line segments is similar enough
+to the single line segment’s rectangle.</p>
+
+<p>In other words, from far enough away this group of line segments:</p>
+
+<p><img src="/assets/img/plotting-data/group-line-segments.png" alt="Group of line segments" class="img-fluid" /></p>
+
+<p>…can be reduced to this:</p>
+
+<p><img src="/assets/img/plotting-data/reduced-line-segment.png" alt="Reduced line segment" class="img-fluid" /></p>
+
+<p>The individual line segments won’t even have to connect because when you’re
+zoomed out enough their pixels will be so relatively large that they’ll be
+touching. When you zoom out far enough, render the data points, and look closely
+at the pixels on the screen, then both of the above will look something like
+this:</p>
+
+<p><img src="/assets/img/plotting-data/equivalent-line-segments.png" alt="From far enough away" class="img-fluid" /></p>
+
+<h3 id="the-algorithm">The algorithm</h3>
+
+<p>First we’ll need to encapsulate the idea of a bounding box around a set of
+points:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BoundingBox</span>
+<span class="p">{</span>
+  <span class="c1">/// &lt;summary&gt;</span>
+  <span class="c1">/// The first point that was added to the bounding box</span>
+  <span class="c1">/// &lt;/summary&gt;</span>
+  <span class="k">public</span> <span class="n">Point</span> <span class="n">EntryPoint</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="c1">/// &lt;summary&gt;</span>
+  <span class="c1">/// A line segment that is visually equivalent to the bounding box.</span>
+  <span class="c1">/// &lt;/summary&gt;</span>
+  <span class="k">public</span> <span class="p">(</span><span class="n">Point</span><span class="p">,</span> <span class="n">Point</span><span class="p">)</span> <span class="n">MajorLineSegment</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="c1">/// &lt;summary&gt;</span>
+  <span class="c1">/// The length of the bounding box.</span>
+  <span class="c1">/// &lt;/summary&gt;</span>
+  <span class="k">public</span> <span class="kt">double</span> <span class="n">MajorLineSegmentDistance</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="c1">/// &lt;summary&gt;</span>
+  <span class="c1">/// The width of the bounding box.</span>
+  <span class="c1">/// &lt;/summary&gt;</span>
+  <span class="k">public</span> <span class="kt">double</span> <span class="n">MinorDistance</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Add</span><span class="p">(</span><span class="n">Point</span> <span class="n">point</span><span class="p">);</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Reset</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>With some implementation of that, here’s some inspirational code that should get
+you started in the right direction:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">void</span> <span class="nf">DrawData</span><span class="p">(</span><span class="n">IDrawing</span> <span class="n">drawing</span><span class="p">,</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Point</span><span class="p">&gt;</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="k">const</span> <span class="kt">double</span> <span class="n">minDiscernableDifference</span> <span class="p">=</span> <span class="m">1.0</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">boundingBox</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">BoundingBox</span><span class="p">();</span>
+  <span class="kt">var</span> <span class="n">lastPoint</span> <span class="p">=</span> <span class="k">default</span><span class="p">(</span><span class="n">Point</span><span class="p">);</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">point</span> <span class="k">in</span> <span class="n">data</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">isFirstPoint</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">isFirstPoint</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+      <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">boundingBox</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">boundingBox</span><span class="p">.</span><span class="n">MinorDistance</span> <span class="p">&lt;</span> <span class="n">minDiscernableDifference</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">lastPoint</span> <span class="p">=</span> <span class="n">point</span><span class="p">;</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Draw the simplified version of the bounding box</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="n">boundingBox</span><span class="p">.</span><span class="n">EntryPoint</span><span class="p">);</span>
+    <span class="kt">var</span> <span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="p">=</span> <span class="n">boundingBox</span><span class="p">.</span><span class="n">MajorLineSegment</span><span class="p">;</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">begin</span><span class="p">);</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="n">end</span><span class="p">);</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">lastPoint</span><span class="p">);</span>
+
+    <span class="c1">// Reset and re-add the current point so it's ready for the next iteration</span>
+    <span class="n">boundingBox</span><span class="p">.</span><span class="nf">Reset</span><span class="p">();</span>
+    <span class="n">boundingBox</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">point</span><span class="p">);</span>
+
+    <span class="n">lastPoint</span> <span class="p">=</span> <span class="n">point</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Draw the simplified version of the bounding box so that the last data</span>
+  <span class="c1">// points aren't lost</span>
+  <span class="p">{</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="n">boundingBox</span><span class="p">.</span><span class="n">EntryPoint</span><span class="p">);</span>
+    <span class="kt">var</span> <span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="p">=</span> <span class="n">boundingBox</span><span class="p">.</span><span class="n">MajorLineSegment</span><span class="p">;</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">begin</span><span class="p">);</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">LineTo</span><span class="p">(</span><span class="n">end</span><span class="p">);</span>
+    <span class="n">drawing</span><span class="p">.</span><span class="nf">MoveTo</span><span class="p">(</span><span class="n">lastPoint</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Caution</strong></p>
+
+<ul>
+  <li>I’m leaving it as an exercise for you to fix this code to take care of drawing
+the bounding box correctly (if at all) when too few points have been added to
+it</li>
+  <li>You’ll also want to think about the case when some of the bounding box’s
+points aren’t far enough apart to warrant drawing them</li>
+  <li>You’ll have to implement the <code class="highlighter-rouge">BoundingBox</code> class</li>
+  <li>This was only loosely inspired by working code I wrote so it probably has
+other bugs. Sorry I can’t just post up the code I wrote—it belongs to my
+employer</li>
+</ul>
+
+<p>Hints:</p>
+
+<ul>
+  <li>Why are we drawing any line segments that lie entirely outside the viewport?
+You don’t want to just check if individual points are in the viewport,
+because a line can have both endpoints outside the viewport yet it still needs
+to be drawn because it crosses through the viewport. You want
+<a href="https://en.wikipedia.org/wiki/Line_clipping" target="_blank">line clipping</a></li>
+  <li>My implementation of <code class="highlighter-rouge">BoundingBox.Add</code> (not shown here) has time complexity
+\(O(n^2)\). In that case and with the above code it would actually be faster
+to just draw all the points than figure out the optimal bounding box around a
+sufficiently long and straight string of data points. Hint: you don’t have to
+simplify all the data points in only a single fine-grained pass…
+<a href="https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm" target="_blank">divide and conquer</a></li>
+  <li>I don’t know how to implement a perfectly minimal bounding box algorithm. I
+ran out of time thinking about it and only came up with a merely good enough
+one. (Sure, bounding boxes that only sit straight on one of their sides are
+really fast and easy—just min/max the points to get each of the four
+corners—But the only kind of bounding box that’s useful here is one that
+can be rotated in any orientation.) But an elegant way to form a good enough
+bounding box for a set of points is to treat the two points farthest from one
+another in that set as the major axis (giving the direction and length of the
+bounding box), and the maximum distance of the points from that line as the
+minor axis distance (giving the width of the bounding box). It’s not perfect,
+but it works pretty well. If I needed a better implementation then I would
+think harder about forming a convex polygon around the set of data points (I
+think there are fast algorithms for that) and then figure out how to fit a
+rectangle of minimal area around that polygon (which I suspect could be done
+quickly somehow)</li>
+</ul>
+
+<p>Also I’ll just briefly point out that if you are trying to establish and
+maintain the correctness of this kind of stuff <em>only</em> by running a UI and seeing
+how it looks on the screen in various scenarios, then you’re doing it wrong.
+This is one of those cases where everything can be broken down into small
+“units” of responsibility and then <em>unit tested</em> with automated tests, with only
+the occasional sanity check by firing up a UI. Enough has been written about
+unit testing elsewhere so that’s all I’ll say here.</p>
+
+<h3 id="downsides">Downsides</h3>
+
+<p>This is definitely more complicated than the other algorithms. I think this is
+somewhere in the territory of optimizations. Make sure you have something that
+at least works before spending a ton of time on this.</p>
+
+<p>It doesn’t help if your data is going randomly in all directions. Let’s hope
+you’re not trying to plot data like that.</p>
+
+<h3 id="upsides">Upsides</h3>
+
+<p>This approach can perform <em>much</em> better than the other algorithms.</p>
+
+<p>As long as a single axis exists in which your data is non-decreasing then it’ll
+work. <em>No matter the direction of that axis</em>. It’ll also work just as well in a
+few other limited cases.</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>Thinking in terms of bounding boxes should get you most of the way there.</p>
+
+          
+          <hr/>
+<p>
+  Would you like to share your thoughts? Join the discussion here:
+</p>
+<p>
+  <a href="https://github.com/matthew-a-thomas/me/issues/11" target="_blank">https://github.com/matthew-a-thomas/me/issues/11</a>
+</p>
+          
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2020&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

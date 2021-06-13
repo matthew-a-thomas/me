@@ -1,11 +1,11 @@
 ---
 title: Of God and the Holy Trinity
 category: god
-description: Paragraph two of the 1689 London Baptist Confession
+description: Chapter Two, Paragraph One of the 1689 London Baptist Confession
 ---
 
-[Paragraph two](https://www.the1689confession.com/1689/chapter-2) of the 1689
-London Baptist Confession reads:
+[Chapter two, paragraph one](https://www.the1689confession.com/1689/chapter-2)
+of the 1689 London Baptist Confession reads:
 
 > The Lord our God is but one only living and true God; whose subsistence is in
   and of Himself, infinite in being and perfection; whose essence cannot be

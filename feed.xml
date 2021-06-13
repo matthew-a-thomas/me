@@ -1,4 +1,98 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-06-13T00:50:38+00:00</updated><id>/feed.xml</id><entry><title type="html">Plotting Data</title><link href="/programming/2020/12/18/plotting-data.html" rel="alternate" type="text/html" title="Plotting Data" /><published>2020-12-18T00:00:00+00:00</published><updated>2020-12-18T00:00:00+00:00</updated><id>/programming/2020/12/18/plotting-data</id><content type="html" xml:base="/programming/2020/12/18/plotting-data.html">&lt;p&gt;There are a couple of things that can make a line graph on the computer run
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-06-13T01:47:10+00:00</updated><id>/feed.xml</id><entry><title type="html">Of God and the Holy Trinity</title><link href="/god/2021/06/12/of-god-and-the-holy-trinity.html" rel="alternate" type="text/html" title="Of God and the Holy Trinity" /><published>2021-06-12T00:00:00+00:00</published><updated>2021-06-12T00:00:00+00:00</updated><id>/god/2021/06/12/of-god-and-the-holy-trinity</id><content type="html" xml:base="/god/2021/06/12/of-god-and-the-holy-trinity.html">&lt;p&gt;&lt;a href=&quot;https://www.the1689confession.com/1689/chapter-2&quot;&gt;Paragraph two&lt;/a&gt; of the 1689
+London Baptist Confession reads:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The Lord our God is but one only living and true God; whose subsistence is in
+  and of Himself, infinite in being and perfection; whose essence cannot be
+  comprehended by any but Himself; a most pure spirit, invisible, without body,
+  parts, or passions, who only hath immortality, dwelling in the light which no
+  man can approach unto; who is immutable, immense, eternal, incomprehensible,
+  almighty, every way infinite, most holy, most wise, most free, most absolute;
+  working all things according to the counsel of His own immutable and most
+  righteous will, for His own glory; most loving, gracious, merciful,
+  long-suffering, abundant in goodness and truth, forgiving iniquity,
+  transgression, and sin; the rewarder of them that diligently seek Him, and
+  withal most just and terrible in His judgments, hating all sin, and who will
+  by no means clear the guilty.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;annoying-things&quot;&gt;Annoying things&lt;/h2&gt;
+
+&lt;p&gt;First, there are a few things this paragraph says about God which frustrate me.
+I don’t want to change them—I think they’re quite accurate to
+reality—but I am quickly frustrated when I think about them.&lt;/p&gt;
+
+&lt;p&gt;Let me show you what I mean.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;[God’s] essence cannot be comprehended by any but himself&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Well, why not? Why isn’t it within my abilities to comprehend God? That insults
+my pride. Which is annoying.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;[God’s] subsistence is in and of himself&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I don’t comprehend that. I thought I was smart. That’s annoying.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;[God] dwells in the light which no man can approach unto&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Well I’m fine if &lt;em&gt;other&lt;/em&gt; people aren’t able to approach unto that light. But I
+thought I was special. Why can’t &lt;em&gt;I&lt;/em&gt; approach unto God’s light? That’s annoying.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;[God] is only living&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;[God] is immutable&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I don’t think anyone has ever seen something which was both &lt;em&gt;alive&lt;/em&gt; and
+&lt;em&gt;immutable&lt;/em&gt;. In fact, I don’t think such a thing exists (other than God). And
+God isn’t just partly alive but is &lt;em&gt;entirely&lt;/em&gt; alive. I thought only dead things
+were immutable. And all the other things which are now alive are in fact in the
+process of changing, of dying. Why can’t I comprehend him by comparing him to
+something he has made? That’s annoying.&lt;/p&gt;
+
+&lt;h2 id=&quot;amazing-things&quot;&gt;Amazing things&lt;/h2&gt;
+
+&lt;p&gt;God exhaustively knows everything about himself. And he knows that he knows it.
+And he knows that he knows that. And that. And yes, that too. And so on.&lt;/p&gt;
+
+&lt;p&gt;As a programmer I’m sort of familiar with recursion. And so I know that
+recursion is sort of like that. But at the same time there’s something lacking
+in my attempts to describe God’s knowledge recursively. I think it has to do
+with the difference between having an algorithm that can recursively compute
+something—want to know if a number is prime? Easy, just find out if it’s
+evenly divided by a number other than the number 1—versus already having
+the answer. God already knows what &lt;em&gt;all&lt;/em&gt; the prime numbers are. It’s not that
+God has some procedure he has to follow in order to arrive at his knowledge
+(such as “write down ‘God knows that. And that. And that’ forever). No, God
+already &lt;em&gt;has&lt;/em&gt; that knowledge in himself.&lt;/p&gt;
+
+&lt;p&gt;In fact God has &lt;em&gt;always&lt;/em&gt; had all this knowledge. The Divine Nature has never
+learned anything because he is immutable.&lt;/p&gt;
+
+&lt;p&gt;Furthermore as a programmer I’m acutely aware of how difficult it is to make a
+computer originate facts. All I know is how to make it operate on information it
+gets from somewhere else. Yet all things exist &lt;em&gt;by reason of God&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;And to realize that God is also “most loving, gracious, merciful”—that’s
+amazing. Furthermore God is “most just and terrible in his judgments, hating all
+sin, and who will by no means clear the guilty”—that’s amazing. And to
+think that God became a man in order to purchase people from his own wrath by
+dying for them—“amazing” just doesn’t do justice to the fact that God is
+both just and the justifier of the one who has faith in Jesus Christ.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
+
+&lt;p&gt;Comprehending God is too difficult for me. He is too different. He is too high.
+I think my head is going to explode.&lt;/p&gt;</content><author><name></name></author><category term="god" /></entry><entry><title type="html">Plotting Data</title><link href="/programming/2020/12/18/plotting-data.html" rel="alternate" type="text/html" title="Plotting Data" /><published>2020-12-18T00:00:00+00:00</published><updated>2020-12-18T00:00:00+00:00</updated><id>/programming/2020/12/18/plotting-data</id><content type="html" xml:base="/programming/2020/12/18/plotting-data.html">&lt;p&gt;There are a couple of things that can make a line graph on the computer run
 really slow. It can take a while to get all the data points, and it can take a
 while to draw them all.&lt;/p&gt;
 
@@ -1841,596 +1935,4 @@ Roman armies that sacked Jerusalem&lt;/li&gt;
 &lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
 
 &lt;p&gt;Don’t be quick to think you’ve found a contradiction in the Bible. You probably
-only have a paradox.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">Making Prime Numbers in Rust</title><link href="/programming/2020/10/27/making-primes-rust.html" rel="alternate" type="text/html" title="Making Prime Numbers in Rust" /><published>2020-10-27T00:00:00+00:00</published><updated>2020-10-27T00:00:00+00:00</updated><id>/programming/2020/10/27/making-primes-rust</id><content type="html" xml:base="/programming/2020/10/27/making-primes-rust.html">&lt;p&gt;A prime number can only be evenly divided by itself (and by the number one). The
-first few prime numbers are:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;2&lt;/li&gt;
-  &lt;li&gt;3&lt;/li&gt;
-  &lt;li&gt;5&lt;/li&gt;
-  &lt;li&gt;7&lt;/li&gt;
-  &lt;li&gt;11&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Two is the only even prime number, just like three is the only prime number that
-is a multiple of three, five is the only prime number that is a multiple of
-five, and so on.&lt;/p&gt;
-
-&lt;p&gt;Recall that the modulo operator “%” tells you the remainder after
-division. For example:&lt;/p&gt;
-
-\[10 \% 3 = 1\]
-
-&lt;p&gt;Because ten divided by three has a remainder of one.&lt;/p&gt;
-
-&lt;p&gt;Eight is not prime because it is an even multiple of two (the remainder after
-dividing eight by two is zero):&lt;/p&gt;
-
-\[8 \% 2 = 0\]
-
-&lt;h2 id=&quot;table&quot;&gt;Table&lt;/h2&gt;
-
-&lt;p&gt;With that in mind, here’s one way to figure out the first few prime numbers:&lt;/p&gt;
-
-&lt;div class=&quot;table-responsive&quot;&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Number&lt;/th&gt;
-      &lt;th&gt;%2&lt;/th&gt;
-      &lt;th&gt;%3&lt;/th&gt;
-      &lt;th&gt;%4&lt;/th&gt;
-      &lt;th&gt;%5&lt;/th&gt;
-      &lt;th&gt;%6&lt;/th&gt;
-      &lt;th&gt;%7&lt;/th&gt;
-      &lt;th&gt;%8&lt;/th&gt;
-      &lt;th&gt;%9&lt;/th&gt;
-      &lt;th&gt;%10&lt;/th&gt;
-      &lt;th&gt;%11&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;7&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;7&lt;/td&gt;
-      &lt;td&gt;7&lt;/td&gt;
-      &lt;td&gt;7&lt;/td&gt;
-      &lt;td&gt;7&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;8&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;8&lt;/td&gt;
-      &lt;td&gt;8&lt;/td&gt;
-      &lt;td&gt;8&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;9&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;9&lt;/td&gt;
-      &lt;td&gt;9&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;10&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;10&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;11&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;/div&gt;
-
-&lt;p&gt;Don’t be intimidated by that large table. Think about the row for the number six
-for a moment:&lt;/p&gt;
-
-&lt;div class=&quot;table-responsive&quot;&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Number&lt;/th&gt;
-      &lt;th&gt;%2&lt;/th&gt;
-      &lt;th&gt;%3&lt;/th&gt;
-      &lt;th&gt;%4&lt;/th&gt;
-      &lt;th&gt;%5&lt;/th&gt;
-      &lt;th&gt;%6&lt;/th&gt;
-      &lt;th&gt;%7&lt;/th&gt;
-      &lt;th&gt;%8&lt;/th&gt;
-      &lt;th&gt;%9&lt;/th&gt;
-      &lt;th&gt;%10&lt;/th&gt;
-      &lt;th&gt;%11&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;/div&gt;
-
-&lt;p&gt;This means six is evenly divided by two, three, and six. Dividing six by any
-other number leaves a remainder. So the first thing I want to point out is the
-zeros indicate which numbers six is a multiple of.&lt;/p&gt;
-
-&lt;p&gt;So to figure out which numbers are primes, just count the zeros in each row. Any
-row with only a single zero is a prime number. From the table above:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;2&lt;/li&gt;
-  &lt;li&gt;3&lt;/li&gt;
-  &lt;li&gt;5&lt;/li&gt;
-  &lt;li&gt;7&lt;/li&gt;
-  &lt;li&gt;11&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;sieve&quot;&gt;Sieve&lt;/h2&gt;
-
-&lt;p&gt;We can also use something called a sieve to find prime numbers. I’ll explain how
-the
-&lt;a href=&quot;https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes&quot; target=&quot;_blank&quot;&gt;Sieve of Eratosthenes&lt;/a&gt;
-works.&lt;/p&gt;
-
-&lt;p&gt;First, make a list of numbers (starting with two):&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;2&lt;/li&gt;
-  &lt;li&gt;3&lt;/li&gt;
-  &lt;li&gt;4&lt;/li&gt;
-  &lt;li&gt;5&lt;/li&gt;
-  &lt;li&gt;6&lt;/li&gt;
-  &lt;li&gt;7&lt;/li&gt;
-  &lt;li&gt;8&lt;/li&gt;
-  &lt;li&gt;9&lt;/li&gt;
-  &lt;li&gt;10&lt;/li&gt;
-  &lt;li&gt;11&lt;/li&gt;
-  &lt;li&gt;12&lt;/li&gt;
-  &lt;li&gt;13&lt;/li&gt;
-  &lt;li&gt;14&lt;/li&gt;
-  &lt;li&gt;15&lt;/li&gt;
-  &lt;li&gt;16&lt;/li&gt;
-  &lt;li&gt;17&lt;/li&gt;
-  &lt;li&gt;18&lt;/li&gt;
-  &lt;li&gt;19&lt;/li&gt;
-  &lt;li&gt;20&lt;/li&gt;
-  &lt;li&gt;21&lt;/li&gt;
-  &lt;li&gt;22&lt;/li&gt;
-  &lt;li&gt;23&lt;/li&gt;
-  &lt;li&gt;24&lt;/li&gt;
-  &lt;li&gt;25&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now start with two and remove all the multiples of two from the rest of the
-list. Make sure to leave the number two. That gives:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;2&lt;/li&gt;
-  &lt;li&gt;3&lt;/li&gt;
-  &lt;li&gt;5&lt;/li&gt;
-  &lt;li&gt;7&lt;/li&gt;
-  &lt;li&gt;9&lt;/li&gt;
-  &lt;li&gt;11&lt;/li&gt;
-  &lt;li&gt;13&lt;/li&gt;
-  &lt;li&gt;15&lt;/li&gt;
-  &lt;li&gt;17&lt;/li&gt;
-  &lt;li&gt;19&lt;/li&gt;
-  &lt;li&gt;21&lt;/li&gt;
-  &lt;li&gt;23&lt;/li&gt;
-  &lt;li&gt;25&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Move on to the next number in the list and do the same thing. So let’s remove
-all the multiples of three. That leaves this list:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;2&lt;/li&gt;
-  &lt;li&gt;3&lt;/li&gt;
-  &lt;li&gt;5&lt;/li&gt;
-  &lt;li&gt;7&lt;/li&gt;
-  &lt;li&gt;11&lt;/li&gt;
-  &lt;li&gt;13&lt;/li&gt;
-  &lt;li&gt;17&lt;/li&gt;
-  &lt;li&gt;19&lt;/li&gt;
-  &lt;li&gt;23&lt;/li&gt;
-  &lt;li&gt;25&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Keep doing that. When you’re done you’ll have a list of prime numbers:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;2&lt;/li&gt;
-  &lt;li&gt;3&lt;/li&gt;
-  &lt;li&gt;5&lt;/li&gt;
-  &lt;li&gt;7&lt;/li&gt;
-  &lt;li&gt;11&lt;/li&gt;
-  &lt;li&gt;13&lt;/li&gt;
-  &lt;li&gt;17&lt;/li&gt;
-  &lt;li&gt;19&lt;/li&gt;
-  &lt;li&gt;23&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;shortcut&quot;&gt;Shortcut&lt;/h2&gt;
-
-&lt;p&gt;There’s a shortcut we can take with both the table and the sieve. I’ll explain
-it in terms of the table. I hope this will make sense.&lt;/p&gt;
-
-&lt;p&gt;Think about the numbers 24, 25, and 31. Here’s how their rows in the above table
-would look:&lt;/p&gt;
-
-&lt;div class=&quot;table-responsive&quot;&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Number&lt;/th&gt;
-      &lt;th&gt;%2&lt;/th&gt;
-      &lt;th&gt;%3&lt;/th&gt;
-      &lt;th&gt;%4&lt;/th&gt;
-      &lt;th&gt;%5&lt;/th&gt;
-      &lt;th&gt;%6&lt;/th&gt;
-      &lt;th&gt;%7&lt;/th&gt;
-      &lt;th&gt;%8&lt;/th&gt;
-      &lt;th&gt;%9&lt;/th&gt;
-      &lt;th&gt;%10&lt;/th&gt;
-      &lt;th&gt;%11&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;24&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;25&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;0&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;7&lt;/td&gt;
-      &lt;td&gt;5&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;31&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;7&lt;/td&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;9&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;/div&gt;
-
-&lt;p&gt;It’s clear that 24 and 25 aren’t prime numbers because both of them have at
-least one zero in addition to the one we’d get if we divided those numbers by
-themselves. It wasn’t necessary to continue to find remainders of either number
-after we found the first zero. And luckily the zeros happened pretty early.&lt;/p&gt;
-
-&lt;p&gt;But what about 31? How many columns do we need to determine if 31 is prime?&lt;/p&gt;
-
-&lt;p&gt;Recall that every number is a multiple of its square root. If you divide any
-number by its square root then you’ll be left with its square root exactly.&lt;/p&gt;
-
-&lt;p&gt;For example, if we divide 25 by five then we’re left with five (its square
-root).&lt;/p&gt;
-
-&lt;p&gt;Also, if you divide a number by another number larger than its square root
-you’ll be left with a number smaller than its square root.&lt;/p&gt;
-
-&lt;p&gt;For example, if we divide 25 by six (which is larger than five, its square root)
-then we’re left with four and one sixth (which is less than its square root).&lt;/p&gt;
-
-&lt;p&gt;Furthermore if a number is an even multiple of one number then it’s also an even
-multiple of another number.&lt;/p&gt;
-
-&lt;p&gt;For example, 24 is two times twelve, three times eight, or four times six.&lt;/p&gt;
-
-&lt;p&gt;All this taken together means we don’t have to worry about anything larger than
-a number’s square root. If a number is not prime then it will be a multiple of
-at least one number less than or equal to its square root.&lt;/p&gt;
-
-&lt;p&gt;The square root of 31 is ~5.57. That means our table doesn’t need columns for
-the numbers greater than five. Since we calculated remainders up through five
-and there were no zeros then we know 31 is prime.&lt;/p&gt;
-
-&lt;p&gt;This also applies to the sieve method. If you start with this list:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;2&lt;/li&gt;
-  &lt;li&gt;3&lt;/li&gt;
-  &lt;li&gt;4&lt;/li&gt;
-  &lt;li&gt;5&lt;/li&gt;
-  &lt;li&gt;6&lt;/li&gt;
-  &lt;li&gt;7&lt;/li&gt;
-  &lt;li&gt;8&lt;/li&gt;
-  &lt;li&gt;9&lt;/li&gt;
-  &lt;li&gt;10&lt;/li&gt;
-  &lt;li&gt;11&lt;/li&gt;
-  &lt;li&gt;12&lt;/li&gt;
-  &lt;li&gt;13&lt;/li&gt;
-  &lt;li&gt;14&lt;/li&gt;
-  &lt;li&gt;15&lt;/li&gt;
-  &lt;li&gt;16&lt;/li&gt;
-  &lt;li&gt;17&lt;/li&gt;
-  &lt;li&gt;18&lt;/li&gt;
-  &lt;li&gt;19&lt;/li&gt;
-  &lt;li&gt;20&lt;/li&gt;
-  &lt;li&gt;21&lt;/li&gt;
-  &lt;li&gt;22&lt;/li&gt;
-  &lt;li&gt;23&lt;/li&gt;
-  &lt;li&gt;24&lt;/li&gt;
-  &lt;li&gt;25&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;…then you can stop after you remove all the multiples of five, because the
-square root of the largest number in the list is five.&lt;/p&gt;
-
-&lt;p&gt;All the multiples of six will have been crossed out as multiples of two.&lt;/p&gt;
-
-&lt;p&gt;All the multiples of seven will have been crossed out as well. Fourteen is a
-multiple of two. 21 is a multiple of three.&lt;/p&gt;
-
-&lt;p&gt;All the multiples of eight will have been crossed out as multiples of two.&lt;/p&gt;
-
-&lt;p&gt;All the multiples of nine will have been crossed out as multiples of three.&lt;/p&gt;
-
-&lt;p&gt;All the multiples of ten will have been crossed out as multiples of two.&lt;/p&gt;
-
-&lt;p&gt;All the multiples of eleven will have been crossed out as well. 22 is a multiple
-of two.&lt;/p&gt;
-
-&lt;p&gt;And so on. I hope you get the picture.&lt;/p&gt;
-
-&lt;h2 id=&quot;generator&quot;&gt;Generator&lt;/h2&gt;
-
-&lt;p&gt;The disadvantage of both the table and the sieve is you have to know the largest
-prime number you want to find. What if you want to continue finding prime
-numbers after that?&lt;/p&gt;
-
-&lt;p&gt;Well it’s not too difficult to extend the sieve idea into a prime number
-generator. Let me explain the algorithm.&lt;/p&gt;
-
-&lt;p&gt;It centers on a list to which we’ll add prime numbers in order as we find them.
-That list starts with the number two.&lt;/p&gt;
-
-\[\text{Primes} = (2)\]
-
-&lt;p&gt;We know that the number three is prime because it is not an even multiple of any
-of the numbers in our prime numbers list. We don’t have to check any of the
-prime numbers larger than the square root of three, so we don’t even have to
-check it against the number two. So we add three to the list.&lt;/p&gt;
-
-\[\text{Primes} = (2, 3)\]
-
-&lt;p&gt;We know that the number four is not prime because it’s an even multiple of a
-number in our prime numbers list (it’s an even multiple of two). So we move on.&lt;/p&gt;
-
-&lt;p&gt;Five is prime because it isn’t a multiple of two. Again we don’t have to check
-it against three because three is larger than the square root of five. So we add
-five to the list.&lt;/p&gt;
-
-\[\text{Primes} = (2, 3, 5)\]
-
-&lt;p&gt;Six is not prime because it’s a multiple of two.&lt;/p&gt;
-
-&lt;p&gt;Seven is prime because it’s not a multiple of two.&lt;/p&gt;
-
-\[\text{Primes} = (2, 3, 5, 7)\]
-
-&lt;p&gt;Eight is not prime because it’s a multiple of two.&lt;/p&gt;
-
-&lt;p&gt;Nine is not prime because it’s a multiple of three. Again we don’t have to
-divide it by five or seven because those are both larger than the square root of
-nine.&lt;/p&gt;
-
-&lt;p&gt;Ten is not prime because it’s a multiple of two.&lt;/p&gt;
-
-&lt;p&gt;Eleven is prime because it’s not a multiple of two or of three.&lt;/p&gt;
-
-\[\text{Primes} = (2, 3, 5, 7, 11)\]
-
-&lt;p&gt;Repeat as long as you want.&lt;/p&gt;
-
-&lt;h2 id=&quot;rust&quot;&gt;Rust&lt;/h2&gt;
-
-&lt;p&gt;Let’s make the prime number generator in
-&lt;a href=&quot;https://www.rust-lang.org/&quot; target=&quot;_blank&quot;&gt;Rust&lt;/a&gt;. Here it is:&lt;/p&gt;
-
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PrimeGenerator&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;primes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PrimeGenerator&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;primes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;vec!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2u&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-  &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;loop&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.candidate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.candidate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1u&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prime&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.primes&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.iter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;quotient&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remainder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;quotient&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prime&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-          &lt;span class=&quot;c&quot;&gt;// We have run out of primes to search and candidate passed all the&lt;/span&gt;
-          &lt;span class=&quot;c&quot;&gt;// tests. It's prime!&lt;/span&gt;
-          &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.primes&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-          &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;candidate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remainder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-          &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;// candidate is a multiple of a prime&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Here are the first ten primes:&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;generator&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;PrimeGenerator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prime&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;generator&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here’s the output:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Here are the first ten primes:
-2
-3
-5
-7
-11
-13
-17
-19
-23
-29
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This doesn’t work in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[no_std]&lt;/code&gt; because the list of primes is stored on the
-heap. Heapless collections do exist but I think that’s out of the scope of this
-tour.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry></feed>
+only have a paradox.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry></feed>

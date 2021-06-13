@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-04-12T16:15:22+00:00</updated><id>/feed.xml</id><entry><title type="html">Plotting Data</title><link href="/programming/2020/12/18/plotting-data.html" rel="alternate" type="text/html" title="Plotting Data" /><published>2020-12-18T00:00:00+00:00</published><updated>2020-12-18T00:00:00+00:00</updated><id>/programming/2020/12/18/plotting-data</id><content type="html" xml:base="/programming/2020/12/18/plotting-data.html">&lt;p&gt;There are a couple of things that can make a line graph on the computer run
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-06-13T00:50:38+00:00</updated><id>/feed.xml</id><entry><title type="html">Plotting Data</title><link href="/programming/2020/12/18/plotting-data.html" rel="alternate" type="text/html" title="Plotting Data" /><published>2020-12-18T00:00:00+00:00</published><updated>2020-12-18T00:00:00+00:00</updated><id>/programming/2020/12/18/plotting-data</id><content type="html" xml:base="/programming/2020/12/18/plotting-data.html">&lt;p&gt;There are a couple of things that can make a line graph on the computer run
 really slow. It can take a while to get all the data points, and it can take a
 while to draw them all.&lt;/p&gt;
 
@@ -51,9 +51,9 @@ lessons in this article will also apply to it.&lt;/p&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;You call &lt;code class=&quot;highlighter-rouge&quot;&gt;MoveTo&lt;/code&gt; to start the drawing at some &lt;code class=&quot;highlighter-rouge&quot;&gt;point&lt;/code&gt; (which is given in screen
-coordinates). Then you call &lt;code class=&quot;highlighter-rouge&quot;&gt;LineTo&lt;/code&gt; to draw from the previous location to a
-given &lt;code class=&quot;highlighter-rouge&quot;&gt;point&lt;/code&gt; (again given in screen coordinates).&lt;/p&gt;
+&lt;p&gt;You call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MoveTo&lt;/code&gt; to start the drawing at some &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;point&lt;/code&gt; (which is given in screen
+coordinates). Then you call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;LineTo&lt;/code&gt; to draw from the previous location to a
+given &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;point&lt;/code&gt; (again given in screen coordinates).&lt;/p&gt;
 
 &lt;p&gt;So to draw a 200x100 pixel rectangle you could do this:&lt;/p&gt;
 
@@ -625,7 +625,7 @@ the bounding box correctly (if at all) when too few points have been added to
 it&lt;/li&gt;
   &lt;li&gt;You’ll also want to think about the case when some of the bounding box’s
 points aren’t far enough apart to warrant drawing them&lt;/li&gt;
-  &lt;li&gt;You’ll have to implement the &lt;code class=&quot;highlighter-rouge&quot;&gt;BoundingBox&lt;/code&gt; class&lt;/li&gt;
+  &lt;li&gt;You’ll have to implement the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BoundingBox&lt;/code&gt; class&lt;/li&gt;
   &lt;li&gt;This was only loosely inspired by working code I wrote so it probably has
 other bugs. Sorry I can’t just post up the code I wrote—it belongs to my
 employer&lt;/li&gt;
@@ -639,7 +639,7 @@ You don’t want to just check if individual points are in the viewport,
 because a line can have both endpoints outside the viewport yet it still needs
 to be drawn because it crosses through the viewport. You want
 &lt;a href=&quot;https://en.wikipedia.org/wiki/Line_clipping&quot; target=&quot;_blank&quot;&gt;line clipping&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;My implementation of &lt;code class=&quot;highlighter-rouge&quot;&gt;BoundingBox.Add&lt;/code&gt; (not shown here) has time complexity
+  &lt;li&gt;My implementation of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BoundingBox.Add&lt;/code&gt; (not shown here) has time complexity
 \(O(n^2)\). In that case and with the above code it would actually be faster
 to just draw all the points than figure out the optimal bounding box around a
 sufficiently long and straight string of data points. Hint: you don’t have to
@@ -702,7 +702,7 @@ that we celebrate &lt;em&gt;His&lt;/em&gt; birthday instead of anyone else?&lt;/
 
 &lt;h2 id=&quot;the-promised-son-of-david&quot;&gt;The promised Son of David&lt;/h2&gt;
 
-&lt;p&gt;Here’s &lt;a href=&quot;https://www.biblegateway.com/passage/?search=2 Samuel 7:4&amp;ndash;17&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;2 Samuel 7:4–17&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Here’s &lt;a href=&quot;https://www.esv.org/search/?q=2 Samuel 7:4&amp;ndash;17&quot; target=&quot;_blank&quot;&gt;2 Samuel 7:4–17&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;But that same night the word of the LORD came to Nathan, “Go and tell my
@@ -741,7 +741,7 @@ title “Son of God” comes from. Which means Jesus is also…&lt;/p&gt;
 
 &lt;h2 id=&quot;the-son-of-god&quot;&gt;The Son of God&lt;/h2&gt;
 
-&lt;p&gt;Here’s &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Psalm 2:7&amp;ndash;12&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Psalm 2:7–12&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Here’s &lt;a href=&quot;https://www.esv.org/search/?q=Psalm 2:7&amp;ndash;12&quot; target=&quot;_blank&quot;&gt;Psalm 2:7–12&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;I will tell of the decree:
@@ -757,7 +757,7 @@ title “Son of God” comes from. Which means Jesus is also…&lt;/p&gt;
 &lt;p&gt;Do you see the strong connection between rulership and the title “Son of God”?&lt;/p&gt;
 
 &lt;p&gt;That’s all behind the voice that came from heaven during Jesus’s baptism in
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 3:13&amp;ndash;17&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 3:13–17&lt;/a&gt;:&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Matthew 3:13&amp;ndash;17&quot; target=&quot;_blank&quot;&gt;Matthew 3:13–17&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Then Jesus came from Galilee to the Jordan to John, to be baptized by him.
@@ -774,7 +774,7 @@ title “Son of God” comes from. Which means Jesus is also…&lt;/p&gt;
 
 &lt;h2 id=&quot;the-son-of-man&quot;&gt;The Son of Man&lt;/h2&gt;
 
-&lt;p&gt;Remember &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Daniel 7:13&amp;ndash;14&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Daniel 7:13–14&lt;/a&gt;?&lt;/p&gt;
+&lt;p&gt;Remember &lt;a href=&quot;https://www.esv.org/search/?q=Daniel 7:13&amp;ndash;14&quot; target=&quot;_blank&quot;&gt;Daniel 7:13–14&lt;/a&gt;?&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;“I saw in the night visions, and behold, with the clouds of heaven there came
@@ -788,7 +788,7 @@ title “Son of God” comes from. Which means Jesus is also…&lt;/p&gt;
 &lt;p&gt;This title also has strong connections to rulership and authority.&lt;/p&gt;
 
 &lt;p&gt;Jesus loved to apply this title to himself. Recall
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Mark 14:61&amp;ndash;62&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Mark 14:61–62&lt;/a&gt;:&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Mark 14:61&amp;ndash;62&quot; target=&quot;_blank&quot;&gt;Mark 14:61–62&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;The high priest asked Jesus, “Are you the Christ, the Son of the Blessed?” And
@@ -798,7 +798,7 @@ title “Son of God” comes from. Which means Jesus is also…&lt;/p&gt;
 
 &lt;h2 id=&quot;the-promised-offspring-of-adam-and-eve&quot;&gt;The promised offspring of Adam and Eve&lt;/h2&gt;
 
-&lt;p&gt;Here’s &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Genesis 3:14&amp;ndash;15&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Genesis 3:14–15&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Here’s &lt;a href=&quot;https://www.esv.org/search/?q=Genesis 3:14&amp;ndash;15&quot; target=&quot;_blank&quot;&gt;Genesis 3:14–15&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;The LORD God said to the serpent, “Because you have done this, cursed are you
@@ -809,7 +809,7 @@ title “Son of God” comes from. Which means Jesus is also…&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;Jesus bruised the head of Satan by utterly defeating him, like
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Hebrews 2:14&amp;ndash;15&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Hebrews 2:14–15&lt;/a&gt; says:&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Hebrews 2:14&amp;ndash;15&quot; target=&quot;_blank&quot;&gt;Hebrews 2:14–15&lt;/a&gt; says:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Since therefore the children share in flesh and blood, he himself likewise
@@ -826,7 +826,7 @@ would deliver Adam and Eve’s children from their sin.&lt;/p&gt;
 
 &lt;h2 id=&quot;the-promised-offspring-of-abraham&quot;&gt;The promised offspring of Abraham&lt;/h2&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Genesis 12:1&amp;ndash;3&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Genesis 12:1–3&lt;/a&gt; is talking about Jesus
+&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=Genesis 12:1&amp;ndash;3&quot; target=&quot;_blank&quot;&gt;Genesis 12:1–3&lt;/a&gt; is talking about Jesus
 when it says:&lt;/p&gt;
 
 &lt;blockquote&gt;
@@ -839,8 +839,8 @@ when it says:&lt;/p&gt;
 
 &lt;p&gt;That’s talking about an offspring of Abraham by whom the nations would be
 blessed. This is what Paul meant when he wrote
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Galatians 3:7&amp;ndash;9&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Galatians 3:7–9&lt;/a&gt; and
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Galatians 3:16&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Galatians 3:16&lt;/a&gt;:&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Galatians 3:7&amp;ndash;9&quot; target=&quot;_blank&quot;&gt;Galatians 3:7–9&lt;/a&gt; and
+&lt;a href=&quot;https://www.esv.org/search/?q=Galatians 3:16&quot; target=&quot;_blank&quot;&gt;Galatians 3:16&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Know then that it is those of faith who are the sons of Abraham. And the
@@ -868,7 +868,7 @@ sacrificial lamb? That was pointing forward to Jesus.&lt;/p&gt;
 passed over in His judgment. That was pointing forward to Jesus.&lt;/p&gt;
 
 &lt;p&gt;This is why John the Baptist said (in
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 1:29&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 1:29&lt;/a&gt;):&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=John 1:29&quot; target=&quot;_blank&quot;&gt;John 1:29&lt;/a&gt;):&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;The next day [John] saw Jesus coming toward him, and said, “Behold, the Lamb
@@ -876,7 +876,7 @@ passed over in His judgment. That was pointing forward to Jesus.&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;This is what Peter meant in
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=1 Peter 1:18&amp;ndash;19&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;1 Peter 1:18–19&lt;/a&gt;:&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=1 Peter 1:18&amp;ndash;19&quot; target=&quot;_blank&quot;&gt;1 Peter 1:18–19&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;You were ransomed from the futile ways inherited from your forefathers, not
@@ -884,7 +884,7 @@ passed over in His judgment. That was pointing forward to Jesus.&lt;/p&gt;
   Christ, &lt;strong&gt;like that of a lamb without blemish or spot&lt;/strong&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;This is what John saw in &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Revelation 5&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Revelation 5&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;This is what John saw in &lt;a href=&quot;https://www.esv.org/search/?q=Revelation 5&quot; target=&quot;_blank&quot;&gt;Revelation 5&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Then I saw in the right hand of him who was seated on the throne a scroll
@@ -921,8 +921,8 @@ passed over in His judgment. That was pointing forward to Jesus.&lt;/p&gt;
 
 &lt;h2 id=&quot;god-incarnate&quot;&gt;God incarnate&lt;/h2&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 1:1&amp;ndash;3&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 1:1–3&lt;/a&gt; and
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 1:14&amp;ndash;18&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 1:14–18&lt;/a&gt; say:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=John 1:1&amp;ndash;3&quot; target=&quot;_blank&quot;&gt;John 1:1–3&lt;/a&gt; and
+&lt;a href=&quot;https://www.esv.org/search/?q=John 1:14&amp;ndash;18&quot; target=&quot;_blank&quot;&gt;John 1:14–18&lt;/a&gt; say:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;In the beginning was the Word, and the Word was with God, and the Word was
@@ -943,7 +943,7 @@ passed over in His judgment. That was pointing forward to Jesus.&lt;/p&gt;
 &lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
 
 &lt;p&gt;Jesus is he of whom it was said in
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Isaiah 9:6&amp;ndash;7&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Isaiah 9:6–7&lt;/a&gt;:&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Isaiah 9:6&amp;ndash;7&quot; target=&quot;_blank&quot;&gt;Isaiah 9:6–7&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;For to us a child is born, to us a son is given; and the government shall be
@@ -953,7 +953,7 @@ passed over in His judgment. That was pointing forward to Jesus.&lt;/p&gt;
   kingdom, to establish it and to uphold it with justice and with righteousness
   from this time forth and forevermore. The zeal of the LORD of hosts will do
   this.&lt;/p&gt;
-&lt;/blockquote&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">What Doesn’t Create a Marriage?</title><link href="/bible/2020/12/07/what-doesnt-create-marriage.html" rel="alternate" type="text/html" title="What Doesn't Create a Marriage?" /><published>2020-12-07T00:00:00+00:00</published><updated>2020-12-07T00:00:00+00:00</updated><id>/bible/2020/12/07/what-doesnt-create-marriage</id><content type="html" xml:base="/bible/2020/12/07/what-doesnt-create-marriage.html">&lt;p&gt;Is a marriage certificate necessary? Is a marriage only valid in a church? Does
+&lt;/blockquote&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">What Doesn’t Create a Marriage?</title><link href="/bible/2020/12/07/what-doesnt-create-marriage.html" rel="alternate" type="text/html" title="What Doesn’t Create a Marriage?" /><published>2020-12-07T00:00:00+00:00</published><updated>2020-12-07T00:00:00+00:00</updated><id>/bible/2020/12/07/what-doesnt-create-marriage</id><content type="html" xml:base="/bible/2020/12/07/what-doesnt-create-marriage.html">&lt;p&gt;Is a marriage certificate necessary? Is a marriage only valid in a church? Does
 a marriage exist only after physical intimacy?&lt;/p&gt;
 
 &lt;p&gt;This post will be brief and limited. Maybe I’ll flesh these things out later.
@@ -978,12 +978,12 @@ civil government’s involvement in Genesis 2 then you’re a better man than me
 &lt;p&gt;Again, many marriages in the Bible happened outside of any religious context yet
 were still considered valid.&lt;/p&gt;
 
-&lt;p&gt;For example, &lt;a href=&quot;https://www.biblegateway.com/passage/?search=1 Corinthians 7:12&amp;ndash;13&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;1 Corinthians 7:12–13&lt;/a&gt; talks
+&lt;p&gt;For example, &lt;a href=&quot;https://www.esv.org/search/?q=1 Corinthians 7:12&amp;ndash;13&quot; target=&quot;_blank&quot;&gt;1 Corinthians 7:12–13&lt;/a&gt; talks
 about believing people having unbelieving spouses. The unbelieving spouses
 wouldn’t be spouses at all if the marriage were only valid in the context of the
 church. Jesus commanded faithfulness in marriages
-(&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 5:32&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 5:32&lt;/a&gt;;
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 19:9&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 19:9&lt;/a&gt;) that existed prior to the New
+(&lt;a href=&quot;https://www.esv.org/search/?q=Matthew 5:32&quot; target=&quot;_blank&quot;&gt;Matthew 5:32&lt;/a&gt;;
+&lt;a href=&quot;https://www.esv.org/search/?q=Matthew 19:9&quot; target=&quot;_blank&quot;&gt;Matthew 19:9&lt;/a&gt;) that existed prior to the New
 Testament Church. And there are other examples in the Bible of marriages
 performed with very little fanfare and even without involvement by religious
 authorities.&lt;/p&gt;
@@ -1012,7 +1012,7 @@ objection that people have raised.&lt;/p&gt;
 
 &lt;h2 id=&quot;biblical-basis&quot;&gt;Biblical basis&lt;/h2&gt;
 
-&lt;p&gt;Take a look at &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Philippians 1:18&amp;ndash;26&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Philippians 1:18–26&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Take a look at &lt;a href=&quot;https://www.esv.org/search/?q=Philippians 1:18&amp;ndash;26&quot; target=&quot;_blank&quot;&gt;Philippians 1:18–26&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;What then? Only that in every way, whether in pretense or in truth, Christ is
@@ -1051,7 +1051,7 @@ us when we are satisfied in Him. But &lt;em&gt;most&lt;/em&gt; glorified when we
 satisfied in Him? I don’t think that necessarily comes from Philippians 1 alone.
 But let’s keep looking at the Bible.&lt;/p&gt;
 
-&lt;p&gt;First, recall &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Exodus 20:3&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Exodus 20:3&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;First, recall &lt;a href=&quot;https://www.esv.org/search/?q=Exodus 20:3&quot; target=&quot;_blank&quot;&gt;Exodus 20:3&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;You shall have no other gods before me.&lt;/p&gt;
@@ -1059,8 +1059,8 @@ But let’s keep looking at the Bible.&lt;/p&gt;
 
 &lt;p&gt;In the Bible’s terms, to worship another god is called “idolatry”.&lt;/p&gt;
 
-&lt;p&gt;Now consider what &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Colossians 3:5&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Colossians 3:5&lt;/a&gt; and
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Ephesians 5:5&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Ephesians 5:5&lt;/a&gt; say about idolatry:&lt;/p&gt;
+&lt;p&gt;Now consider what &lt;a href=&quot;https://www.esv.org/search/?q=Colossians 3:5&quot; target=&quot;_blank&quot;&gt;Colossians 3:5&lt;/a&gt; and
+&lt;a href=&quot;https://www.esv.org/search/?q=Ephesians 5:5&quot; target=&quot;_blank&quot;&gt;Ephesians 5:5&lt;/a&gt; say about idolatry:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Put to death therefore what is earthly in you: sexual immorality, impurity,
@@ -1139,7 +1139,7 @@ satisfied in Him.&lt;/p&gt;
 
 &lt;p&gt;How do you view God? Is He your highest pleasure? If not then consider what the
 Bible says about idolatry on the one hand and what is most glorifying to God on
-the other.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">WebAssembly’s Name</title><link href="/programming/2020/11/19/wasm-name.html" rel="alternate" type="text/html" title="WebAssembly's Name" /><published>2020-11-19T00:00:00+00:00</published><updated>2020-11-19T00:00:00+00:00</updated><id>/programming/2020/11/19/wasm-name</id><content type="html" xml:base="/programming/2020/11/19/wasm-name.html">&lt;p&gt;Here’s what &lt;a href=&quot;https://webassembly.org/&quot; target=&quot;_blank&quot;&gt;WebAssembly&lt;/a&gt; has to say
+the other.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">WebAssembly’s Name</title><link href="/programming/2020/11/19/wasm-name.html" rel="alternate" type="text/html" title="WebAssembly’s Name" /><published>2020-11-19T00:00:00+00:00</published><updated>2020-11-19T00:00:00+00:00</updated><id>/programming/2020/11/19/wasm-name</id><content type="html" xml:base="/programming/2020/11/19/wasm-name.html">&lt;p&gt;Here’s what &lt;a href=&quot;https://webassembly.org/&quot; target=&quot;_blank&quot;&gt;WebAssembly&lt;/a&gt; has to say
 about itself:&lt;/p&gt;
 
 &lt;blockquote&gt;
@@ -1301,7 +1301,7 @@ assembly language.&lt;/p&gt;
 it is being influenced too much by today’s internet technologies. And we all
 know how fast the internet changes.&lt;/p&gt;
 
-&lt;p&gt;So I’d stick to the web for WebAssembly.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">Lift Your Drooping Hands</title><link href="/bible/2020/11/18/hebrews-drooping-hands.html" rel="alternate" type="text/html" title="Lift Your Drooping Hands" /><published>2020-11-18T00:00:00+00:00</published><updated>2020-11-18T00:00:00+00:00</updated><id>/bible/2020/11/18/hebrews-drooping-hands</id><content type="html" xml:base="/bible/2020/11/18/hebrews-drooping-hands.html">&lt;p&gt;Let’s look at &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Hebrews 11:39–12:17&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Hebrews 11:39–12:17&lt;/a&gt;. It begins
+&lt;p&gt;So I’d stick to the web for WebAssembly.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">Lift Your Drooping Hands</title><link href="/bible/2020/11/18/hebrews-drooping-hands.html" rel="alternate" type="text/html" title="Lift Your Drooping Hands" /><published>2020-11-18T00:00:00+00:00</published><updated>2020-11-18T00:00:00+00:00</updated><id>/bible/2020/11/18/hebrews-drooping-hands</id><content type="html" xml:base="/bible/2020/11/18/hebrews-drooping-hands.html">&lt;p&gt;Let’s look at &lt;a href=&quot;https://www.esv.org/search/?q=Hebrews 11:39–12:17&quot; target=&quot;_blank&quot;&gt;Hebrews 11:39–12:17&lt;/a&gt;. It begins
 with:&lt;/p&gt;
 
 &lt;blockquote&gt;
@@ -1320,8 +1320,8 @@ God delayed. Instead it was because God had a good purpose in mind.&lt;/p&gt;
 
 &lt;p&gt;God’s purposes for delaying in the Old Testament included His desire to unite
 Christians in the author’s day with the Old Testament saints through faith
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Hebrews 4:2&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Hebrews 4:2&lt;/a&gt;. And God continued that purpose
-through the audience’s day &lt;a href=&quot;https://www.biblegateway.com/passage/?search=2 Peter 3:9&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;2 Peter 3:9&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Hebrews 4:2&quot; target=&quot;_blank&quot;&gt;Hebrews 4:2&lt;/a&gt;. And God continued that purpose
+through the audience’s day &lt;a href=&quot;https://www.esv.org/search/?q=2 Peter 3:9&quot; target=&quot;_blank&quot;&gt;2 Peter 3:9&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;God always has a purpose in delaying His good promises.&lt;/strong&gt;&lt;/p&gt;
 
@@ -1377,7 +1377,7 @@ enduring through faith.&lt;/p&gt;
 
 &lt;p&gt;Notice how Jesus was the prime motivation for running the race. They took
 motivation by looking to Him. I can’t help being reminded of
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=2 Corinthians 3:17–18&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;2 Corinthians 3:17–18&lt;/a&gt;. It was by looking to
+&lt;a href=&quot;https://www.esv.org/search/?q=2 Corinthians 3:17–18&quot; target=&quot;_blank&quot;&gt;2 Corinthians 3:17–18&lt;/a&gt;. It was by looking to
 Jesus that the New Testament Christian was both encouraged and transformed. The
 end of the race was glory (“Jesus is seated at the right hand of the throne of
 God”), and by running this race they were transformed into the glorious image of
@@ -1398,7 +1398,7 @@ of Hebrews was being asked to do.&lt;/p&gt;
 were given specific promises by God and they knew God was trustworthy and would
 keep His promises, and so they were assured in their hope and held strong
 convictions. Jesus was given a command by the Father
-(&lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 10:18&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 10:18&lt;/a&gt;) whom He knew to be faithful, and
+(&lt;a href=&quot;https://www.esv.org/search/?q=John 10:18&quot; target=&quot;_blank&quot;&gt;John 10:18&lt;/a&gt;) whom He knew to be faithful, and
 so it was no arbitrary hope that Jesus had. It’s even strange to call it “hope”
 because the outcome wasn’t at all in doubt. How could it be any other way than
 that God keeps His promises? The same for the audience of Hebrews. They were
@@ -1410,7 +1410,7 @@ goal is so well placed.&lt;/p&gt;
 comfort, pleasure, influence, and peace with the world. From the rest of
 scripture we know where that kind of race ends: it ends in hell. And the faith
 involved in that race is a deceitful faith giving false assurance.
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Luke 12:19–21&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Luke 12:19–21&lt;/a&gt;&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Luke 12:19–21&quot; target=&quot;_blank&quot;&gt;Luke 12:19–21&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Let’s continue:&lt;/p&gt;
 
@@ -1425,7 +1425,7 @@ involved in that race is a deceitful faith giving false assurance.
 &lt;p&gt;First, the suffering that came during the race was not new or unusual. It was to
 be expected. It was so normal that the founder and perfecter of their faith
 encountered it. It was experienced by their entire brotherhood throughout the
-world &lt;a href=&quot;https://www.biblegateway.com/passage/?search=1 Peter 5:9&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;1 Peter 5:9&lt;/a&gt;.&lt;/p&gt;
+world &lt;a href=&quot;https://www.esv.org/search/?q=1 Peter 5:9&quot; target=&quot;_blank&quot;&gt;1 Peter 5:9&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Second, the audience of Hebrews had not suffered to any unusual degree. In fact
 their suffering was light in comparison to Jesus. They (obviously) hadn’t yet
@@ -1458,7 +1458,7 @@ without the discipline that God gives to all his children.&lt;/p&gt;
 &lt;p&gt;Second, their Father loves them and is changing them. Recall that, for the New
 Testament Christian, suffering produced character, character produced hope, and
 hope did not put them to shame because God had decidedly set His love on them
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 5:3–5&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 5:3–5&lt;/a&gt;. God was disciplining them for
+&lt;a href=&quot;https://www.esv.org/search/?q=Romans 5:3–5&quot; target=&quot;_blank&quot;&gt;Romans 5:3–5&lt;/a&gt;. God was disciplining them for
 their good, so that they would share His holiness.&lt;/p&gt;
 
 &lt;p&gt;Third, the audience in general had experienced the discipline of their own
@@ -1469,7 +1469,7 @@ God a worse father?&lt;/p&gt;
 &lt;p&gt;Fourth, they needed to keep some perspective. In the moment it might really
 hurt, but consider the effect in the long run. Even if they died they would get
 to be with the Lord which was far better
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Philippians 1:21–23&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Philippians 1:21–23&lt;/a&gt;. And if they continued to
+&lt;a href=&quot;https://www.esv.org/search/?q=Philippians 1:21–23&quot; target=&quot;_blank&quot;&gt;Philippians 1:21–23&lt;/a&gt;. And if they continued to
 live then they would get to enjoy the peaceful fruit of righteousness. There is
 a lot of peace that comes from no longer being tempted by particular things.&lt;/p&gt;
 
@@ -1507,7 +1507,7 @@ knees are more prone to following crooked paths.&lt;/p&gt;
 &lt;p&gt;Everything above applies to Christians both then and now.&lt;/p&gt;
 
 &lt;p&gt;If you are trusting in Jesus for God to pass over you on that day when He judges
-the secrets of men (&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 2:16&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 2:16&lt;/a&gt;) then everything
+the secrets of men (&lt;a href=&quot;https://www.esv.org/search/?q=Romans 2:16&quot; target=&quot;_blank&quot;&gt;Romans 2:16&lt;/a&gt;) then everything
 above applies to you. &lt;strong&gt;Christian, lift your drooping hands!&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;If you aren’t trusting in Jesus then I’m sure you can tell how the above doesn’t
@@ -1515,7 +1515,7 @@ apply to you. The author of Hebrews was writing to Christians and explaining how
 things related to &lt;em&gt;them&lt;/em&gt;, not to you. In that case I recommend putting your hope
 and confidence in Jesus so that you can start running the correct race. If you
 do then you will not be disappointed
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Isaiah 28:16&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Isaiah 28:16&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">Battery Life</title><link href="/phone/2020/11/17/battery-life.html" rel="alternate" type="text/html" title="Battery Life" /><published>2020-11-17T00:00:00+00:00</published><updated>2020-11-17T00:00:00+00:00</updated><id>/phone/2020/11/17/battery-life</id><content type="html" xml:base="/phone/2020/11/17/battery-life.html">&lt;p&gt;The one great thing about feature phones was their battery life. The one
+&lt;a href=&quot;https://www.esv.org/search/?q=Isaiah 28:16&quot; target=&quot;_blank&quot;&gt;Isaiah 28:16&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">Battery Life</title><link href="/phone/2020/11/17/battery-life.html" rel="alternate" type="text/html" title="Battery Life" /><published>2020-11-17T00:00:00+00:00</published><updated>2020-11-17T00:00:00+00:00</updated><id>/phone/2020/11/17/battery-life</id><content type="html" xml:base="/phone/2020/11/17/battery-life.html">&lt;p&gt;The one great thing about feature phones was their battery life. The one
 terrible thing about smartphones is their battery life.&lt;/p&gt;
 
 &lt;p&gt;I will never understand the market that created phones that can’t stay charged
@@ -1600,13 +1600,13 @@ out. It’s a little too large for even my large hands.&lt;/p&gt;
 
 &lt;p&gt;Okay, then what about Paul versus James?&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 3:28&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 3:28&lt;/a&gt; says:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=Romans 3:28&quot; target=&quot;_blank&quot;&gt;Romans 3:28&lt;/a&gt; says:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;For we hold that one is justified by faith apart from works of the law.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://www.biblegateway.com/passage/?search=James 2:24&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;James 2:24&lt;/a&gt; says:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=James 2:24&quot; target=&quot;_blank&quot;&gt;James 2:24&lt;/a&gt; says:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;You see that a person is justified by works and not by faith alone.&lt;/p&gt;
@@ -1661,8 +1661,8 @@ reading to better understand my meaning.&lt;/p&gt;
 &lt;h2 id=&quot;used-the-same-way&quot;&gt;Used the same way?&lt;/h2&gt;
 
 &lt;p&gt;There are some interesting things that Paul says about “justification” in the
-neighborhood of &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 3:28&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 3:28&lt;/a&gt;. I’ll just focus on
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 4:2&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 4:2&lt;/a&gt;:&lt;/p&gt;
+neighborhood of &lt;a href=&quot;https://www.esv.org/search/?q=Romans 3:28&quot; target=&quot;_blank&quot;&gt;Romans 3:28&lt;/a&gt;. I’ll just focus on
+&lt;a href=&quot;https://www.esv.org/search/?q=Romans 4:2&quot; target=&quot;_blank&quot;&gt;Romans 4:2&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;If Abraham was justified by works, he has something to boast about, but not
@@ -1679,10 +1679,10 @@ neighborhood of &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Ro
 
 &lt;p&gt;I’ll just quickly acknowledge that the “works” that Paul is talking about are
 works of “the Law”, meaning the Mosaic Law. But that includes the Ten
-Commandments (&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Exodus 20&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Exodus 20&lt;/a&gt;) and the Two Great
+Commandments (&lt;a href=&quot;https://www.esv.org/search/?q=Exodus 20&quot; target=&quot;_blank&quot;&gt;Exodus 20&lt;/a&gt;) and the Two Great
 Commandments (love the Lord with all your
-heart—&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Deuteronomy 6:5&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Deuteronomy 6:5&lt;/a&gt;; and love your
-neighbor as yourself—&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Leviticus 19:18&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Leviticus 19:18&lt;/a&gt;). So
+heart—&lt;a href=&quot;https://www.esv.org/search/?q=Deuteronomy 6:5&quot; target=&quot;_blank&quot;&gt;Deuteronomy 6:5&lt;/a&gt;; and love your
+neighbor as yourself—&lt;a href=&quot;https://www.esv.org/search/?q=Leviticus 19:18&quot; target=&quot;_blank&quot;&gt;Leviticus 19:18&lt;/a&gt;). So
 don’t go looking for an exception for these “Christian”
 commandments—they’re among the “works” that Paul says don’t justify anyone
 before God.&lt;/p&gt;
@@ -1690,7 +1690,7 @@ before God.&lt;/p&gt;
 &lt;p&gt;There are also some interesting things that James says in the neighborhood of
 James 2:24.&lt;/p&gt;
 
-&lt;p&gt;Take &lt;a href=&quot;https://www.biblegateway.com/passage/?search=James 2:14&amp;mdash;17&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;James 2:14—17&lt;/a&gt; for example (emphasis
+&lt;p&gt;Take &lt;a href=&quot;https://www.esv.org/search/?q=James 2:14&amp;mdash;17&quot; target=&quot;_blank&quot;&gt;James 2:14—17&lt;/a&gt; for example (emphasis
 mine, of course):&lt;/p&gt;
 
 &lt;blockquote&gt;
@@ -1705,7 +1705,7 @@ mine, of course):&lt;/p&gt;
 is talking about “that” faith, a so-called faith unaccompanied by works, a dead
 and lifeless thing that even demons have—and shudder!&lt;/p&gt;
 
-&lt;p&gt;Then comes &lt;a href=&quot;https://www.biblegateway.com/passage/?search=James 2:18&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;James 2:18&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Then comes &lt;a href=&quot;https://www.esv.org/search/?q=James 2:18&quot; target=&quot;_blank&quot;&gt;James 2:18&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;But someone will say, “You have faith and I have works.” Show me your faith
@@ -1742,14 +1742,14 @@ righteousness; Paul was talking about God declaring people to be righteous.&lt;/
 
 &lt;p&gt;I’ll simply point out that Paul said God declares people to be righteous &lt;em&gt;apart&lt;/em&gt;
 from their works (of the Law, which includes the Ten Commandments and other
-“Christian” things, see above) &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 4:6&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 4:6&lt;/a&gt;. And
+“Christian” things, see above) &lt;a href=&quot;https://www.esv.org/search/?q=Romans 4:6&quot; target=&quot;_blank&quot;&gt;Romans 4:6&lt;/a&gt;. And
 that God declares people to be righteous who, at the moment of that
-declaration, are otherwise ungodly &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 4:5&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 4:5&lt;/a&gt;.&lt;/p&gt;
+declaration, are otherwise ungodly &lt;a href=&quot;https://www.esv.org/search/?q=Romans 4:5&quot; target=&quot;_blank&quot;&gt;Romans 4:5&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;If you’re inclined to object to that, please first double-check that you aren’t
 just re-raising these 2,000 year old objections:
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 6:1&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 6:1&lt;/a&gt;;
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Romans 6:15&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Romans 6:15&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Romans 6:1&quot; target=&quot;_blank&quot;&gt;Romans 6:1&lt;/a&gt;;
+&lt;a href=&quot;https://www.esv.org/search/?q=Romans 6:15&quot; target=&quot;_blank&quot;&gt;Romans 6:15&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;God’s declaration of righteousness is a free gift that He gives. He is not
 influenced in any way by the person’s personal merit. And He is completely free
@@ -1759,7 +1759,7 @@ righteousness to them.&lt;/p&gt;
 &lt;p&gt;And God always follows His declaration of righteousness with the progressive
 work of transforming the sinner into a more and more righteous person through
 the living, active, working faith that He gives them. Once God starts that work
-He will complete it &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Philippians 1:6&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Philippians 1:6&lt;/a&gt;.&lt;/p&gt;
+He will complete it &lt;a href=&quot;https://www.esv.org/search/?q=Philippians 1:6&quot; target=&quot;_blank&quot;&gt;Philippians 1:6&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;And the Christian never gets to point to anything about himself.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">Paradoxes, Contradictions, and the Bible</title><link href="/bible/2020/10/28/paradoxes-contradictions-bible.html" rel="alternate" type="text/html" title="Paradoxes, Contradictions, and the Bible" /><published>2020-10-28T00:00:00+00:00</published><updated>2020-10-28T00:00:00+00:00</updated><id>/bible/2020/10/28/paradoxes-contradictions-bible</id><content type="html" xml:base="/bible/2020/10/28/paradoxes-contradictions-bible.html">&lt;p&gt;A contradiction is when two mutually exclusive things are both said to be true
 at the same time in the same sense. For example, it’s a contradiction to say
@@ -1805,21 +1805,21 @@ calling contradictions are only paradoxes.&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;Peter denied Jesus once before and twice after the rooster crowed
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Mark 14:30&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Mark 14:30&lt;/a&gt;;
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Mark 14:66-72&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Mark 14:66-72&lt;/a&gt;.
+&lt;a href=&quot;https://www.esv.org/search/?q=Mark 14:30&quot; target=&quot;_blank&quot;&gt;Mark 14:30&lt;/a&gt;;
+&lt;a href=&quot;https://www.esv.org/search/?q=Mark 14:66-72&quot; target=&quot;_blank&quot;&gt;Mark 14:66-72&lt;/a&gt;.
 Peter denied Jesus three times before the rooster crowed
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Luke 22:34&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Luke 22:34&lt;/a&gt;;
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Luke 22:54-62&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Luke 22:54-62&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;There is only one God &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Deuteronomy 6:4&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Deuteronomy 6:4&lt;/a&gt;;
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Isaiah 44:6&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Isaiah 44:6&lt;/a&gt;.
-Jesus is God &lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 1:1&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 1:1&lt;/a&gt;. The Holy Spirit is
-God &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Acts 5:3-4&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Acts 5:3-4&lt;/a&gt;. The Father is God
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Philippians 1:2&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Philippians 1:2&lt;/a&gt;. Jesus is not the Holy
-Spirit &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 3:16&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 3:16&lt;/a&gt;. Jesus is not the Father
-&lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 3:17&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 3:17&lt;/a&gt;. The Holy Spirit is not the
-Father &lt;a href=&quot;https://www.biblegateway.com/passage/?search=John 14:26&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;John 14:26&lt;/a&gt;&lt;/li&gt;
+&lt;a href=&quot;https://www.esv.org/search/?q=Luke 22:34&quot; target=&quot;_blank&quot;&gt;Luke 22:34&lt;/a&gt;;
+&lt;a href=&quot;https://www.esv.org/search/?q=Luke 22:54-62&quot; target=&quot;_blank&quot;&gt;Luke 22:54-62&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;There is only one God &lt;a href=&quot;https://www.esv.org/search/?q=Deuteronomy 6:4&quot; target=&quot;_blank&quot;&gt;Deuteronomy 6:4&lt;/a&gt;;
+&lt;a href=&quot;https://www.esv.org/search/?q=Isaiah 44:6&quot; target=&quot;_blank&quot;&gt;Isaiah 44:6&lt;/a&gt;.
+Jesus is God &lt;a href=&quot;https://www.esv.org/search/?q=John 1:1&quot; target=&quot;_blank&quot;&gt;John 1:1&lt;/a&gt;. The Holy Spirit is
+God &lt;a href=&quot;https://www.esv.org/search/?q=Acts 5:3-4&quot; target=&quot;_blank&quot;&gt;Acts 5:3-4&lt;/a&gt;. The Father is God
+&lt;a href=&quot;https://www.esv.org/search/?q=Philippians 1:2&quot; target=&quot;_blank&quot;&gt;Philippians 1:2&lt;/a&gt;. Jesus is not the Holy
+Spirit &lt;a href=&quot;https://www.esv.org/search/?q=Matthew 3:16&quot; target=&quot;_blank&quot;&gt;Matthew 3:16&lt;/a&gt;. Jesus is not the Father
+&lt;a href=&quot;https://www.esv.org/search/?q=Matthew 3:17&quot; target=&quot;_blank&quot;&gt;Matthew 3:17&lt;/a&gt;. The Holy Spirit is not the
+Father &lt;a href=&quot;https://www.esv.org/search/?q=John 14:26&quot; target=&quot;_blank&quot;&gt;John 14:26&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Jesus said his contemporary generation would not pass away until He came
-again &lt;a href=&quot;https://www.biblegateway.com/passage/?search=Matthew 24:30-34&amp;amp;version=ESV&quot; target=&quot;_blank&quot;&gt;Matthew 24:30-34&lt;/a&gt;&lt;/li&gt;
+again &lt;a href=&quot;https://www.esv.org/search/?q=Matthew 24:30-34&quot; target=&quot;_blank&quot;&gt;Matthew 24:30-34&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;But these are only paradoxes. Here are some possible explanations:&lt;/p&gt;
@@ -2418,7 +2418,7 @@ nine.&lt;/p&gt;
 
 &lt;p&gt;Here’s the output:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Here are the first ten primes:
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Here are the first ten primes:
 2
 3
 5
@@ -2431,6 +2431,6 @@ nine.&lt;/p&gt;
 29
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;This doesn’t work in &lt;code class=&quot;highlighter-rouge&quot;&gt;[no_std]&lt;/code&gt; because the list of primes is stored on the
+&lt;p&gt;This doesn’t work in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[no_std]&lt;/code&gt; because the list of primes is stored on the
 heap. Heapless collections do exist but I think that’s out of the scope of this
 tour.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry></feed>

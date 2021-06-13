@@ -81,9 +81,9 @@ lessons in this article will also apply to it.</p>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>You call <code class="highlighter-rouge">MoveTo</code> to start the drawing at some <code class="highlighter-rouge">point</code> (which is given in screen
-coordinates). Then you call <code class="highlighter-rouge">LineTo</code> to draw from the previous location to a
-given <code class="highlighter-rouge">point</code> (again given in screen coordinates).</p>
+<p>You call <code class="language-plaintext highlighter-rouge">MoveTo</code> to start the drawing at some <code class="language-plaintext highlighter-rouge">point</code> (which is given in screen
+coordinates). Then you call <code class="language-plaintext highlighter-rouge">LineTo</code> to draw from the previous location to a
+given <code class="language-plaintext highlighter-rouge">point</code> (again given in screen coordinates).</p>
 
 <p>So to draw a 200x100 pixel rectangle you could do this:</p>
 
@@ -655,7 +655,7 @@ the bounding box correctly (if at all) when too few points have been added to
 it</li>
   <li>You’ll also want to think about the case when some of the bounding box’s
 points aren’t far enough apart to warrant drawing them</li>
-  <li>You’ll have to implement the <code class="highlighter-rouge">BoundingBox</code> class</li>
+  <li>You’ll have to implement the <code class="language-plaintext highlighter-rouge">BoundingBox</code> class</li>
   <li>This was only loosely inspired by working code I wrote so it probably has
 other bugs. Sorry I can’t just post up the code I wrote—it belongs to my
 employer</li>
@@ -669,7 +669,7 @@ You don’t want to just check if individual points are in the viewport,
 because a line can have both endpoints outside the viewport yet it still needs
 to be drawn because it crosses through the viewport. You want
 <a href="https://en.wikipedia.org/wiki/Line_clipping" target="_blank">line clipping</a></li>
-  <li>My implementation of <code class="highlighter-rouge">BoundingBox.Add</code> (not shown here) has time complexity
+  <li>My implementation of <code class="language-plaintext highlighter-rouge">BoundingBox.Add</code> (not shown here) has time complexity
 \(O(n^2)\). In that case and with the above code it would actually be faster
 to just draw all the points than figure out the optimal bounding box around a
 sufficiently long and straight string of data points. Hint: you don’t have to

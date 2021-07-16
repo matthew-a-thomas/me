@@ -2,7 +2,6 @@
 title: "Who is Jesus?"
 category: bible
 description: "What child is this?"
-comments: 10
 ---
 
 Every year we celebrate Christmas. But what is so much more special about Jesus

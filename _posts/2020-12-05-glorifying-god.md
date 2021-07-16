@@ -2,7 +2,6 @@
 title: "Glorifying God"
 category: bible
 description: "God is most glorified in us when we are most satisfied in Him"
-comments: 8
 ---
 
 John Piper is well known for coining

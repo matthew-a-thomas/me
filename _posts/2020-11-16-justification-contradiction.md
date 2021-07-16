@@ -2,7 +2,6 @@
 title: "Justification in the Bible: a Contradiction?"
 category: bible
 description: "James vs Paul"
-comments: 4
 ---
 The point of [my previous post]({% post_url 2020-10-28-paradoxes-contradictions-bible %}) was:
 

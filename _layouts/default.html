@@ -25,9 +25,6 @@
           <p><i>{{ page.date | date: '%B %d, %Y' }}&mdash;{{ page.description }}</i></p>
           {% endif %}
           {{ content }}
-          {% if page.comments %}
-          {% include comments.html %}
-          {% endif %}
         </div>
         <div class="list-group-item">
           {% include footer.html %}

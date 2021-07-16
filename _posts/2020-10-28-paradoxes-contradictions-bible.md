@@ -2,7 +2,6 @@
 title: Paradoxes, Contradictions, and the Bible
 category: bible
 description: A look at paradoxes, contradictions, and the Bible
-comments: 3
 ---
 A contradiction is when two mutually exclusive things are both said to be true
 at the same time in the same sense. For example, it's a contradiction to say

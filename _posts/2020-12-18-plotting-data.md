@@ -2,7 +2,6 @@
 title: "Plotting Data"
 category: programming
 description: "And doing it quickly"
-comments: 11
 ---
 
 There are a couple of things that can make a line graph on the computer run

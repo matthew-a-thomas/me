@@ -2,7 +2,6 @@
 title: "Battery Life"
 category: phone
 description: "A tale of three phones"
-comments: 5
 ---
 
 The one great thing about feature phones was their battery life. The one

@@ -177,9 +177,8 @@ you're looking at $$O(k^2)$$ row operations. And rows can be pretty large
 depending on what $$k$$ is and how large your message is.
 
 Fountain codes only help in _erasure_ channels. But many communication channels
-in real life are _noisy_. In practice that usually means you might have to
-transmit each row wrapped in an error detection code (like CRC) which adds
-overhead.
+in real life are _noisy_. In practice that means you might have to transmit each
+row wrapped in an error detection code (like CRC) which adds overhead.
 
 Throughput is strongly dependent on the size of each row. Rows that are too
 large will usually have a greater chance of being lost through an erasure
@@ -188,8 +187,23 @@ size means it will take a very long time for the receiving party to solve the
 system of equations.
 
 You have to send information about which parts were XOR'd together which adds
-overhead. This overhead can be very significant for small messages or small row
-sizes.
+overhead. This overhead can be very significant for small messages or large
+values of $$k$$.
+
+## Systematic fountain codes
+
+A _systematic_ fountain code just ensures that the first $$k$$ rows that get
+transmitted are the first $$k$$ parts of the message in order.
+
+I'll leave it as an exercise for you to think about why that might be helpful.
+Hint: here's what the first three generated rows would have been from our
+example above if our fountain code was systematic:
+
+|Row|Part 1|Part 2|Part 3|$$\oplus$$|
+|-|-|-|-|-|
+|1|✓|||`01001000`|
+|2||✓||`01101001`|
+|3|||✓|`00100001`|
 
 ## See also
 

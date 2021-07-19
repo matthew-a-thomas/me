@@ -411,9 +411,8 @@ you’re looking at \(O(k^2)\) row operations. And rows can be pretty large
 depending on what \(k\) is and how large your message is.</p>
 
 <p>Fountain codes only help in <em>erasure</em> channels. But many communication channels
-in real life are <em>noisy</em>. In practice that usually means you might have to
-transmit each row wrapped in an error detection code (like CRC) which adds
-overhead.</p>
+in real life are <em>noisy</em>. In practice that means you might have to transmit each
+row wrapped in an error detection code (like CRC) which adds overhead.</p>
 
 <p>Throughput is strongly dependent on the size of each row. Rows that are too
 large will usually have a greater chance of being lost through an erasure
@@ -422,8 +421,52 @@ size means it will take a very long time for the receiving party to solve the
 system of equations.</p>
 
 <p>You have to send information about which parts were XOR’d together which adds
-overhead. This overhead can be very significant for small messages or small row
-sizes.</p>
+overhead. This overhead can be very significant for small messages or large
+values of \(k\).</p>
+
+<h2 id="systematic-fountain-codes">Systematic fountain codes</h2>
+
+<p>A <em>systematic</em> fountain code just ensures that the first \(k\) rows that get
+transmitted are the first \(k\) parts of the message in order.</p>
+
+<p>I’ll leave it as an exercise for you to think about why that might be helpful.
+Hint: here’s what the first three generated rows would have been from our
+example above if our fountain code was systematic:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Row</th>
+      <th>Part 1</th>
+      <th>Part 2</th>
+      <th>Part 3</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>✓</td>
+      <td> </td>
+      <td> </td>
+      <td><code class="language-plaintext highlighter-rouge">01001000</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td> </td>
+      <td>✓</td>
+      <td> </td>
+      <td><code class="language-plaintext highlighter-rouge">01101001</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td> </td>
+      <td> </td>
+      <td>✓</td>
+      <td><code class="language-plaintext highlighter-rouge">00100001</code></td>
+    </tr>
+  </tbody>
+</table>
 
 <h2 id="see-also">See also</h2>
 

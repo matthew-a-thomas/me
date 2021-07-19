@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-07-19T16:45:15+00:00</updated><id>/feed.xml</id><entry><title type="html">Fountain Codes</title><link href="/programming/2021/07/19/fountain-codes.html" rel="alternate" type="text/html" title="Fountain Codes" /><published>2021-07-19T00:00:00+00:00</published><updated>2021-07-19T00:00:00+00:00</updated><id>/programming/2021/07/19/fountain-codes</id><content type="html" xml:base="/programming/2021/07/19/fountain-codes.html">&lt;p&gt;A &lt;a href=&quot;https://en.wikipedia.org/wiki/Fountain_code&quot;&gt;fountain code&lt;/a&gt; is a
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-07-19T16:50:41+00:00</updated><id>/feed.xml</id><entry><title type="html">Fountain Codes</title><link href="/programming/2021/07/19/fountain-codes.html" rel="alternate" type="text/html" title="Fountain Codes" /><published>2021-07-19T00:00:00+00:00</published><updated>2021-07-19T00:00:00+00:00</updated><id>/programming/2021/07/19/fountain-codes</id><content type="html" xml:base="/programming/2021/07/19/fountain-codes.html">&lt;p&gt;A &lt;a href=&quot;https://en.wikipedia.org/wiki/Fountain_code&quot;&gt;fountain code&lt;/a&gt; is a
 &lt;a href=&quot;https://en.wikipedia.org/wiki/Error_correction_code#Forward_error_correction&quot;&gt;forward error correction code&lt;/a&gt;
 for lossy channels. In other words a fountain code is an
 &lt;a href=&quot;https://en.wikipedia.org/wiki/Erasure_code&quot;&gt;erasure code&lt;/a&gt;.&lt;/p&gt;
@@ -381,9 +381,8 @@ you’re looking at \(O(k^2)\) row operations. And rows can be pretty large
 depending on what \(k\) is and how large your message is.&lt;/p&gt;
 
 &lt;p&gt;Fountain codes only help in &lt;em&gt;erasure&lt;/em&gt; channels. But many communication channels
-in real life are &lt;em&gt;noisy&lt;/em&gt;. In practice that usually means you might have to
-transmit each row wrapped in an error detection code (like CRC) which adds
-overhead.&lt;/p&gt;
+in real life are &lt;em&gt;noisy&lt;/em&gt;. In practice that means you might have to transmit each
+row wrapped in an error detection code (like CRC) which adds overhead.&lt;/p&gt;
 
 &lt;p&gt;Throughput is strongly dependent on the size of each row. Rows that are too
 large will usually have a greater chance of being lost through an erasure
@@ -392,8 +391,52 @@ size means it will take a very long time for the receiving party to solve the
 system of equations.&lt;/p&gt;
 
 &lt;p&gt;You have to send information about which parts were XOR’d together which adds
-overhead. This overhead can be very significant for small messages or small row
-sizes.&lt;/p&gt;
+overhead. This overhead can be very significant for small messages or large
+values of \(k\).&lt;/p&gt;
+
+&lt;h2 id=&quot;systematic-fountain-codes&quot;&gt;Systematic fountain codes&lt;/h2&gt;
+
+&lt;p&gt;A &lt;em&gt;systematic&lt;/em&gt; fountain code just ensures that the first \(k\) rows that get
+transmitted are the first \(k\) parts of the message in order.&lt;/p&gt;
+
+&lt;p&gt;I’ll leave it as an exercise for you to think about why that might be helpful.
+Hint: here’s what the first three generated rows would have been from our
+example above if our fountain code was systematic:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Row&lt;/th&gt;
+      &lt;th&gt;Part 1&lt;/th&gt;
+      &lt;th&gt;Part 2&lt;/th&gt;
+      &lt;th&gt;Part 3&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01001000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01101001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;h2 id=&quot;see-also&quot;&gt;See also&lt;/h2&gt;
 

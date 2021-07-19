@@ -1,5 +1,5 @@
 ---
-title: "Who is Jesus?"
+title: "Who Is Jesus?"
 category: bible
 description: "What child is this?"
 ---

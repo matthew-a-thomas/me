@@ -173,7 +173,7 @@ the message each time.
 
 It's pretty I/O intensive to solve the system of equations. If you use
 [Gaussian Elimination](https://en.wikipedia.org/wiki/Gaussian_elimination) then
-you're looking at $$O(n^2)$$ row operations. And rows can be pretty large
+you're looking at $$O(k^2)$$ row operations. And rows can be pretty large
 depending on what $$k$$ is and how large your message is.
 
 Fountain codes only help in _erasure_ channels. But many communication channels

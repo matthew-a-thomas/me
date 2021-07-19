@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="What they are and how they work">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Fountain Codes - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h1 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h1>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Fountain Codes</h1>
+          
+          
+          <p><i>July 19, 2021&mdash;What they are and how they work</i></p>
+          
+          <p>A <a href="https://en.wikipedia.org/wiki/Fountain_code">fountain code</a> is a
+<a href="https://en.wikipedia.org/wiki/Error_correction_code#Forward_error_correction">forward error correction code</a>
+for lossy channels. In other words a fountain code is an
+<a href="https://en.wikipedia.org/wiki/Erasure_code">erasure code</a>.</p>
+
+<p>That’s just a fancy way to say that a fountain code is one of those things that
+lets you send a message somewhere, have parts of your communication fail to make
+it, and the other party will still be able to understand you clearly.</p>
+
+<p>Fountain codes aren’t the only thing that can do this. But they are interesting
+for some reasons I’ll get into.</p>
+
+<h2 id="the-short-explanation">The short explanation</h2>
+
+<p>Send enough redundant information to the other party that on a good day you
+wasted some time talking and on a bad day they can still piece together exactly
+what you said.</p>
+
+<h2 id="the-long-explanation">The long explanation</h2>
+
+<p>What you will do:</p>
+
+<ol>
+  <li>Split your binary message up into \(k\) parts</li>
+  <li>Pick a random subset of those \(k\) parts and XOR them together</li>
+  <li>Call that jumbled mess (with an indication of which pieces were XOR’d
+together) a “row”</li>
+  <li>Send that row</li>
+  <li>Repeat at least \(k\) times</li>
+  <li>Repeat some more for good measure
+    <ul>
+      <li>On a good day you’ll only have to repeat a small number more times</li>
+      <li>On a bad day you’ll have to repeat several more times depending on how many 
+ of your transmissions were lost</li>
+    </ul>
+  </li>
+</ol>
+
+<p>What the other party will do:</p>
+
+<ol>
+  <li>Gather as many rows as possible</li>
+  <li>Once they have at least \(k\) rows, try to solve a system of equations</li>
+</ol>
+
+<p>And that’s it!</p>
+
+<h2 id="an-example">An example</h2>
+
+<p>Suppose you want to send this message:</p>
+
+<blockquote>
+  <p>Hi!</p>
+</blockquote>
+
+<p>Here are its ASCII bytes in hexadecimal:</p>
+
+<blockquote>
+  <p>0x48 0x69 0x21</p>
+</blockquote>
+
+<p>And here are its ASCII bytes in binary:</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">01001000 01101001 00100001</code></p>
+</blockquote>
+
+<h3 id="sending-the-message">Sending the message</h3>
+
+<p>There are three bytes, so let’s choose \(k = 3\) and split the message up
+accordingly:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Part</th>
+      <th>Binary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">01001000</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><code class="language-plaintext highlighter-rouge">01101001</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><code class="language-plaintext highlighter-rouge">00100001</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The next step is to choose a random subset of these three parts and XOR them
+together. Let’s choose parts one and two. Keep in mind that \(\oplus\) means XOR
+and \(01001000 \oplus 01101001 = 00100001\):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parts</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1, 2</td>
+      <td><code class="language-plaintext highlighter-rouge">00100001</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>And we do that again. Let’s choose parts two and three:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parts</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1, 2</td>
+      <td><code class="language-plaintext highlighter-rouge">00100001</code></td>
+    </tr>
+    <tr>
+      <td>2, 3</td>
+      <td><code class="language-plaintext highlighter-rouge">01001000</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>And let’s do that a third time, picking parts one, two, and three:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parts</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1, 2</td>
+      <td><code class="language-plaintext highlighter-rouge">00100001</code></td>
+    </tr>
+    <tr>
+      <td>2, 3</td>
+      <td><code class="language-plaintext highlighter-rouge">01001000</code></td>
+    </tr>
+    <tr>
+      <td>1, 2, 3</td>
+      <td><code class="language-plaintext highlighter-rouge">00000000</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="receiving-the-message">Receiving the message</h3>
+
+<p>Now let’s pretend like we have received those three rows. We can represent them
+as a system of equations:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Row</th>
+      <th>Part 1</th>
+      <th>Part 2</th>
+      <th>Part 3</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td> </td>
+      <td><code class="language-plaintext highlighter-rouge">00100001</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td> </td>
+      <td>✓</td>
+      <td>✓</td>
+      <td><code class="language-plaintext highlighter-rouge">01001000</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td><code class="language-plaintext highlighter-rouge">00000000</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Now just solve the system of equations. The row operation we’ll use is XOR. Here
+are the steps to solve it:</p>
+
+<ol>
+<li>XOR row 1 into row 3:
+
+<table>
+  <thead>
+    <tr>
+      <th>Row</th>
+      <th>Part 1</th>
+      <th>Part 2</th>
+      <th>Part 3</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td> </td>
+      <td><code>00100001</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td> </td>
+      <td>✓</td>
+      <td>✓</td>
+      <td><code>01001000</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td> </td>
+      <td> </td>
+      <td>✓</td>
+      <td><code>00100001</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</li>
+<li>XOR row 3 into row 2:
+
+<table>
+  <thead>
+    <tr>
+      <th>Row</th>
+      <th>Part 1</th>
+      <th>Part 2</th>
+      <th>Part 3</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td> </td>
+      <td><code>00100001</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td> </td>
+      <td>✓</td>
+      <td> </td>
+      <td><code>01101001</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td> </td>
+      <td> </td>
+      <td>✓</td>
+      <td><code>00100001</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</li>
+<li>XOR row 2 into row 1:
+
+<table>
+  <thead>
+    <tr>
+      <th>Row</th>
+      <th>Part 1</th>
+      <th>Part 2</th>
+      <th>Part 3</th>
+      <th>\(\oplus\)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>✓</td>
+      <td> </td>
+      <td> </td>
+      <td><code>01001000</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td> </td>
+      <td>✓</td>
+      <td> </td>
+      <td><code>01101001</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td> </td>
+      <td> </td>
+      <td>✓</td>
+      <td><code>00100001</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</li>
+</ol>
+
+<p>And it’s solved! Did you notice what is now in that last column? Look a little
+more closely:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Binary</th>
+      <th>Hex</th>
+      <th>ASCII</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">01001000</code></td>
+      <td>0x48</td>
+      <td>H</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">01101001</code></td>
+      <td>0x69</td>
+      <td>i</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">00100001</code></td>
+      <td>0x21</td>
+      <td>!</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>I’ll leave it as an exercise for you to figure out
+<a href="https://en.wikipedia.org/wiki/Overdetermined_system">what would have happened</a>
+if we had gathered four rows instead of three. Or if we had gathered a different
+three rows. Or if we had chosen something for \(k\) other than three. Or what
+the probability is of being unable to decode the message when you have gathered
+exactly \(n \geq k\) rows.</p>
+
+<h2 id="some-interesting-properties">Some interesting properties</h2>
+
+<p>Fountain codes are <em>rateless</em>. That means that you don’t have to decide up front
+how many rows you’re going to send. You can just keep sending them until you get
+tired of it. This is different than
+<a href="https://en.wikipedia.org/wiki/Reed%E2%80%93Solomon_error_correction">Reed Solomon</a>.</p>
+
+<p>Fountain codes can easily be multicasted. Meaning several parties can send a
+message over individually slow connections to a single party and the receiving
+party will get it at the combined speed of all those connections. There are
+\(2^k - 1\) unique and useful rows for every message of \(k\) parts. Because
+that number gets very large very quickly there is no need to coordinate between
+all the senders: each sender can just randomly generate rows and they’re more
+than likely going to be unique and useful to the receiving party.</p>
+
+<h2 id="some-downsides">Some downsides</h2>
+
+<p>It’s pretty I/O intensive to generate a row. On average you have to read half of
+the message each time.</p>
+
+<p>It’s pretty I/O intensive to solve the system of equations. If you use
+<a href="https://en.wikipedia.org/wiki/Gaussian_elimination">Gaussian Elimination</a> then
+you’re looking at \(O(n^2)\) row operations. And rows can be pretty large
+depending on what \(k\) is and how large your message is.</p>
+
+<p>Fountain codes only help in <em>erasure</em> channels. But many communication channels
+in real life are <em>noisy</em>. In practice that usually means you might have to
+transmit each row wrapped in an error detection code (like CRC) which adds
+overhead.</p>
+
+<p>Throughput is strongly dependent on the size of each row. Rows that are too
+large will usually have a greater chance of being lost through an erasure
+channel. But row size is inversely proportional to \(k\), so too small a row
+size means it will take a very long time for the receiving party to solve the
+system of equations.</p>
+
+<p>You have to send information about which parts were XOR’d together which adds
+overhead. This overhead can be very significant for small messages or small row
+sizes.</p>
+
+<h2 id="see-also">See also</h2>
+
+<p><a href="https://github.com/matthew-a-thomas/Fountain">https://github.com/matthew-a-thomas/Fountain</a>—fountain
+codes applied to files.</p>
+
+<p><a href="https://github.com/matthew-a-thomas/cs-fountain-codes">https://github.com/matthew-a-thomas/cs-fountain-codes</a>—simulated
+performance of a few different fountain codes (or fountain-code-esque things).
+The graphs on that page can be pretty confusing. Open an issue in that
+repository if anything isn’t clear.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2021&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

@@ -1,4 +1,409 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-07-16T21:00:13+00:00</updated><id>/feed.xml</id><entry><title type="html">The Dark Ages Are Now</title><link href="/misc/2021/06/22/dark-ages-are-now.html" rel="alternate" type="text/html" title="The Dark Ages Are Now" /><published>2021-06-22T00:00:00+00:00</published><updated>2021-06-22T00:00:00+00:00</updated><id>/misc/2021/06/22/dark-ages-are-now</id><content type="html" xml:base="/misc/2021/06/22/dark-ages-are-now.html">&lt;p&gt;I have emails from as recent as 2011 proving that I went to a few
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-07-19T16:27:48+00:00</updated><id>/feed.xml</id><entry><title type="html">Fountain Codes</title><link href="/programming/2021/07/19/fountain-codes.html" rel="alternate" type="text/html" title="Fountain Codes" /><published>2021-07-19T00:00:00+00:00</published><updated>2021-07-19T00:00:00+00:00</updated><id>/programming/2021/07/19/fountain-codes</id><content type="html" xml:base="/programming/2021/07/19/fountain-codes.html">&lt;p&gt;A &lt;a href=&quot;https://en.wikipedia.org/wiki/Fountain_code&quot;&gt;fountain code&lt;/a&gt; is a
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Error_correction_code#Forward_error_correction&quot;&gt;forward error correction code&lt;/a&gt;
+for lossy channels. In other words a fountain code is an
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Erasure_code&quot;&gt;erasure code&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;That’s just a fancy way to say that a fountain code is one of those things that
+lets you send a message somewhere, have parts of your communication fail to make
+it, and the other party will still be able to understand you clearly.&lt;/p&gt;
+
+&lt;p&gt;Fountain codes aren’t the only thing that can do this. But they are interesting
+for some reasons I’ll get into.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-short-explanation&quot;&gt;The short explanation&lt;/h2&gt;
+
+&lt;p&gt;Send enough redundant information to the other party that on a good day you
+wasted some time talking and on a bad day they can still piece together exactly
+what you said.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-long-explanation&quot;&gt;The long explanation&lt;/h2&gt;
+
+&lt;p&gt;What you will do:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Split your binary message up into \(k\) parts&lt;/li&gt;
+  &lt;li&gt;Pick a random subset of those \(k\) parts and XOR them together&lt;/li&gt;
+  &lt;li&gt;Call that jumbled mess (with an indication of which pieces were XOR’d
+together) a “row”&lt;/li&gt;
+  &lt;li&gt;Send that row&lt;/li&gt;
+  &lt;li&gt;Repeat at least \(k\) times&lt;/li&gt;
+  &lt;li&gt;Repeat some more for good measure
+    &lt;ul&gt;
+      &lt;li&gt;On a good day you’ll only have to repeat a small number more times&lt;/li&gt;
+      &lt;li&gt;On a bad day you’ll have to repeat several more times depending on how many 
+ of your transmissions were lost&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;What the other party will do:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Gather as many rows as possible&lt;/li&gt;
+  &lt;li&gt;Once they have at least \(k\) rows, try to solve a system of equations&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;And that’s it!&lt;/p&gt;
+
+&lt;h2 id=&quot;an-example&quot;&gt;An example&lt;/h2&gt;
+
+&lt;p&gt;Suppose you want to send this message:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hi!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Here are its ASCII bytes in hexadecimal:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;0x48 0x69 0x21&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;And here are its ASCII bytes in binary:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01001000 01101001 00100001&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;sending-the-message&quot;&gt;Sending the message&lt;/h3&gt;
+
+&lt;p&gt;There are three bytes, so let’s choose \(k = 3\) and split the message up
+accordingly:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Part&lt;/th&gt;
+      &lt;th&gt;Binary&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01001000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01101001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;The next step is to choose a random subset of these three parts and XOR them
+together. Let’s choose parts one and two. Keep in mind that \(\oplus\) means XOR
+and \(01001000 \oplus 01101001 = 00100001\):&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Parts&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1, 2&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;And we do that again. Let’s choose parts two and three:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Parts&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1, 2&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2, 3&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01001000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;And let’s do that a third time, picking parts one, two, and three:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Parts&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1, 2&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2, 3&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01001000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1, 2, 3&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00000000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;receiving-the-message&quot;&gt;Receiving the message&lt;/h3&gt;
+
+&lt;p&gt;Now let’s pretend like we have received those three rows. We can represent them
+as a system of equations:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Row&lt;/th&gt;
+      &lt;th&gt;Part 1&lt;/th&gt;
+      &lt;th&gt;Part 2&lt;/th&gt;
+      &lt;th&gt;Part 3&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01001000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00000000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Now just solve the system of equations. The row operation we’ll use is XOR. Here
+are the steps to solve it:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;XOR row 1 into row 3:
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Row&lt;/th&gt;
+      &lt;th&gt;Part 1&lt;/th&gt;
+      &lt;th&gt;Part 2&lt;/th&gt;
+      &lt;th&gt;Part 3&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;01001000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;/li&gt;
+&lt;li&gt;XOR row 3 into row 2:
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Row&lt;/th&gt;
+      &lt;th&gt;Part 1&lt;/th&gt;
+      &lt;th&gt;Part 2&lt;/th&gt;
+      &lt;th&gt;Part 3&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;01101001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;/li&gt;
+&lt;li&gt;XOR row 2 into row 1:
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Row&lt;/th&gt;
+      &lt;th&gt;Part 1&lt;/th&gt;
+      &lt;th&gt;Part 2&lt;/th&gt;
+      &lt;th&gt;Part 3&lt;/th&gt;
+      &lt;th&gt;\(\oplus\)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;01001000&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;01101001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;✓&lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;00100001&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;And it’s solved! Did you notice what is now in that last column? Look a little
+more closely:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Binary&lt;/th&gt;
+      &lt;th&gt;Hex&lt;/th&gt;
+      &lt;th&gt;ASCII&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01001000&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;0x48&lt;/td&gt;
+      &lt;td&gt;H&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;01101001&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;0x69&lt;/td&gt;
+      &lt;td&gt;i&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;00100001&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;0x21&lt;/td&gt;
+      &lt;td&gt;!&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;I’ll leave it as an exercise for you to figure out
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Overdetermined_system&quot;&gt;what would have happened&lt;/a&gt;
+if we had gathered four rows instead of three. Or if we had gathered a different
+three rows. Or if we had chosen something for \(k\) other than three. Or what
+the probability is of being unable to decode the message when you have gathered
+exactly \(n \geq k\) rows.&lt;/p&gt;
+
+&lt;h2 id=&quot;some-interesting-properties&quot;&gt;Some interesting properties&lt;/h2&gt;
+
+&lt;p&gt;Fountain codes are &lt;em&gt;rateless&lt;/em&gt;. That means that you don’t have to decide up front
+how many rows you’re going to send. You can just keep sending them until you get
+tired of it. This is different than
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Reed%E2%80%93Solomon_error_correction&quot;&gt;Reed Solomon&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Fountain codes can easily be multicasted. Meaning several parties can send a
+message over individually slow connections to a single party and the receiving
+party will get it at the combined speed of all those connections. There are
+\(2^k - 1\) unique and useful rows for every message of \(k\) parts. Because
+that number gets very large very quickly there is no need to coordinate between
+all the senders: each sender can just randomly generate rows and they’re more
+than likely going to be unique and useful to the receiving party.&lt;/p&gt;
+
+&lt;h2 id=&quot;some-downsides&quot;&gt;Some downsides&lt;/h2&gt;
+
+&lt;p&gt;It’s pretty I/O intensive to generate a row. On average you have to read half of
+the message each time.&lt;/p&gt;
+
+&lt;p&gt;It’s pretty I/O intensive to solve the system of equations. If you use
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Gaussian_elimination&quot;&gt;Gaussian Elimination&lt;/a&gt; then
+you’re looking at \(O(n^2)\) row operations. And rows can be pretty large
+depending on what \(k\) is and how large your message is.&lt;/p&gt;
+
+&lt;p&gt;Fountain codes only help in &lt;em&gt;erasure&lt;/em&gt; channels. But many communication channels
+in real life are &lt;em&gt;noisy&lt;/em&gt;. In practice that usually means you might have to
+transmit each row wrapped in an error detection code (like CRC) which adds
+overhead.&lt;/p&gt;
+
+&lt;p&gt;Throughput is strongly dependent on the size of each row. Rows that are too
+large will usually have a greater chance of being lost through an erasure
+channel. But row size is inversely proportional to \(k\), so too small a row
+size means it will take a very long time for the receiving party to solve the
+system of equations.&lt;/p&gt;
+
+&lt;p&gt;You have to send information about which parts were XOR’d together which adds
+overhead. This overhead can be very significant for small messages or small row
+sizes.&lt;/p&gt;
+
+&lt;h2 id=&quot;see-also&quot;&gt;See also&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/matthew-a-thomas/Fountain&quot;&gt;https://github.com/matthew-a-thomas/Fountain&lt;/a&gt;—fountain
+codes applied to files.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/matthew-a-thomas/cs-fountain-codes&quot;&gt;https://github.com/matthew-a-thomas/cs-fountain-codes&lt;/a&gt;—simulated
+performance of a few different fountain codes (or fountain-code-esque things).
+The graphs on that page can be pretty confusing. Open an issue in that
+repository if anything isn’t clear.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">The Dark Ages Are Now</title><link href="/misc/2021/06/22/dark-ages-are-now.html" rel="alternate" type="text/html" title="The Dark Ages Are Now" /><published>2021-06-22T00:00:00+00:00</published><updated>2021-06-22T00:00:00+00:00</updated><id>/misc/2021/06/22/dark-ages-are-now</id><content type="html" xml:base="/misc/2021/06/22/dark-ages-are-now.html">&lt;p&gt;I have emails from as recent as 2011 proving that I went to a few
 &lt;a href=&quot;https://en.wikipedia.org/wiki/LAN_party&quot;&gt;LAN parties&lt;/a&gt; with some friends. I have
 records of receipts, chat conversations about what PC upgrades we’d be making
 for the events, what video games we were going to play. It was good clean fun.&lt;/p&gt;
@@ -1708,173 +2113,4 @@ out. It’s a little too large for even my large hands.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;&lt;em&gt;With normal usage&lt;/em&gt;&lt;/strong&gt;.&lt;/p&gt;
 
-&lt;p&gt;This is the best phone I have ever owned.&lt;/p&gt;</content><author><name></name></author><category term="phone" /></entry><entry><title type="html">Justification in the Bible: a Contradiction?</title><link href="/bible/2020/11/16/justification-contradiction.html" rel="alternate" type="text/html" title="Justification in the Bible: a Contradiction?" /><published>2020-11-16T00:00:00+00:00</published><updated>2020-11-16T00:00:00+00:00</updated><id>/bible/2020/11/16/justification-contradiction</id><content type="html" xml:base="/bible/2020/11/16/justification-contradiction.html">&lt;p&gt;The point of &lt;a href=&quot;/bible/2020/10/28/paradoxes-contradictions-bible.html&quot;&gt;my previous post&lt;/a&gt; was:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Don’t be quick to think you’ve found a contradiction in the Bible. You probably only have a paradox.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Okay, then what about Paul versus James?&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=Romans 3:28&quot; target=&quot;_blank&quot;&gt;Romans 3:28&lt;/a&gt; says:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For we hold that one is justified by faith apart from works of the law.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=James 2:24&quot; target=&quot;_blank&quot;&gt;James 2:24&lt;/a&gt; says:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You see that a person is justified by works and not by faith alone.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;So which is it? By faith or by works?&lt;/p&gt;
-
-&lt;p&gt;At first blush this seems pretty difficult. The same Greek word for “justified”
-was used by both
-&lt;a href=&quot;https://biblehub.com/interlinear/romans/3-28.htm&quot; target=&quot;_blank&quot;&gt;Paul&lt;/a&gt;
-and
-&lt;a href=&quot;https://biblehub.com/interlinear/james/2-24.htm&quot; target=&quot;_blank&quot;&gt;James&lt;/a&gt;.
-They’re both using this word.&lt;/p&gt;
-
-&lt;h2 id=&quot;context-is-king&quot;&gt;Context is king&lt;/h2&gt;
-
-&lt;p&gt;Remember that a word’s meaning is determined by its context. Take the word
-“take” for example.
-&lt;a href=&quot;https://www.google.com/search?q=take+definition&quot; target=&quot;_blank&quot;&gt;According to this Google search&lt;/a&gt;,
-that word can be used in lots of ways:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;He leaned forward to &lt;em&gt;take&lt;/em&gt; (lay hold of) her hand&lt;/li&gt;
-  &lt;li&gt;He &lt;em&gt;took&lt;/em&gt; (removed from a particular place) an envelope from his inside pocket&lt;/li&gt;
-  &lt;li&gt;He completed a particularly difficult scene in two &lt;em&gt;takes&lt;/em&gt; (scenes)&lt;/li&gt;
-  &lt;li&gt;The &lt;em&gt;take&lt;/em&gt; (an amount gained) from commodity taxation&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;So if I say “I took it” you won’t immediately know whether I mean “I took it
-from right under her nose” meaning I stole it, or if I mean “I took it to be
-inspected” meaning my car can now be registered with the state. You have to keep
-reading to better understand my meaning.&lt;/p&gt;
-
-&lt;p&gt;According to BibleHub, the word that both Paul and James use is
-&lt;a href=&quot;https://biblehub.com/greek/1344.htm&quot; target=&quot;_blank&quot;&gt;Strong’s Greek #1344 δικαιοῦ&lt;/a&gt;. However you pronounce that, it means:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;To show to be righteous, declare righteous.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;As in:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;I make righteous, defend the cause of, plead for the righteousness (innocence)
-  of, acquit, justify; hence: I regard as righteous.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;So which is it? To show to be righteous, or to declare to be righteous?&lt;/p&gt;
-
-&lt;p&gt;It depends on how the word is used.&lt;/p&gt;
-
-&lt;h2 id=&quot;used-the-same-way&quot;&gt;Used the same way?&lt;/h2&gt;
-
-&lt;p&gt;There are some interesting things that Paul says about “justification” in the
-neighborhood of &lt;a href=&quot;https://www.esv.org/search/?q=Romans 3:28&quot; target=&quot;_blank&quot;&gt;Romans 3:28&lt;/a&gt;. I’ll just focus on
-&lt;a href=&quot;https://www.esv.org/search/?q=Romans 4:2&quot; target=&quot;_blank&quot;&gt;Romans 4:2&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;If Abraham was justified by works, he has something to boast about, but not
-  before God.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Allow me to point out a few things from that verse:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;If someone is justified by works then they have something to boast about&lt;/li&gt;
-  &lt;li&gt;No one has anything to boast about before God&lt;/li&gt;
-  &lt;li&gt;Therefore no one is justified &lt;em&gt;before God&lt;/em&gt; by works&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I’ll just quickly acknowledge that the “works” that Paul is talking about are
-works of “the Law”, meaning the Mosaic Law. But that includes the Ten
-Commandments (&lt;a href=&quot;https://www.esv.org/search/?q=Exodus 20&quot; target=&quot;_blank&quot;&gt;Exodus 20&lt;/a&gt;) and the Two Great
-Commandments (love the Lord with all your
-heart—&lt;a href=&quot;https://www.esv.org/search/?q=Deuteronomy 6:5&quot; target=&quot;_blank&quot;&gt;Deuteronomy 6:5&lt;/a&gt;; and love your
-neighbor as yourself—&lt;a href=&quot;https://www.esv.org/search/?q=Leviticus 19:18&quot; target=&quot;_blank&quot;&gt;Leviticus 19:18&lt;/a&gt;). So
-don’t go looking for an exception for these “Christian”
-commandments—they’re among the “works” that Paul says don’t justify anyone
-before God.&lt;/p&gt;
-
-&lt;p&gt;There are also some interesting things that James says in the neighborhood of
-James 2:24.&lt;/p&gt;
-
-&lt;p&gt;Take &lt;a href=&quot;https://www.esv.org/search/?q=James 2:14&amp;mdash;17&quot; target=&quot;_blank&quot;&gt;James 2:14—17&lt;/a&gt; for example (emphasis
-mine, of course):&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;What good is it, my brothers, if someone says he has faith but does not have
-  works? Can &lt;strong&gt;that&lt;/strong&gt; faith save him? If a brother or sister is poorly clothed
-  and lacking in daily food, and one of you says to them, “Go in peace, be
-  warmed and filled,” without giving them the things needed for the body, what
-  good is that? So also faith by itself, if it does not have works, is dead.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;What kind of “faith” is James talking about which is unable to save anyone? He
-is talking about “that” faith, a so-called faith unaccompanied by works, a dead
-and lifeless thing that even demons have—and shudder!&lt;/p&gt;
-
-&lt;p&gt;Then comes &lt;a href=&quot;https://www.esv.org/search/?q=James 2:18&quot; target=&quot;_blank&quot;&gt;James 2:18&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;But someone will say, “You have faith and I have works.” Show me your faith
-  apart from your works, and I will show you my faith by my works.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;It’s not as clear to me precisely what kind of works James is talking about. But
-it doesn’t matter. What’s clear is James throws down the rhetorical gauntlet by
-challenging his hypothetical opponent to &lt;em&gt;prove&lt;/em&gt; their faith &lt;em&gt;to him&lt;/em&gt; using any
-other means than demonstrating their works.&lt;/p&gt;
-
-&lt;p&gt;Taken together we can see that James is saying:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A living faith is necessarily accompanied by works&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;People&lt;/em&gt; (you and me, not God) cannot distinguish claims of faith without
-inspecting the accompanying works&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;He then goes on to list several biblical characters whose claims to faith were
-proven genuine through their works. In that sense they were justified by their
-works.&lt;/p&gt;
-
-&lt;p&gt;James was talking about people demonstrating true living faith and showing
-righteousness; Paul was talking about God declaring people to be righteous.&lt;/p&gt;
-
-&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
-
-&lt;p&gt;Paul and James did not use the word in the same way. There is no contradiction.&lt;/p&gt;
-
-&lt;h2 id=&quot;the-controversy&quot;&gt;The controversy&lt;/h2&gt;
-
-&lt;p&gt;A bit of controversy has swarmed around these verses for more than 500 years.&lt;/p&gt;
-
-&lt;p&gt;I’ll simply point out that Paul said God declares people to be righteous &lt;em&gt;apart&lt;/em&gt;
-from their works (of the Law, which includes the Ten Commandments and other
-“Christian” things, see above) &lt;a href=&quot;https://www.esv.org/search/?q=Romans 4:6&quot; target=&quot;_blank&quot;&gt;Romans 4:6&lt;/a&gt;. And
-that God declares people to be righteous who, at the moment of that
-declaration, are otherwise ungodly &lt;a href=&quot;https://www.esv.org/search/?q=Romans 4:5&quot; target=&quot;_blank&quot;&gt;Romans 4:5&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;If you’re inclined to object to that, please first double-check that you aren’t
-just re-raising these 2,000 year old objections:
-&lt;a href=&quot;https://www.esv.org/search/?q=Romans 6:1&quot; target=&quot;_blank&quot;&gt;Romans 6:1&lt;/a&gt;;
-&lt;a href=&quot;https://www.esv.org/search/?q=Romans 6:15&quot; target=&quot;_blank&quot;&gt;Romans 6:15&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;God’s declaration of righteousness is a free gift that He gives. He is not
-influenced in any way by the person’s personal merit. And He is completely free
-and just to declare sinners to be righteous when He credits Jesus’s real
-righteousness to them.&lt;/p&gt;
-
-&lt;p&gt;And God always follows His declaration of righteousness with the progressive
-work of transforming the sinner into a more and more righteous person through
-the living, active, working faith that He gives them. Once God starts that work
-He will complete it &lt;a href=&quot;https://www.esv.org/search/?q=Philippians 1:6&quot; target=&quot;_blank&quot;&gt;Philippians 1:6&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;And the Christian never gets to point to anything about himself.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry></feed>
+&lt;p&gt;This is the best phone I have ever owned.&lt;/p&gt;</content><author><name></name></author><category term="phone" /></entry></feed>

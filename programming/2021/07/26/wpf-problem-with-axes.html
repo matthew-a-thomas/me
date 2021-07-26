@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Chart axes, that is">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>WPF's Problem with Axes - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h1 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h1>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>WPF's Problem with Axes</h1>
+          
+          
+          <p><i>July 26, 2021&mdash;Chart axes, that is</i></p>
+          
+          <p>WPF performs layout in two passes. The first is called the “measure” pass. The
+second is called the “arrange” pass.</p>
+
+<p>During the measure pass a control is queried for the minimum amount of space it
+needs. Between that and the arrange pass the parent control decides how much
+space to actually give it. Then the arrange pass happens: the control is told
+the maximum amount of space it can use and it replies with how much space it
+actually used.</p>
+
+<p>That’s a very powerful way to do layout. The system is flexible enough to make
+all these different layouts possible:</p>
+
+<ul>
+  <li>Grid/table. The sizes of child controls are related through rows
+and columns</li>
+  <li>Stack. In a vertical stack the widths of child controls are related, and they
+get as much vertical space as they want</li>
+  <li>Wrapped list. Child controls are lined up. When one passes the end of the
+line then it and all subsequent children drop down to the next line</li>
+  <li>Canvas. No size constraints or relations whatsoever between child controls.
+They are manually placed and can take up as much space as they want</li>
+  <li>And more!</li>
+</ul>
+
+<p>Sounds great! But can you tell what they all have in common?</p>
+
+<p>Their number of children can be known ahead of time.</p>
+
+<h2 id="the-challenge">The challenge</h2>
+
+<p>Everyone is familiar with line graphs. Here’s one I threw together in Excel:</p>
+
+<p><img src="/assets/img/wpf-problem-with-axes/line-graph.png" alt="Line graph" class="img-fluid" /></p>
+
+<p>Let’s focus on the vertical axis (the numbers on the left). How would you make
+that in WPF?</p>
+
+<h2 id="vertical-stack">Vertical stack</h2>
+
+<p>It looks a lot like a vertical stack of text blocks, doesn’t it? Easy enough:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;StackPanel</span> <span class="na">Orientation=</span><span class="s">"Vertical"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;TextBlock</span> <span class="na">Text=</span><span class="s">"25"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;TextBlock</span> <span class="na">Text=</span><span class="s">"20"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;TextBlock</span> <span class="na">Text=</span><span class="s">"15"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;TextBlock</span> <span class="na">Text=</span><span class="s">"10"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;TextBlock</span> <span class="na">Text=</span><span class="s">"5"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;TextBlock</span> <span class="na">Text=</span><span class="s">"0"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/StackPanel&gt;</span>
+</code></pre></div></div>
+
+<p>Add some styling and you’re done, right?</p>
+
+<p>Wrong. How did you know to use increments of five? Excel used increments of five
+because that’s just how large my chart happened to be. But if I squash it some:</p>
+
+<p><img src="/assets/img/wpf-problem-with-axes/squashed.png" alt="Squashed line graph" class="img-fluid" /></p>
+
+<p>…then it uses a different increment.</p>
+
+<p>So how many text blocks should there be? You won’t know until you try to fit the
+axis into a certain area.</p>
+
+<p>A chart axis is different than all of the layouts I listed above because a chart
+axis does not know how many child tick marks it has until you put it somewhere.</p>
+
+<h2 id="custom-control">Custom control</h2>
+
+<p>Okay, so what is the soonest we can know how much space our axis has to work
+with, so that we can decide how many child tick marks it should have?</p>
+
+<p>Well… we have access to that information as soon as the arrange pass. And we
+can hook into that. How about this?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Axis</span> <span class="p">:</span> <span class="n">FrameworkElement</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">static</span> <span class="k">readonly</span> <span class="n">DependencyProperty</span> <span class="n">TickTemplateProperty</span> <span class="p">=</span> <span class="p">...;</span>
+
+  <span class="k">readonly</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">FrameworkElement</span><span class="p">&gt;</span> <span class="n">_children</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+  <span class="k">protected</span> <span class="k">override</span> <span class="n">IEnumerator</span> <span class="n">LogicalChildren</span> <span class="p">=&gt;</span> <span class="n">_children</span><span class="p">.</span><span class="nf">GetEnumerator</span><span class="p">();</span>
+
+  <span class="k">public</span> <span class="n">DataTemplate</span> <span class="n">TickTemplate</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">=&gt;</span> <span class="p">(</span><span class="n">DataTemplate</span><span class="p">)</span><span class="nf">GetValue</span><span class="p">(</span><span class="n">TickTemplateProperty</span><span class="p">);</span>
+    <span class="k">set</span> <span class="p">=&gt;</span> <span class="nf">SetValue</span><span class="p">(</span><span class="n">TickTemplateProperty</span><span class="p">,</span> <span class="k">value</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">protected</span> <span class="k">override</span> <span class="kt">int</span> <span class="n">VisualChildrenCount</span> <span class="p">=&gt;</span> <span class="n">_children</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span>
+
+  <span class="k">protected</span> <span class="k">override</span> <span class="n">Size</span> <span class="nf">ArrangeOverride</span><span class="p">(</span><span class="n">Size</span> <span class="n">finalSize</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Clear the current children</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">child</span> <span class="k">in</span> <span class="n">_children</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="nf">RemoveVisualChild</span><span class="p">(</span><span class="n">child</span><span class="p">);</span>
+      <span class="nf">RemoveLogicalChild</span><span class="p">(</span><span class="n">child</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">_children</span><span class="p">.</span><span class="nf">Clear</span><span class="p">();</span>
+
+    <span class="c1">// Figure out how many we need and add them</span>
+    <span class="kt">var</span> <span class="n">sizeOfOneTick</span> <span class="p">=</span> <span class="p">???</span>
+    <span class="kt">var</span> <span class="n">numTicks</span> <span class="p">=</span> <span class="n">finalSize</span><span class="p">.</span><span class="n">Height</span> <span class="p">/</span> <span class="n">sizeOfOneTick</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">numTicks</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="kt">var</span> <span class="n">child</span> <span class="p">=</span> <span class="p">(</span><span class="n">FrameworkElement</span><span class="p">)</span><span class="n">TickTemplate</span><span class="p">.</span><span class="nf">LoadContent</span><span class="p">();</span>
+      <span class="n">_children</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">child</span><span class="p">);</span>
+      <span class="nf">AddLogicalChild</span><span class="p">(</span><span class="n">child</span><span class="p">);</span> <span class="c1">// You want bindings to work in styles, right?</span>
+      <span class="nf">AddVisualChild</span><span class="p">(</span><span class="n">child</span><span class="p">);</span> <span class="c1">// You want it to show up, right?</span>
+    <span class="p">}</span>
+    <span class="nf">ApplyTickValues</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">void</span> <span class="nf">ApplyTickValues</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">tickInterval</span> <span class="p">=</span> <span class="m">30.0</span> <span class="p">/</span> <span class="n">_children</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">_children</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="kt">var</span> <span class="n">child</span> <span class="p">=</span> <span class="n">_children</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+      <span class="kt">var</span> <span class="k">value</span> <span class="p">=</span> <span class="n">tickInterval</span> <span class="p">*</span> <span class="n">i</span><span class="p">;</span>
+      <span class="n">child</span><span class="p">.</span><span class="n">DataContext</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">protected</span> <span class="k">override</span> <span class="n">Visual</span> <span class="nf">GetVisualChild</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_children</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
+
+  <span class="k">protected</span> <span class="k">override</span> <span class="n">Size</span> <span class="nf">MeasureOverride</span><span class="p">(</span><span class="n">Size</span> <span class="n">availableSize</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">infiniteSize</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Size</span><span class="p">(</span><span class="kt">double</span><span class="p">.</span><span class="n">PositiveInfinity</span><span class="p">,</span> <span class="kt">double</span><span class="p">.</span><span class="n">PositiveInfinity</span><span class="p">);</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">child</span> <span class="k">in</span> <span class="n">_children</span><span class="p">)</span>
+      <span class="n">child</span><span class="p">.</span><span class="nf">Measure</span><span class="p">(</span><span class="n">infiniteSize</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">Size</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>There is a lot of cruft since we’re manually managing both logical and visual
+children. And we make some assumptions about the axis range and how tick
+intervals are calculated. But those aren’t serious challenges.</p>
+
+<p>We managed to hook into the measure and arrange passes, and in the arrange pass
+we are making the correct number of tick marks. And we even abstracted away the
+job of creating a tick mark so that our axis control is more reusable.</p>
+
+<p>Mission accomplished? Nope! Do you see the issue?</p>
+
+<p>How do we know how large one tick mark is on the screen? If a tick is just a
+simple text block with unchanging text then it’s very easy. WPF has
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.media.formattedtext?view=net-5.0">just the thing</a>
+for measuring text. But that doesn’t work for the data template above. What if
+someone wants to make the tick marks a little more complex than plain old text?
+We could manually perform measure and arrange passes on the first one within our
+own arrange pass. But a lot of things only work within a logical tree. So we
+would have to ensure that the first tick mark (the one we’re measuring) is
+temporarily added to our logical tree during our arrange pass. But guess what
+happens when our logical tree changes? WPF performs another layout pass on us!
+So in figuring out how large one tick mark is within the arrange pass we end up
+triggering another arrange pass, which will have to calculate how large a tick
+mark is which will trigger another arrange pass, on and on forever.</p>
+
+<p>Note that bindings in the <code class="language-plaintext highlighter-rouge">TickTemplate</code> might also cause the tick marks to
+change size. I’m glossing over this detail because ideally the next layout pass
+would account for this change.</p>
+
+<h2 id="the-dcc-law">The DCC law</h2>
+
+<p>We cannot alter the number of children in either our measure or our arrange pass
+because doing so triggers another layout pass and so on forever. I’m going to
+call this the WPF Dynamic Child Count (DCC) law:</p>
+
+<blockquote>
+  <p>At least one layout pass must be able to complete without altering the logical
+  or visual trees</p>
+</blockquote>
+
+<p>If we violate this law then we run into infinite loops and other trouble.</p>
+
+<p>This means that the happy path through both our measure and arrange passes must
+operate on children that have already been created and added. In other words,
+they should look as close as possible to this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">protected</span> <span class="k">override</span> <span class="n">Size</span> <span class="nf">ArrangeOverride</span><span class="p">(</span><span class="n">Size</span> <span class="n">finalSize</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">child</span> <span class="k">in</span> <span class="n">_children</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">childRect</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Rect</span><span class="p">(</span>
+      <span class="p">...,</span> <span class="c1">// Get location from somewhere</span>
+      <span class="n">child</span><span class="p">.</span><span class="n">DesiredSize</span>
+    <span class="p">);</span>
+    <span class="n">child</span><span class="p">.</span><span class="nf">Arrange</span><span class="p">(</span><span class="n">childRect</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="k">new</span> <span class="nf">Size</span><span class="p">(...);</span> <span class="c1">// Decide how much space we actually used</span>
+<span class="p">}</span>
+
+<span class="k">protected</span> <span class="k">override</span> <span class="n">Size</span> <span class="nf">MeasureOverride</span><span class="p">(</span><span class="n">Size</span> <span class="n">availableSize</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">child</span> <span class="k">in</span> <span class="n">_children</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">childSize</span> <span class="p">=</span> <span class="p">...;</span> <span class="c1">// Compute child size somehow</span>
+    <span class="n">child</span><span class="p">.</span><span class="nf">Measure</span><span class="p">(</span><span class="n">childSize</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="k">new</span> <span class="nf">Size</span><span class="p">(...);</span> <span class="c1">// Decide what the minimum viable size is</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>There’s a lot of hand waving there, but:</p>
+
+<ul>
+  <li>Neither the measure pass nor the arrange pass alters the logical tree</li>
+  <li>Neither pass creates children, but instead operates on children that are
+already there</li>
+</ul>
+
+<p>So we aren’t breaking the DCC law.</p>
+
+<p>But now we have a chicken-and-egg problem. Where do the child tick marks come
+from?</p>
+
+<h2 id="the-compromise">The compromise</h2>
+
+<p>The solution is a compromise: create the children in response to size changes:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Note: this isn't the only way to do this</span>
+<span class="k">protected</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">OnRenderSizeChanged</span><span class="p">(</span><span class="n">SizeChangedInfo</span> <span class="n">sizeInfo</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">_children</span> <span class="p">=</span> <span class="p">...;</span> <span class="c1">// Create tick mark children based on the current RenderSize</span>
+  <span class="k">base</span><span class="p">.</span><span class="nf">OnRenderSizeChanged</span><span class="p">(</span><span class="n">sizeInfo</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Why is this a compromise? Because now it’s impossible for our axis control to
+be <code class="language-plaintext highlighter-rouge">Auto</code>-sized. If we drop it into an <code class="language-plaintext highlighter-rouge">Auto</code>-sized cell in a <code class="language-plaintext highlighter-rouge">Grid</code> then it
+won’t show up because it’ll get scrunched out of view.</p>
+
+<p>Why is that? To answer that we have to look a little more closely at our axis in
+this sequence of events:</p>
+
+<ol>
+  <li>Parent control performs a measure pass on us, telling us we have so much
+space available and asking how much of it we need</li>
+  <li>We don’t have any children yet because our size hasn’t yet changed. What
+amount of space will we say that we need?</li>
+  <li>Parent control decides on some amount of space to give us</li>
+  <li>Parent control performs an arrange pass on us, telling us we have so much
+space available</li>
+  <li>We don’t have any children yet because our size hasn’t yet changed</li>
+  <li>After our arrange pass completes, WPF changes our size to the amount of
+space we said we used</li>
+  <li>Since we have hooked into our own size changes, we decide that so many
+children will fit, instantiate that number of children, and add them to our
+logical and visual trees</li>
+  <li>If we added any children then WPF will cause our parent to perform another
+layout pass over us, and the above steps might repeat</li>
+</ol>
+
+<p>In step #2, what amount of space will we say we need when we have no children
+yet? Note: we cannot say we need as much space as we’re given (in other words we
+cannot just return the <code class="language-plaintext highlighter-rouge">availableSize</code> parameter) because it’s common for
+controls to be offered <em>infinite</em> space and WPF throws an exception when you
+return that. Some finite number has to be returned. But what? Let’s settle on
+returning <code class="language-plaintext highlighter-rouge">new Size(0, 0)</code>, or no space. That tells our parent that we’re
+really flexible and can fit anywhere. (As an aside: this is what <code class="language-plaintext highlighter-rouge">Canvas</code> does.)</p>
+
+<p>Okay, so our parent knows that we don’t need any space. Guess what happens if
+our parent is a <code class="language-plaintext highlighter-rouge">Grid</code> and we’re in an <code class="language-plaintext highlighter-rouge">Auto</code>-sized cell? The <code class="language-plaintext highlighter-rouge">Grid</code> gives us
+no space! Step #4 happens and we’re told we have no space. Our only possible
+reply in step #5 is that we used no space. So our <code class="language-plaintext highlighter-rouge">RenderSize</code> gets set to zero,
+obviously no child tick marks will fit in zero space so we don’t create any
+children, so we don’t add any children, so our logical and visual trees don’t
+change, so we’re done. Our axis won’t show up!</p>
+
+<p>It has to be told how large it is. It cannot be <code class="language-plaintext highlighter-rouge">Auto</code>-sized.</p>
+
+<p>Pretty lame, right?</p>
+
+<p><em>Caution: the code above will likely not compile. It’s just inspirational
+pseudocode written off the cuff.</em></p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2021&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

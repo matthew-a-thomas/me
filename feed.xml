@@ -1,4 +1,280 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-07-19T16:50:41+00:00</updated><id>/feed.xml</id><entry><title type="html">Fountain Codes</title><link href="/programming/2021/07/19/fountain-codes.html" rel="alternate" type="text/html" title="Fountain Codes" /><published>2021-07-19T00:00:00+00:00</published><updated>2021-07-19T00:00:00+00:00</updated><id>/programming/2021/07/19/fountain-codes</id><content type="html" xml:base="/programming/2021/07/19/fountain-codes.html">&lt;p&gt;A &lt;a href=&quot;https://en.wikipedia.org/wiki/Fountain_code&quot;&gt;fountain code&lt;/a&gt; is a
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-07-26T20:34:10+00:00</updated><id>/feed.xml</id><entry><title type="html">WPF’s Problem with Axes</title><link href="/programming/2021/07/26/wpf-problem-with-axes.html" rel="alternate" type="text/html" title="WPF’s Problem with Axes" /><published>2021-07-26T00:00:00+00:00</published><updated>2021-07-26T00:00:00+00:00</updated><id>/programming/2021/07/26/wpf-problem-with-axes</id><content type="html" xml:base="/programming/2021/07/26/wpf-problem-with-axes.html">&lt;p&gt;WPF performs layout in two passes. The first is called the “measure” pass. The
+second is called the “arrange” pass.&lt;/p&gt;
+
+&lt;p&gt;During the measure pass a control is queried for the minimum amount of space it
+needs. Between that and the arrange pass the parent control decides how much
+space to actually give it. Then the arrange pass happens: the control is told
+the maximum amount of space it can use and it replies with how much space it
+actually used.&lt;/p&gt;
+
+&lt;p&gt;That’s a very powerful way to do layout. The system is flexible enough to make
+all these different layouts possible:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Grid/table. The sizes of child controls are related through rows
+and columns&lt;/li&gt;
+  &lt;li&gt;Stack. In a vertical stack the widths of child controls are related, and they
+get as much vertical space as they want&lt;/li&gt;
+  &lt;li&gt;Wrapped list. Child controls are lined up. When one passes the end of the
+line then it and all subsequent children drop down to the next line&lt;/li&gt;
+  &lt;li&gt;Canvas. No size constraints or relations whatsoever between child controls.
+They are manually placed and can take up as much space as they want&lt;/li&gt;
+  &lt;li&gt;And more!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Sounds great! But can you tell what they all have in common?&lt;/p&gt;
+
+&lt;p&gt;Their number of children can be known ahead of time.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-challenge&quot;&gt;The challenge&lt;/h2&gt;
+
+&lt;p&gt;Everyone is familiar with line graphs. Here’s one I threw together in Excel:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/wpf-problem-with-axes/line-graph.png&quot; alt=&quot;Line graph&quot; class=&quot;img-fluid&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Let’s focus on the vertical axis (the numbers on the left). How would you make
+that in WPF?&lt;/p&gt;
+
+&lt;h2 id=&quot;vertical-stack&quot;&gt;Vertical stack&lt;/h2&gt;
+
+&lt;p&gt;It looks a lot like a vertical stack of text blocks, doesn’t it? Easy enough:&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;StackPanel&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Orientation=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Vertical&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;25&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;20&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;15&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;5&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/StackPanel&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add some styling and you’re done, right?&lt;/p&gt;
+
+&lt;p&gt;Wrong. How did you know to use increments of five? Excel used increments of five
+because that’s just how large my chart happened to be. But if I squash it some:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/wpf-problem-with-axes/squashed.png&quot; alt=&quot;Squashed line graph&quot; class=&quot;img-fluid&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;…then it uses a different increment.&lt;/p&gt;
+
+&lt;p&gt;So how many text blocks should there be? You won’t know until you try to fit the
+axis into a certain area.&lt;/p&gt;
+
+&lt;p&gt;A chart axis is different than all of the layouts I listed above because a chart
+axis does not know how many child tick marks it has until you put it somewhere.&lt;/p&gt;
+
+&lt;h2 id=&quot;custom-control&quot;&gt;Custom control&lt;/h2&gt;
+
+&lt;p&gt;Okay, so what is the soonest we can know how much space our axis has to work
+with, so that we can decide how many child tick marks it should have?&lt;/p&gt;
+
+&lt;p&gt;Well… we have access to that information as soon as the arrange pass. And we
+can hook into that. How about this?&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Axis&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FrameworkElement&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;readonly&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DependencyProperty&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TickTemplateProperty&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;readonly&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FrameworkElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IEnumerator&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LogicalChildren&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetEnumerator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DataTemplate&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TickTemplate&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;get&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DataTemplate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TickTemplateProperty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;SetValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TickTemplateProperty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;VisualChildrenCount&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ArrangeOverride&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;finalSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Clear the current children&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nf&quot;&gt;RemoveVisualChild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;nf&quot;&gt;RemoveLogicalChild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Clear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// Figure out how many we need and add them&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sizeOfOneTick&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;???&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numTicks&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;finalSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Height&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sizeOfOneTick&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numTicks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FrameworkElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TickTemplate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;LoadContent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;nf&quot;&gt;AddLogicalChild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// You want bindings to work in styles, right?&lt;/span&gt;
+      &lt;span class=&quot;nf&quot;&gt;AddVisualChild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// You want it to show up, right?&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;ApplyTickValues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ApplyTickValues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tickInterval&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;30.0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tickInterval&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DataContext&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Visual&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetVisualChild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MeasureOverride&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;availableSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;infiniteSize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PositiveInfinity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PositiveInfinity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Measure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;infiniteSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There is a lot of cruft since we’re manually managing both logical and visual
+children. And we make some assumptions about the axis range and how tick
+intervals are calculated. But those aren’t serious challenges.&lt;/p&gt;
+
+&lt;p&gt;We managed to hook into the measure and arrange passes, and in the arrange pass
+we are making the correct number of tick marks. And we even abstracted away the
+job of creating a tick mark so that our axis control is more reusable.&lt;/p&gt;
+
+&lt;p&gt;Mission accomplished? Nope! Do you see the issue?&lt;/p&gt;
+
+&lt;p&gt;How do we know how large one tick mark is on the screen? If a tick is just a
+simple text block with unchanging text then it’s very easy. WPF has
+&lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/api/system.windows.media.formattedtext?view=net-5.0&quot;&gt;just the thing&lt;/a&gt;
+for measuring text. But that doesn’t work for the data template above. What if
+someone wants to make the tick marks a little more complex than plain old text?
+We could manually perform measure and arrange passes on the first one within our
+own arrange pass. But a lot of things only work within a logical tree. So we
+would have to ensure that the first tick mark (the one we’re measuring) is
+temporarily added to our logical tree during our arrange pass. But guess what
+happens when our logical tree changes? WPF performs another layout pass on us!
+So in figuring out how large one tick mark is within the arrange pass we end up
+triggering another arrange pass, which will have to calculate how large a tick
+mark is which will trigger another arrange pass, on and on forever.&lt;/p&gt;
+
+&lt;p&gt;Note that bindings in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TickTemplate&lt;/code&gt; might also cause the tick marks to
+change size. I’m glossing over this detail because ideally the next layout pass
+would account for this change.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-dcc-law&quot;&gt;The DCC law&lt;/h2&gt;
+
+&lt;p&gt;We cannot alter the number of children in either our measure or our arrange pass
+because doing so triggers another layout pass and so on forever. I’m going to
+call this the WPF Dynamic Child Count (DCC) law:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;At least one layout pass must be able to complete without altering the logical
+  or visual trees&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;If we violate this law then we run into infinite loops and other trouble.&lt;/p&gt;
+
+&lt;p&gt;This means that the happy path through both our measure and arrange passes must
+operate on children that have already been created and added. In other words,
+they should look as close as possible to this:&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ArrangeOverride&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;finalSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;childRect&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Rect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;...,&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Get location from somewhere&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DesiredSize&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Arrange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;childRect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(...);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Decide how much space we actually used&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MeasureOverride&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Size&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;availableSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;childSize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Compute child size somehow&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Measure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;childSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(...);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Decide what the minimum viable size is&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There’s a lot of hand waving there, but:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Neither the measure pass nor the arrange pass alters the logical tree&lt;/li&gt;
+  &lt;li&gt;Neither pass creates children, but instead operates on children that are
+already there&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So we aren’t breaking the DCC law.&lt;/p&gt;
+
+&lt;p&gt;But now we have a chicken-and-egg problem. Where do the child tick marks come
+from?&lt;/p&gt;
+
+&lt;h2 id=&quot;the-compromise&quot;&gt;The compromise&lt;/h2&gt;
+
+&lt;p&gt;The solution is a compromise: create the children in response to size changes:&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Note: this isn't the only way to do this&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;OnRenderSizeChanged&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SizeChangedInfo&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sizeInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;_children&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Create tick mark children based on the current RenderSize&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;base&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;OnRenderSizeChanged&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sizeInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Why is this a compromise? Because now it’s impossible for our axis control to
+be &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Auto&lt;/code&gt;-sized. If we drop it into an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Auto&lt;/code&gt;-sized cell in a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Grid&lt;/code&gt; then it
+won’t show up because it’ll get scrunched out of view.&lt;/p&gt;
+
+&lt;p&gt;Why is that? To answer that we have to look a little more closely at our axis in
+this sequence of events:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Parent control performs a measure pass on us, telling us we have so much
+space available and asking how much of it we need&lt;/li&gt;
+  &lt;li&gt;We don’t have any children yet because our size hasn’t yet changed. What
+amount of space will we say that we need?&lt;/li&gt;
+  &lt;li&gt;Parent control decides on some amount of space to give us&lt;/li&gt;
+  &lt;li&gt;Parent control performs an arrange pass on us, telling us we have so much
+space available&lt;/li&gt;
+  &lt;li&gt;We don’t have any children yet because our size hasn’t yet changed&lt;/li&gt;
+  &lt;li&gt;After our arrange pass completes, WPF changes our size to the amount of
+space we said we used&lt;/li&gt;
+  &lt;li&gt;Since we have hooked into our own size changes, we decide that so many
+children will fit, instantiate that number of children, and add them to our
+logical and visual trees&lt;/li&gt;
+  &lt;li&gt;If we added any children then WPF will cause our parent to perform another
+layout pass over us, and the above steps might repeat&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In step #2, what amount of space will we say we need when we have no children
+yet? Note: we cannot say we need as much space as we’re given (in other words we
+cannot just return the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;availableSize&lt;/code&gt; parameter) because it’s common for
+controls to be offered &lt;em&gt;infinite&lt;/em&gt; space and WPF throws an exception when you
+return that. Some finite number has to be returned. But what? Let’s settle on
+returning &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new Size(0, 0)&lt;/code&gt;, or no space. That tells our parent that we’re
+really flexible and can fit anywhere. (As an aside: this is what &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Canvas&lt;/code&gt; does.)&lt;/p&gt;
+
+&lt;p&gt;Okay, so our parent knows that we don’t need any space. Guess what happens if
+our parent is a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Grid&lt;/code&gt; and we’re in an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Auto&lt;/code&gt;-sized cell? The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Grid&lt;/code&gt; gives us
+no space! Step #4 happens and we’re told we have no space. Our only possible
+reply in step #5 is that we used no space. So our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RenderSize&lt;/code&gt; gets set to zero,
+obviously no child tick marks will fit in zero space so we don’t create any
+children, so we don’t add any children, so our logical and visual trees don’t
+change, so we’re done. Our axis won’t show up!&lt;/p&gt;
+
+&lt;p&gt;It has to be told how large it is. It cannot be &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Auto&lt;/code&gt;-sized.&lt;/p&gt;
+
+&lt;p&gt;Pretty lame, right?&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Caution: the code above will likely not compile. It’s just inspirational
+pseudocode written off the cuff.&lt;/em&gt;&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">Fountain Codes</title><link href="/programming/2021/07/19/fountain-codes.html" rel="alternate" type="text/html" title="Fountain Codes" /><published>2021-07-19T00:00:00+00:00</published><updated>2021-07-19T00:00:00+00:00</updated><id>/programming/2021/07/19/fountain-codes</id><content type="html" xml:base="/programming/2021/07/19/fountain-codes.html">&lt;p&gt;A &lt;a href=&quot;https://en.wikipedia.org/wiki/Fountain_code&quot;&gt;fountain code&lt;/a&gt; is a
 &lt;a href=&quot;https://en.wikipedia.org/wiki/Error_correction_code#Forward_error_correction&quot;&gt;forward error correction code&lt;/a&gt;
 for lossy channels. In other words a fountain code is an
 &lt;a href=&quot;https://en.wikipedia.org/wiki/Erasure_code&quot;&gt;erasure code&lt;/a&gt;.&lt;/p&gt;
@@ -2079,81 +2355,4 @@ apply to you. The author of Hebrews was writing to Christians and explaining how
 things related to &lt;em&gt;them&lt;/em&gt;, not to you. In that case I recommend putting your hope
 and confidence in Jesus so that you can start running the correct race. If you
 do then you will not be disappointed
-&lt;a href=&quot;https://www.esv.org/search/?q=Isaiah 28:16&quot; target=&quot;_blank&quot;&gt;Isaiah 28:16&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">Battery Life</title><link href="/phone/2020/11/17/battery-life.html" rel="alternate" type="text/html" title="Battery Life" /><published>2020-11-17T00:00:00+00:00</published><updated>2020-11-17T00:00:00+00:00</updated><id>/phone/2020/11/17/battery-life</id><content type="html" xml:base="/phone/2020/11/17/battery-life.html">&lt;p&gt;The one great thing about feature phones was their battery life. The one
-terrible thing about smartphones is their battery life.&lt;/p&gt;
-
-&lt;p&gt;I will never understand the market that created phones that can’t stay charged
-for even 24 hours.&lt;/p&gt;
-
-&lt;h2 id=&quot;an-old-phone&quot;&gt;An old phone&lt;/h2&gt;
-
-&lt;p&gt;Here is an old smartphone I used to have:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/battery-life/before.jpg&quot; alt=&quot;An old phone that fit nicely in my hand&quot; class=&quot;img-fluid&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;It was a Motorola Something Or Other. It was kind of neat. It had a little HDMI
-port so you could plug it into a TV and watch movies. It was also dual-core
-which was very special at the time.&lt;/p&gt;
-
-&lt;p&gt;See how nicely it fit in my hand?&lt;/p&gt;
-
-&lt;p&gt;I was about to go on an extended trip to a place where I needed the phone to
-last more than 24 hours at a time. I’m sure you can guess how much it matters if
-a phone fits nicely in your hand when the battery is dead at the most critical
-moment.&lt;/p&gt;
-
-&lt;p&gt;So I did this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/battery-life/after.jpg&quot; alt=&quot;That phone after giving it a hulking battery&quot; class=&quot;img-fluid&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;It no longer fit nicely in my hand. It weighed so much that the back case
-cracked once after I accidentally dropped it from only waist level.&lt;/p&gt;
-
-&lt;p&gt;But guess what?&lt;/p&gt;
-
-&lt;p&gt;It lasted for days at a time.&lt;/p&gt;
-
-&lt;p&gt;And it was worth it.&lt;/p&gt;
-
-&lt;h2 id=&quot;a-new-phone&quot;&gt;A new phone&lt;/h2&gt;
-
-&lt;p&gt;Fast forward to a couple of years ago. That phone was long gone and I had
-upgraded to the Pixel 3. The Pixel 3 was the best phone I had ever owned. It was
-fast. It took better pictures than iPhones. It didn’t have any bloatware but was
-stock vanilla untarnished Android. It came with more frequent software updates
-than any other phone, and straight from the horse’s mouth (no
-waiting-on-the-carrier nonsense). I could &lt;em&gt;wash&lt;/em&gt; this phone. I was so excited I
-didn’t even notice the battery didn’t last very long.&lt;/p&gt;
-
-&lt;p&gt;It fit so nicely in my hand.&lt;/p&gt;
-
-&lt;p&gt;Fast forward to just recently. The Pixel 3 had seen better days. I had smushed
-the camera module while it was in my pocket by leaning too hard against
-something, so it didn’t take pictures right. A stock vanilla Android experience
-was no longer unique but lots of other phone manufacturers were doing it too.
-Software updates were becoming less and less significant as Android stabilized.
-And it was no longer waterproof. In fact water had seeped into it while it was
-in my pocket at the beach, and normal things were broken like the proximity
-detector—I couldn’t dial extensions or even hang up a call.&lt;/p&gt;
-
-&lt;p&gt;And I was getting tired of having to bring a charger with me everywhere I went.&lt;/p&gt;
-
-&lt;p&gt;Its time was up. So I traded it in.&lt;/p&gt;
-
-&lt;h2 id=&quot;the-best-phone&quot;&gt;The best phone&lt;/h2&gt;
-
-&lt;p&gt;And in its place I got a Moto G Power.&lt;/p&gt;
-
-&lt;p&gt;You’ll recognize that “Moto G” is not a name associated with quality and luxury.
-Well, because of a deal it was even cheaper. It was so cheap it was more than
-free after trading in the worn out Pixel 3. It is noticeably slower. It takes
-very average pictures. It isn’t waterproof. It has a lot of plastic inside and
-out. It’s a little too large for even my large hands.&lt;/p&gt;
-
-&lt;p&gt;But guess what? I can get the battery to last for &lt;em&gt;more than three days&lt;/em&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/battery-life/long-battery-life.png&quot; alt=&quot;More than three days of battery life&quot; class=&quot;img-fluid&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;&lt;em&gt;With normal usage&lt;/em&gt;&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;This is the best phone I have ever owned.&lt;/p&gt;</content><author><name></name></author><category term="phone" /></entry></feed>
+&lt;a href=&quot;https://www.esv.org/search/?q=Isaiah 28:16&quot; target=&quot;_blank&quot;&gt;Isaiah 28:16&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry></feed>

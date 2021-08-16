@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="First impressions of Terraform in Azure">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Terraforming Clouds - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h1 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h1>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Terraforming Clouds</h1>
+          
+          
+          <p><i>August 16, 2021&mdash;First impressions of Terraform in Azure</i></p>
+          
+          <p><a href="https://www.terraform.io/">Terraform</a> is a software tool for “infrastructure as
+code”. “Infrastructure as code” just means that you deploy cloud resources
+(databases, applications, and how they’re wired together) with a configuration
+file. Terraform is a tool which reads its brand of configuration file and can
+interact with several different clouds (Azure, Google Cloud, AWS, etc).</p>
+
+<h2 id="the-good">The good</h2>
+
+<p>Once you learn how to write Terraform configuration files you can put them into
+source control and create a continuous integration pipeline so that:</p>
+
+<ul>
+  <li>You can fearlessly change cloud resources</li>
+  <li>Cloud resources are always in sync with source code</li>
+  <li>You can easily revert to a previous version of source code <em>and</em> a previous
+cloud setup</li>
+</ul>
+
+<p>These are real benefits. You can have a continuous integration pipeline that
+builds and tests your application, and then deploys it to the cloud while making
+sure all the necessary infrastructure is in place and configured properly.</p>
+
+<p>And it’s awesome being able to put all the infrastructure in source control. It
+feels a lot less fragile.</p>
+
+<h2 id="the-bad">The bad</h2>
+
+<p>You can’t do everything with Terraform; in theory it lags behind. When Azure
+comes out with something new then someone from Microsoft has to update the
+Terraform
+<a href="https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs">“plugin” for Azure</a>.
+To be honest this isn’t a problem for me.</p>
+
+<p>Terraform will not show mercy to cloud resources that it controls. If you remove
+a database from your configuration file then Terraform will not think twice
+about deleting it. So make sure you keep regular backups (you would be doing
+that anyway, right?) and in a storage container that isn’t under Terraform’s
+control (otherwise your fat fingers will make it delete all your backups, too!)</p>
+
+<p>There is a learning curve.</p>
+
+<h2 id="the-ugly">The ugly</h2>
+
+<p>I’m not really sure how I would improve Terraform. The configuration language is
+okay. The tooling feels complete. There is documentation for everything.</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>I think I’m going to use infrastructure as code techniques in all my future
+cloud projects. You should, too!</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2021&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

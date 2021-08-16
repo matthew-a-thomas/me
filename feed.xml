@@ -1,4 +1,53 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-07-26T20:34:10+00:00</updated><id>/feed.xml</id><entry><title type="html">WPF’s Problem with Axes</title><link href="/programming/2021/07/26/wpf-problem-with-axes.html" rel="alternate" type="text/html" title="WPF’s Problem with Axes" /><published>2021-07-26T00:00:00+00:00</published><updated>2021-07-26T00:00:00+00:00</updated><id>/programming/2021/07/26/wpf-problem-with-axes</id><content type="html" xml:base="/programming/2021/07/26/wpf-problem-with-axes.html">&lt;p&gt;WPF performs layout in two passes. The first is called the “measure” pass. The
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-08-16T12:58:00+00:00</updated><id>/feed.xml</id><entry><title type="html">Terraforming Clouds</title><link href="/programming/2021/08/16/terraforming-clouds.html" rel="alternate" type="text/html" title="Terraforming Clouds" /><published>2021-08-16T00:00:00+00:00</published><updated>2021-08-16T00:00:00+00:00</updated><id>/programming/2021/08/16/terraforming-clouds</id><content type="html" xml:base="/programming/2021/08/16/terraforming-clouds.html">&lt;p&gt;&lt;a href=&quot;https://www.terraform.io/&quot;&gt;Terraform&lt;/a&gt; is a software tool for “infrastructure as
+code”. “Infrastructure as code” just means that you deploy cloud resources
+(databases, applications, and how they’re wired together) with a configuration
+file. Terraform is a tool which reads its brand of configuration file and can
+interact with several different clouds (Azure, Google Cloud, AWS, etc).&lt;/p&gt;
+
+&lt;h2 id=&quot;the-good&quot;&gt;The good&lt;/h2&gt;
+
+&lt;p&gt;Once you learn how to write Terraform configuration files you can put them into
+source control and create a continuous integration pipeline so that:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You can fearlessly change cloud resources&lt;/li&gt;
+  &lt;li&gt;Cloud resources are always in sync with source code&lt;/li&gt;
+  &lt;li&gt;You can easily revert to a previous version of source code &lt;em&gt;and&lt;/em&gt; a previous
+cloud setup&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These are real benefits. You can have a continuous integration pipeline that
+builds and tests your application, and then deploys it to the cloud while making
+sure all the necessary infrastructure is in place and configured properly.&lt;/p&gt;
+
+&lt;p&gt;And it’s awesome being able to put all the infrastructure in source control. It
+feels a lot less fragile.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-bad&quot;&gt;The bad&lt;/h2&gt;
+
+&lt;p&gt;You can’t do everything with Terraform; in theory it lags behind. When Azure
+comes out with something new then someone from Microsoft has to update the
+Terraform
+&lt;a href=&quot;https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs&quot;&gt;“plugin” for Azure&lt;/a&gt;.
+To be honest this isn’t a problem for me.&lt;/p&gt;
+
+&lt;p&gt;Terraform will not show mercy to cloud resources that it controls. If you remove
+a database from your configuration file then Terraform will not think twice
+about deleting it. So make sure you keep regular backups (you would be doing
+that anyway, right?) and in a storage container that isn’t under Terraform’s
+control (otherwise your fat fingers will make it delete all your backups, too!)&lt;/p&gt;
+
+&lt;p&gt;There is a learning curve.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-ugly&quot;&gt;The ugly&lt;/h2&gt;
+
+&lt;p&gt;I’m not really sure how I would improve Terraform. The configuration language is
+okay. The tooling feels complete. There is documentation for everything.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
+
+&lt;p&gt;I think I’m going to use infrastructure as code techniques in all my future
+cloud projects. You should, too!&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">WPF’s Problem with Axes</title><link href="/programming/2021/07/26/wpf-problem-with-axes.html" rel="alternate" type="text/html" title="WPF’s Problem with Axes" /><published>2021-07-26T00:00:00+00:00</published><updated>2021-07-26T00:00:00+00:00</updated><id>/programming/2021/07/26/wpf-problem-with-axes</id><content type="html" xml:base="/programming/2021/07/26/wpf-problem-with-axes.html">&lt;p&gt;WPF performs layout in two passes. The first is called the “measure” pass. The
 second is called the “arrange” pass.&lt;/p&gt;
 
 &lt;p&gt;During the measure pass a control is queried for the minimum amount of space it
@@ -2141,218 +2190,4 @@ assembly language.&lt;/p&gt;
 it is being influenced too much by today’s internet technologies. And we all
 know how fast the internet changes.&lt;/p&gt;
 
-&lt;p&gt;So I’d stick to the web for WebAssembly.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">Lift Your Drooping Hands</title><link href="/bible/2020/11/18/hebrews-drooping-hands.html" rel="alternate" type="text/html" title="Lift Your Drooping Hands" /><published>2020-11-18T00:00:00+00:00</published><updated>2020-11-18T00:00:00+00:00</updated><id>/bible/2020/11/18/hebrews-drooping-hands</id><content type="html" xml:base="/bible/2020/11/18/hebrews-drooping-hands.html">&lt;p&gt;Let’s look at &lt;a href=&quot;https://www.esv.org/search/?q=Hebrews 11:39–12:17&quot; target=&quot;_blank&quot;&gt;Hebrews 11:39–12:17&lt;/a&gt;. It begins
-with:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;And all these, though commended through their faith, did not receive what was
-  promised, since God had provided something better for us, that apart from us
-  they should not be made perfect.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;You’ll remember the “Hall of Faith” earlier in chapter 11. Here the author is
-beginning to make it clear why he wrote that list. First he wanted his audience
-to remember that although the Old Testament saints did well through their faith
-they still did not receive what was promised.&lt;/p&gt;
-
-&lt;p&gt;Notice that it wasn’t because those Old Testament saints did anything wrong that
-God delayed. Instead it was because God had a good purpose in mind.&lt;/p&gt;
-
-&lt;p&gt;God’s purposes for delaying in the Old Testament included His desire to unite
-Christians in the author’s day with the Old Testament saints through faith
-&lt;a href=&quot;https://www.esv.org/search/?q=Hebrews 4:2&quot; target=&quot;_blank&quot;&gt;Hebrews 4:2&lt;/a&gt;. And God continued that purpose
-through the audience’s day &lt;a href=&quot;https://www.esv.org/search/?q=2 Peter 3:9&quot; target=&quot;_blank&quot;&gt;2 Peter 3:9&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;God always has a purpose in delaying His good promises.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Let’s continue:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Therefore, since we are surrounded by so great a cloud of witnesses, let us
-  also lay aside every weight, and sin which clings so closely, and let us run
-  with endurance the race that is set before us, looking to Jesus, the founder
-  and perfecter of our faith, who for the joy that was set before him endured
-  the cross, despising the shame, and is seated at the right hand of the throne
-  of God.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We need to get clear in what way the surrounding great cloud of people were
-witnesses. Were they witnessing the author’s audience, like people gathered in
-the stands cheering on the athletes below them? Or were they bearing witness to
-some fact?&lt;/p&gt;
-
-&lt;p&gt;I think it’s the latter.&lt;/p&gt;
-
-&lt;p&gt;First, it’s too large a job for non-omniscient and non-omnipresent people to
-witness the affairs of every saint on earth to much degree. Sure, mere humans
-are able to provide oversight to even very large groups of people—this is
-what police and the government do every day. But it’s quite easy to escape their
-notice. So it just doesn’t mean very much to say “you’re being watched by the
-saints of old”.&lt;/p&gt;
-
-&lt;p&gt;Second, there’s the logistical problem to consider. Sure, the Lord could have
-watched the audience of Hebrews in detail, since He is omniscient and
-omnipresent, and then could have given a summary report to the saints in heaven,
-highlighting the significant things. But then it would have been &lt;em&gt;the Lord&lt;/em&gt;
-watching, not the saints in heaven. And again that report given to the saints in
-heaven would necessarily be missing some information (because it would be for
-finite people). Why would you presume that all the actions of anyone’s life in
-particular would consume that limited space?&lt;/p&gt;
-
-&lt;p&gt;Third, why would anyone desire to watch every minute of other people’s lives
-when they are in the presence of the Most Glorious One? Do we really think mere
-mortals command so much more attention than the Lord?&lt;/p&gt;
-
-&lt;p&gt;No, the Old Testament saints were figuratively standing as witnesses to the
-facts that God is faithful, that it is possible to endure faithfully to the end
-of your life, that faith really is sufficient for enduring to the end, and
-things like that.&lt;/p&gt;
-
-&lt;p&gt;Okay, with that out of the way…&lt;/p&gt;
-
-&lt;p&gt;God had set a race before the audience of Hebrews. This was the same race set
-before the Old Testament saints. The Old Testament saints ran it well by
-enduring through faith, and now it’s the audience’s turn to run it well by
-enduring through faith.&lt;/p&gt;
-
-&lt;p&gt;Notice how Jesus was the prime motivation for running the race. They took
-motivation by looking to Him. I can’t help being reminded of
-&lt;a href=&quot;https://www.esv.org/search/?q=2 Corinthians 3:17–18&quot; target=&quot;_blank&quot;&gt;2 Corinthians 3:17–18&lt;/a&gt;. It was by looking to
-Jesus that the New Testament Christian was both encouraged and transformed. The
-end of the race was glory (“Jesus is seated at the right hand of the throne of
-God”), and by running this race they were transformed into the glorious image of
-Jesus.&lt;/p&gt;
-
-&lt;p&gt;Also notice how Jesus was the prime example of a runner in this race. He (quite
-successfully) endured the cross and is now seated in glory. He successfully
-completed the race. And He endured the main instance of suffering in his race
-“for the joy that was set before him”. In other words He saw past the suffering
-and anticipated (with joy) where the race was taking him. He saw with the
-assurance of things hoped for, the conviction of things not seen. In other words
-He saw with eyes of faith. He ran His race through faith, just like the audience
-of Hebrews was being asked to do.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;They had sufficient means and cause to run the race with endurance.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Notice how the target of that faith was not arbitrary. The Old Testament saints
-were given specific promises by God and they knew God was trustworthy and would
-keep His promises, and so they were assured in their hope and held strong
-convictions. Jesus was given a command by the Father
-(&lt;a href=&quot;https://www.esv.org/search/?q=John 10:18&quot; target=&quot;_blank&quot;&gt;John 10:18&lt;/a&gt;) whom He knew to be faithful, and
-so it was no arbitrary hope that Jesus had. It’s even strange to call it “hope”
-because the outcome wasn’t at all in doubt. How could it be any other way than
-that God keeps His promises? The same for the audience of Hebrews. They were
-being asked to run a specific race toward a specific goal, and the author was
-taking pains to show them how worthy a goal it is and how faith targeting that
-goal is so well placed.&lt;/p&gt;
-
-&lt;p&gt;In other words, it’s a different race entirely that aims for more money, power,
-comfort, pleasure, influence, and peace with the world. From the rest of
-scripture we know where that kind of race ends: it ends in hell. And the faith
-involved in that race is a deceitful faith giving false assurance.
-&lt;a href=&quot;https://www.esv.org/search/?q=Luke 12:19–21&quot; target=&quot;_blank&quot;&gt;Luke 12:19–21&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Let’s continue:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Consider him who endured from sinners such hostility against himself, so that
-  you may not grow weary or fainthearted. In your struggle against sin you have
-  not yet resisted to the point of shedding your blood.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;The author seems to be making two points.&lt;/p&gt;
-
-&lt;p&gt;First, the suffering that came during the race was not new or unusual. It was to
-be expected. It was so normal that the founder and perfecter of their faith
-encountered it. It was experienced by their entire brotherhood throughout the
-world &lt;a href=&quot;https://www.esv.org/search/?q=1 Peter 5:9&quot; target=&quot;_blank&quot;&gt;1 Peter 5:9&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Second, the audience of Hebrews had not suffered to any unusual degree. In fact
-their suffering was light in comparison to Jesus. They (obviously) hadn’t yet
-died because of their faith, so they were actually faring pretty well.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;And have you forgotten the exhortation that addresses you as sons?&lt;/p&gt;
-
-  &lt;p&gt;“My son, do not regard lightly the discipline of the Lord, nor be weary when
-  reproved by him. For the Lord disciplines the one he loves, and chastises
-  every son whom he receives.”&lt;/p&gt;
-
-  &lt;p&gt;It is for discipline that you have to endure. God is treating you as sons. For
-  what son is there whom his father does not discipline? If you are left without
-  discipline, in which all have participated, then you are illegitimate children
-  and not sons. Besides this, we have had earthly fathers who disciplined us and
-  we respected them. Shall we not much more be subject to the Father of spirits
-  and live? For they disciplined us for a short time as it seemed best to them,
-  but he disciplines us for our good, that we may share his holiness. For the
-  moment all discipline seems painful rather than pleasant, but later it yields
-  the peaceful fruit of righteousness to those who have been trained by it.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;The author gives a few more reasons for the audience to endure.&lt;/p&gt;
-
-&lt;p&gt;First, the author reminded them that they are sons of God, and God disciplines
-all his children. They would not be legitimate children of God if they were left
-without the discipline that God gives to all his children.&lt;/p&gt;
-
-&lt;p&gt;Second, their Father loves them and is changing them. Recall that, for the New
-Testament Christian, suffering produced character, character produced hope, and
-hope did not put them to shame because God had decidedly set His love on them
-&lt;a href=&quot;https://www.esv.org/search/?q=Romans 5:3–5&quot; target=&quot;_blank&quot;&gt;Romans 5:3–5&lt;/a&gt;. God was disciplining them for
-their good, so that they would share His holiness.&lt;/p&gt;
-
-&lt;p&gt;Third, the audience in general had experienced the discipline of their own
-earthly fathers. Yet they continued to respect their earthly fathers instead of
-grumbling and despising them. So why would they object to God’s discipline? Is
-God a worse father?&lt;/p&gt;
-
-&lt;p&gt;Fourth, they needed to keep some perspective. In the moment it might really
-hurt, but consider the effect in the long run. Even if they died they would get
-to be with the Lord which was far better
-&lt;a href=&quot;https://www.esv.org/search/?q=Philippians 1:21–23&quot; target=&quot;_blank&quot;&gt;Philippians 1:21–23&lt;/a&gt;. And if they continued to
-live then they would get to enjoy the peaceful fruit of righteousness. There is
-a lot of peace that comes from no longer being tempted by particular things.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;They needed to take the long view.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Therefore lift your drooping hands and strengthen your weak knees, and make
-  straight paths for your feet, so that what is lame may not be put out of joint
-  but rather be healed. Strive for peace with everyone, and for the holiness
-  without which no one will see the Lord. See to it that no one fails to obtain
-  the grace of God; that no “root of bitterness” springs up and causes trouble,
-  and by it many become defiled; that no one is sexually immoral or unholy like
-  Esau, who sold his birthright for a single meal. For you know that afterward,
-  when he desired to inherit the blessing, he was rejected, for he found no
-  chance to repent, though he sought it with tears.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Here the author drives home some points of application. He seems to put them
-into two groups.&lt;/p&gt;
-
-&lt;p&gt;First, he told them to lift their drooping hands. This means take encouragement,
-renew the vigor of their race-running, strengthen their weak knees.&lt;/p&gt;
-
-&lt;p&gt;Second, he told them to make straight paths for their feet. This means walk in
-righteousness. The goal is “so that what is lame may not be put out of joint but
-rather be healed”. Temptations to sin are aggravated by walking crooked paths.&lt;/p&gt;
-
-&lt;p&gt;There is some interplay between these two groups. Walking in crooked paths
-hampers spiritual growth, weakens the spiritual hands, discourages the
-Christian, and leads to division and destruction. And drooping hands and weak
-knees are more prone to following crooked paths.&lt;/p&gt;
-
-&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
-
-&lt;p&gt;Everything above applies to Christians both then and now.&lt;/p&gt;
-
-&lt;p&gt;If you are trusting in Jesus for God to pass over you on that day when He judges
-the secrets of men (&lt;a href=&quot;https://www.esv.org/search/?q=Romans 2:16&quot; target=&quot;_blank&quot;&gt;Romans 2:16&lt;/a&gt;) then everything
-above applies to you. &lt;strong&gt;Christian, lift your drooping hands!&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;If you aren’t trusting in Jesus then I’m sure you can tell how the above doesn’t
-apply to you. The author of Hebrews was writing to Christians and explaining how
-things related to &lt;em&gt;them&lt;/em&gt;, not to you. In that case I recommend putting your hope
-and confidence in Jesus so that you can start running the correct race. If you
-do then you will not be disappointed
-&lt;a href=&quot;https://www.esv.org/search/?q=Isaiah 28:16&quot; target=&quot;_blank&quot;&gt;Isaiah 28:16&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry></feed>
+&lt;p&gt;So I’d stick to the web for WebAssembly.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry></feed>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-08-16T12:58:00+00:00</updated><id>/feed.xml</id><entry><title type="html">Terraforming Clouds</title><link href="/programming/2021/08/16/terraforming-clouds.html" rel="alternate" type="text/html" title="Terraforming Clouds" /><published>2021-08-16T00:00:00+00:00</published><updated>2021-08-16T00:00:00+00:00</updated><id>/programming/2021/08/16/terraforming-clouds</id><content type="html" xml:base="/programming/2021/08/16/terraforming-clouds.html">&lt;p&gt;&lt;a href=&quot;https://www.terraform.io/&quot;&gt;Terraform&lt;/a&gt; is a software tool for “infrastructure as
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-08-16T13:03:03+00:00</updated><id>/feed.xml</id><entry><title type="html">Terraforming Clouds</title><link href="/programming/2021/08/16/terraforming-clouds.html" rel="alternate" type="text/html" title="Terraforming Clouds" /><published>2021-08-16T00:00:00+00:00</published><updated>2021-08-16T00:00:00+00:00</updated><id>/programming/2021/08/16/terraforming-clouds</id><content type="html" xml:base="/programming/2021/08/16/terraforming-clouds.html">&lt;p&gt;&lt;a href=&quot;https://www.terraform.io/&quot;&gt;Terraform&lt;/a&gt; is a software tool for “infrastructure as
 code”. “Infrastructure as code” just means that you deploy cloud resources
 (databases, applications, and how they’re wired together) with a configuration
 file. Terraform is a tool which reads its brand of configuration file and can
@@ -47,7 +47,12 @@ okay. The tooling feels complete. There is documentation for everything.&lt;/p&g
 &lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
 
 &lt;p&gt;I think I’m going to use infrastructure as code techniques in all my future
-cloud projects. You should, too!&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">WPF’s Problem with Axes</title><link href="/programming/2021/07/26/wpf-problem-with-axes.html" rel="alternate" type="text/html" title="WPF’s Problem with Axes" /><published>2021-07-26T00:00:00+00:00</published><updated>2021-07-26T00:00:00+00:00</updated><id>/programming/2021/07/26/wpf-problem-with-axes</id><content type="html" xml:base="/programming/2021/07/26/wpf-problem-with-axes.html">&lt;p&gt;WPF performs layout in two passes. The first is called the “measure” pass. The
+cloud projects. You should, too!&lt;/p&gt;
+
+&lt;p&gt;Would I use Terraform? Probably. I need to finish learning about
+&lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/architecture/cloud-native/infrastructure-as-code#azure-resource-manager-templates&quot;&gt;Azure Resource Manager Templates&lt;/a&gt;.
+Apparently Microsoft has a native solution for infrastructure as code, and I
+might prefer that over Terraform.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">WPF’s Problem with Axes</title><link href="/programming/2021/07/26/wpf-problem-with-axes.html" rel="alternate" type="text/html" title="WPF’s Problem with Axes" /><published>2021-07-26T00:00:00+00:00</published><updated>2021-07-26T00:00:00+00:00</updated><id>/programming/2021/07/26/wpf-problem-with-axes</id><content type="html" xml:base="/programming/2021/07/26/wpf-problem-with-axes.html">&lt;p&gt;WPF performs layout in two passes. The first is called the “measure” pass. The
 second is called the “arrange” pass.&lt;/p&gt;
 
 &lt;p&gt;During the measure pass a control is queried for the minimum amount of space it

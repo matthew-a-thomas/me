@@ -14,7 +14,7 @@ Follow these steps to set up your development environment:
    ```
 1. Run this command to build and serve this site:
    ```
-   jekyll serve --watch
+   bundle exec jekyll serve --watch
    ```
 1. Open your browser to http://localhost:4000/
 

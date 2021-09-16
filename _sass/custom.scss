@@ -15,8 +15,23 @@ blockquote {
 .center {
   text-align: center;
 }
+code {
+  font-size: 1em;
+}
 h1, h2, h3, h4, h5, h6 {
   text-align: left;
+}
+h1 {
+  font-size: 4rem;
+}
+h2 {
+  font-size: 3rem;
+}
+h3 {
+  font-size: 2rem;
+}
+h4, h5, h6 {
+  font-size: 1.25rem;
 }
 .highlight pre {
   border: 0.1px solid $secondary;

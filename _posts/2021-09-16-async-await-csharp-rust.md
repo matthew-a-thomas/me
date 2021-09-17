@@ -1,5 +1,5 @@
 ---
-title: Async and await in C# vs Rust
+title: Async and Await in C# vs Rust
 description: Why Rust futures are better because they are polled
 category: programming
 ---

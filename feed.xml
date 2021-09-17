@@ -1,4 +1,199 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-09-16T20:23:01+00:00</updated><id>/feed.xml</id><entry><title type="html">Async and await in C# vs Rust</title><link href="/programming/2021/09/16/async-await-csharp-rust.html" rel="alternate" type="text/html" title="Async and await in C# vs Rust" /><published>2021-09-16T00:00:00+00:00</published><updated>2021-09-16T00:00:00+00:00</updated><id>/programming/2021/09/16/async-await-csharp-rust</id><content type="html" xml:base="/programming/2021/09/16/async-await-csharp-rust.html">&lt;p&gt;Both &lt;a href=&quot;https://www.rust-lang.org/&quot;&gt;Rust&lt;/a&gt; and
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-09-17T13:59:30+00:00</updated><id>/feed.xml</id><entry><title type="html">Short Circuit Protection</title><link href="/computers/2021/09/17/short-circuit.html" rel="alternate" type="text/html" title="Short Circuit Protection" /><published>2021-09-17T00:00:00+00:00</published><updated>2021-09-17T00:00:00+00:00</updated><id>/computers/2021/09/17/short-circuit</id><content type="html" xml:base="/computers/2021/09/17/short-circuit.html">&lt;p&gt;My PC power supply recently bit the dust. It was during a storm when the power
+cut out. My PC wouldn’t turn back on afterward. Maybe a power surge? At any
+rate, I ordered a new power supply and it finally arrived yesterday evening.&lt;/p&gt;
+
+&lt;p&gt;And I’m happy to report that my new power supply has short circuit protection.
+Here’s how I found out.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;I took the cover off my PC case and freed the old power supply from its screws.
+Both the old and the new power supply are modular: instead of all the cables
+dangling out of it you only plug in the ones you need. So I unplugged all the
+cables from the power supply end. “This will be an easy job” I thought to
+myself, “all I have to do is drop the new power supply in and replug all these
+modular cables.”&lt;/p&gt;
+
+&lt;p&gt;Wrong.&lt;/p&gt;
+
+&lt;p&gt;First I noticed the main motherboard power connector (the big 24 pin one) was
+different. Of course it’s the same on the motherboard end, but on the power
+supply the 24 pins are split up into two plugs: something random like 10 pins on
+one plug and the remaining 12 pins on another one; two different modular slots
+separated by a little distance on the power supply. Did motherboards used to
+only take 10 or 12 pin connectors? It was clear that my old plug was not going
+to work.&lt;/p&gt;
+
+&lt;p&gt;“No problem, I’ll just use the cable that came with the new power supply.”&lt;/p&gt;
+
+&lt;p&gt;Next was the auxiliary 8 pin motherboard power plug. Both ends fit.&lt;/p&gt;
+
+&lt;p&gt;“Good.”&lt;/p&gt;
+
+&lt;p&gt;The graphics card power plug was different on the power supply side. It had the
+same number of pins in the same pattern, but they were keyed slightly different.
+I don’t really like the new cord. It is flat instead of braided so it doesn’t
+sit right in the case. And it has two graphics card plugs on the one end even
+though I only have one graphics card. Who wants an extra plug dangling in their
+case?&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Mumble grumble.&lt;/em&gt; Out with the old cord, in with the new.&lt;/p&gt;
+
+&lt;p&gt;Finally, the two or three strings of hard drive power plugs. Again, exactly the
+same on the hard drive side of things, and exactly the same number of pins in
+the same pattern on the power supply side. But keyed differently.&lt;/p&gt;
+
+&lt;p&gt;“Ugh, why are they doing this to me?”&lt;/p&gt;
+
+&lt;p&gt;The other side of the case came off to expose the important ends of my hard
+drives. I carefully dissected the kraken’s tangled mess of tentacles. After some
+time and effort I had the old power strings in my hand. Next I cautiously
+inserted the new strings’ plugs.&lt;/p&gt;
+
+&lt;p&gt;“I hope I didn’t accidentally bump any of these SATA connectors.”&lt;/p&gt;
+
+&lt;p&gt;And I was done!&lt;/p&gt;
+
+&lt;p&gt;On went the case panels, up went my PC onto its little shelf, in went the power
+cord and USB plugs and display cords, down went my finger onto the power button.&lt;/p&gt;
+
+&lt;p&gt;Nothing.&lt;/p&gt;
+
+&lt;p&gt;“I &lt;em&gt;think&lt;/em&gt; I pressed the power button?”&lt;/p&gt;
+
+&lt;p&gt;I poked it again. Still nothing.&lt;/p&gt;
+
+&lt;p&gt;“Hmm… Maybe the power surge destroyed my motherboard too? Why do I buy such
+cheap surge protectors?”&lt;/p&gt;
+
+&lt;p&gt;I knew I still had the bent paperclip laying around that I had used to jumper
+the old power supply as I diagnosed it. I grabbed that, took the side panel off,
+unplugged the motherboard end of the fat 24-pin motherboard power cable, and
+carefully inserted the paperclip into the correct two pins.&lt;/p&gt;
+
+&lt;p&gt;There was a very faint click from a solenoid in the power supply, then nothing.&lt;/p&gt;
+
+&lt;p&gt;I did it again just to see. Same thing. Again. And, there were a couple of faint
+clicks, like it was groggily waking up but then something was urgently shouting
+at it “Quick!! Save yourself!!” in the midst of other terrified screams and in a
+panic it would stumble over itself as it rushed to disconnect itself from the
+mains.&lt;/p&gt;
+
+&lt;p&gt;Perplexed, I unplugged everything from the power supply.&lt;/p&gt;
+
+&lt;p&gt;“Good thing this power supply is modular!”&lt;/p&gt;
+
+&lt;p&gt;And I tried again. Just a single click this time.&lt;/p&gt;
+
+&lt;p&gt;“That sounds like a normal turning on click to me. Not a panicky click.”&lt;/p&gt;
+
+&lt;p&gt;Time for process of elimination. In went the graphics card plug. Fine. The hard
+drive plugs. Fine. The big fat 24 pin motherboard plug and the smaller 8 pin aux
+power plug.&lt;/p&gt;
+
+&lt;p&gt;Not fine.&lt;/p&gt;
+
+&lt;p&gt;Actually, there was a very brief flash of light coming from somewhere in the
+case.&lt;/p&gt;
+
+&lt;p&gt;Now, a flash of light by itself is nothing unusual. They stick LEDs on
+everything. I hate them, but the WiFi card has one, some aim out the back of my
+motherboard, they’re everywhere. I feel like I had to pay extra to buy RAM
+without LEDs. Why would someone want LEDs on their RAM??&lt;/p&gt;
+
+&lt;p&gt;“Okay, it doesn’t like my motherboard. But where is that light coming from?”&lt;/p&gt;
+
+&lt;p&gt;I kept turning it on. Sometimes there would be two clicks from the power supply.
+Sometimes there would be several. The poor power supply was going to have PTSD.
+But I had to find that brief flash of light.&lt;/p&gt;
+
+&lt;p&gt;And I discovered it wasn’t coming from the open side of the case. It wasn’t
+coming from anything in or on the &lt;em&gt;top&lt;/em&gt; of the motherboard, but instead I could
+see the flash coming from &lt;em&gt;behind&lt;/em&gt; the lower corner.&lt;/p&gt;
+
+&lt;p&gt;“Oh great, did I drop a screw in there or something?”&lt;/p&gt;
+
+&lt;p&gt;I imagined all the things that could have fallen into the holes in the back of
+the case.&lt;/p&gt;
+
+&lt;p&gt;Out came all the SATA plugs. Out came the graphics card and WiFi card. Out came
+the motherboard power plugs. Out came all the screws holding the motherboard in
+place. Out came the motherboard.&lt;/p&gt;
+
+&lt;p&gt;“Hmm. No loose screws laying around behind the motherboard. Just dust.”&lt;/p&gt;
+
+&lt;p&gt;I flipped it around and searched for the scorch marks. Nothing.&lt;/p&gt;
+
+&lt;p&gt;Well there had to be something making that light. I looked closer.&lt;/p&gt;
+
+&lt;p&gt;And then I saw it: two strings of surface mount LEDs.&lt;/p&gt;
+
+&lt;p&gt;On the &lt;em&gt;back&lt;/em&gt; of my motherboard.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Groan!&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;“I am never buying a single LED ever for the rest of my life. I’m not even going
+to talk to anyone who has anything to do with LEDs or anything that LEDs go on,
+in, or around. I don’t even like the letter ‘L’ anymore.”&lt;/p&gt;
+
+&lt;p&gt;What in the world were they doing on the &lt;em&gt;back&lt;/em&gt; of my motherboard?? Diagnostic
+lights? Mood lighting? Well all this diagnosing wasn’t putting me in a light
+mood.&lt;/p&gt;
+
+&lt;p&gt;Okay, it definitely wasn’t arcing. I should have known: the hue wasn’t quite
+right, and it was silent. Well at least the light has a legitimate claim to
+existence; &lt;em&gt;someone&lt;/em&gt; wanted light to come out the back of the motherboard, and
+here light was coming out the back. I couldn’t blame the light for doing what it
+was designed to do.&lt;/p&gt;
+
+&lt;p&gt;In went the motherboard to the case. In went the motherboard screws.&lt;/p&gt;
+
+&lt;p&gt;“Hmm. Maybe I’ll do process of elimination again, just to be extra sure.”&lt;/p&gt;
+
+&lt;p&gt;In went the 24 pin motherboard plug (and the case power switch plug). I poked
+the power button.&lt;/p&gt;
+
+&lt;p&gt;And everything sprang to life! I had left the hard drive power cords plugged
+into the power supply; they were happily whirring away. My CPU fan was spinning
+its little heart out.&lt;/p&gt;
+
+&lt;p&gt;Wow! What a wonderful chorus.&lt;/p&gt;
+
+&lt;p&gt;“Maybe my graphics card?”&lt;/p&gt;
+
+&lt;p&gt;In went the graphics card power. Fine! I could just hear all the money I was
+saving by not replacing all these components. What a beautiful noise.&lt;/p&gt;
+
+&lt;p&gt;“A short in some case accessory, maybe one of the USB plugs?”&lt;/p&gt;
+
+&lt;p&gt;In went all the case accessories and fans. Fine!&lt;/p&gt;
+
+&lt;p&gt;I was getting tired of saving money. There was a problem to solve. What in the
+world went wrong??&lt;/p&gt;
+
+&lt;p&gt;“Wait a minute, what’s this one cord still dangling here?”&lt;/p&gt;
+
+&lt;p&gt;I had forgotten about the 8-pin motherboard auxiliary power plug. I guess it
+really is auxiliary after all? But it was dangling and begging for a home, so I
+plugged it back in.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Click.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Aha! The culprit, caught red-handed!&lt;/p&gt;
+
+&lt;p&gt;I looked closer at that cord and compared it to the new one. Of course the
+motherboard side was identical on both. And the power supply side was physically
+keyed the same. But there was an empty pin in one place on the one cord, and an
+empty pin in a different place on the other cord.&lt;/p&gt;
+
+&lt;p&gt;They were wired differently! I was sending 12V straight to ground! A short
+circuit!&lt;/p&gt;
+
+&lt;h1 id=&quot;️&quot;&gt;🤦‍♂️&lt;/h1&gt;
+
+&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
+
+&lt;p&gt;Don’t mix and match modular power supply cables from different manufacturers.&lt;/p&gt;</content><author><name></name></author><category term="computers" /></entry><entry><title type="html">Async and Await in C# vs Rust</title><link href="/programming/2021/09/16/async-await-csharp-rust.html" rel="alternate" type="text/html" title="Async and Await in C# vs Rust" /><published>2021-09-16T00:00:00+00:00</published><updated>2021-09-16T00:00:00+00:00</updated><id>/programming/2021/09/16/async-await-csharp-rust</id><content type="html" xml:base="/programming/2021/09/16/async-await-csharp-rust.html">&lt;p&gt;Both &lt;a href=&quot;https://www.rust-lang.org/&quot;&gt;Rust&lt;/a&gt; and
 &lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/&quot;&gt;C#&lt;/a&gt; support
 asynchronous methods and awaitable expressions.&lt;/p&gt;
 
@@ -2656,143 +2851,4 @@ be what creates a marriage&lt;/p&gt;
 
 &lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
 
-&lt;p&gt;None of these things are what create a marriage.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry><entry><title type="html">Glorifying God</title><link href="/bible/2020/12/05/glorifying-god.html" rel="alternate" type="text/html" title="Glorifying God" /><published>2020-12-05T00:00:00+00:00</published><updated>2020-12-05T00:00:00+00:00</updated><id>/bible/2020/12/05/glorifying-god</id><content type="html" xml:base="/bible/2020/12/05/glorifying-god.html">&lt;p&gt;John Piper is well known for coining
-&lt;a href=&quot;https://www.desiringgod.org/topics/christian-hedonism&quot; target=&quot;_blank&quot;&gt;this phrase&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;God is most glorified in us when we are most satisfied in him.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I want to take a look at where he found this in the Bible, then think about an
-objection that people have raised.&lt;/p&gt;
-
-&lt;h2 id=&quot;biblical-basis&quot;&gt;Biblical basis&lt;/h2&gt;
-
-&lt;p&gt;Take a look at &lt;a href=&quot;https://www.esv.org/search/?q=Philippians 1:18&amp;ndash;26&quot; target=&quot;_blank&quot;&gt;Philippians 1:18–26&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;What then? Only that in every way, whether in pretense or in truth, Christ is
-  proclaimed, and in that I rejoice.&lt;/p&gt;
-
-  &lt;p&gt;Yes, and I will rejoice, for I know that through your prayers and the help of
-  the Spirit of Jesus Christ this will turn out for my deliverance, as it is my
-  eager expectation and hope that I will not be at all ashamed, but that with
-  full courage now as always &lt;strong&gt;Christ will be honored in my body, whether by
-  life or by death. For to me to live is Christ, and to die is gain.&lt;/strong&gt; If I am
-  to live in the flesh, that means fruitful labor for me. Yet which I shall
-  choose I cannot tell. I am hard pressed between the two. &lt;strong&gt;My desire is to
-  depart and be with Christ, for that is far better.&lt;/strong&gt; But to remain in the
-  flesh is more necessary on your account. Convinced of this, I know that I will
-  remain and continue with you all, for your progress and joy in the faith, so
-  that in me you may have ample cause to glory in Christ Jesus, because of my
-  coming to you again.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Notice these things:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Paul said Christ would be honored by Paul’s life and by his death&lt;/li&gt;
-  &lt;li&gt;Christ would be honored by Paul’s life because to live is Christ&lt;/li&gt;
-  &lt;li&gt;Christ would be honored by Paul’s death because to die is gain—it is
-far better to depart and be with Christ&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;In both cases (life and death) Paul said Christ would be honored, and he
-connects both cases directly to his desire for Christ.&lt;/p&gt;
-
-&lt;p&gt;I understand that to be the heart of Piper’s statement.&lt;/p&gt;
-
-&lt;p&gt;I think it’s very fair to conclude from Philippians 1 that God is glorified in
-us when we are satisfied in Him. But &lt;em&gt;most&lt;/em&gt; glorified when we are &lt;em&gt;most&lt;/em&gt;
-satisfied in Him? I don’t think that necessarily comes from Philippians 1 alone.
-But let’s keep looking at the Bible.&lt;/p&gt;
-
-&lt;p&gt;First, recall &lt;a href=&quot;https://www.esv.org/search/?q=Exodus 20:3&quot; target=&quot;_blank&quot;&gt;Exodus 20:3&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You shall have no other gods before me.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In the Bible’s terms, to worship another god is called “idolatry”.&lt;/p&gt;
-
-&lt;p&gt;Now consider what &lt;a href=&quot;https://www.esv.org/search/?q=Colossians 3:5&quot; target=&quot;_blank&quot;&gt;Colossians 3:5&lt;/a&gt; and
-&lt;a href=&quot;https://www.esv.org/search/?q=Ephesians 5:5&quot; target=&quot;_blank&quot;&gt;Ephesians 5:5&lt;/a&gt; say about idolatry:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Put to death therefore what is earthly in you: sexual immorality, impurity,
-  passion, evil desire, and &lt;strong&gt;covetousness, which is idolatry.&lt;/strong&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For you may be sure of this, that everyone who is sexually immoral or impure,
-  or &lt;strong&gt;who is covetous (that is, an idolater)&lt;/strong&gt;, has no inheritance in the
-  kingdom of Christ and God.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;So in the Bible’s terms, idolatry is more than worshiping Baal. It is also the
-love of stuff that isn’t God.&lt;/p&gt;
-
-&lt;p&gt;So the Bible says that there is only one holy option for what occupies the top
-shelf of our hearts and desires: God. In other words there is no other holy
-choice but to be most satisfied in God.&lt;/p&gt;
-
-&lt;p&gt;I didn’t go into a lot of detail but I think that’s enough to establish from the
-Bible that God is most glorified in us when we are most satisfied in Him.&lt;/p&gt;
-
-&lt;h2 id=&quot;an-objection&quot;&gt;An objection&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://templestream.blogspot.com/2017/09/argument-hedonism-piper-idolatry-templestream-warden.html?m=1&quot; target=&quot;_blank&quot;&gt;Here is an objection&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;ol&gt;
-    &lt;li&gt;According to the law of identity, “joy in God” is not God, and God is not
-  “joy in God.”&lt;/li&gt;
-    &lt;li&gt;Seeking as the highest aim anything but God is idolatry.&lt;/li&gt;
-    &lt;li&gt;Therefore, seeking joy in God as the highest aim is idolatry.&lt;/li&gt;
-  &lt;/ol&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;The author also states this:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Let me be clear that I am not denying that we should find our greatest joy in
-  God. Rather, that seeing God merely as a means to our greatest joy is not
-  glorifying to God and is actually harmful to our relationship with God.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I’m not sure where to go with this. On the one hand the author is right that
-seeing God as a means to an end is idolatry. On the other hand I don’t
-understand how this is an objection against Piper’s thesis.&lt;/p&gt;
-
-&lt;p&gt;It’s a little subtle but there can be a difference between seeking joy in God
-and seeking God. By definition, seeking God means you are desiring Him. So to
-have God as one’s highest aim means that God is one’s chief pleasure. But if
-one’s pleasure of God somehow becomes more important than the person of God then
-something is wrong. It’s subtle, but I think the author is technically right.&lt;/p&gt;
-
-&lt;p&gt;But I’m not sure how meaningful this argument is in general. Consider what
-happens when we cut another argument from the same template:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;According to the law of identity, any action is not God, and God is not an
-action&lt;/li&gt;
-  &lt;li&gt;Seeking as the highest aim anything but God is idolatry&lt;/li&gt;
-  &lt;li&gt;Seeking God is an action&lt;/li&gt;
-  &lt;li&gt;Therefore, “seeking God” as the highest aim is idolatry&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Is that helpful? I guess there could somehow be a difference between the pursuit
-of the pursuit of God and the pursuit of God. But that doesn’t move the chains
-very far.&lt;/p&gt;
-
-&lt;p&gt;And at the end of the day I don’t see how any form of argument from that
-template can make it untrue that God is most glorified in us when we are most
-satisfied in Him.&lt;/p&gt;
-
-&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
-
-&lt;p&gt;The point is that God is most glorified in us when we are most satisfied in Him.&lt;/p&gt;
-
-&lt;p&gt;How do you view God? Is He your highest pleasure? If not then consider what the
-Bible says about idolatry on the one hand and what is most glorifying to God on
-the other.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry></feed>
+&lt;p&gt;None of these things are what create a marriage.&lt;/p&gt;</content><author><name></name></author><category term="bible" /></entry></feed>

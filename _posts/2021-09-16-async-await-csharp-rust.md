@@ -480,6 +480,46 @@ recycled. You can only recycle the tokens if you have full control over the
 `ValueTask`s that are created with your `IValueTaskSource`. That limits the
 usefulness of this trick.
 
+**Edit September 29, 2021:**
+> [The documentation for `ValueTask`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1?view=net-5.0#remarks)
+  says:
+>
+> > A `ValueTask<TResult>` instance may only be awaited once, and consumers may
+    not read `Result` until the instance has completed. If these limitations are
+    unacceptable, convert the `ValueTask<TResult>` to a `Task<TResult>` by
+    calling `AsTask`.
+> >
+> > The following operations should never be performed on a `ValueTask<TResult>`
+    instance:
+> >
+> > * Awaiting the instance multiple times.
+> > * Calling `AsTask` multiple times.
+> > * Using `.Result` or `.GetAwaiter().GetResult()` when the operation hasn't
+      yet completed, or using them multiple times.
+> > * Using more than one of these techniques to consume the instance.
+> >
+> > If you do any of the above, the results are undefined.
+>
+> Now, I'm pretty sure these limitations do not apply if you create a
+  `ValueTask`
+  [from a `Task`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1.-ctor?view=net-5.0#System_Threading_Tasks_ValueTask_1__ctor_System_Threading_Tasks_Task__0__).
+  But do you see how even `ValueTask` has specific limitations?
+>
+> These limitations necessarily exist because `ValueTask` is a `struct` (meaning
+  you use value semantics on it and instances probably live on the stack). It's
+  very easy to create copies of C# `struct`s&mdash;just assign the `struct` to
+  another variable&mdash;but changing the state of one does not change the state
+  of the copies. In C# there _must_ to be an `Action` continuation object, and a
+  reference to it _must_ to be kept somewhere. Perhaps the ideal design would
+  only let there be a single reference so that once the continuation is executed
+  then that single reference can be discarded (which would be the signal that
+  the asynchronous operation has completed). But it's impossible to do that in
+  C# with `struct`s because of how easy it is to copy `struct`s and because of
+  how disconnected they are once you do; the developer must either have full
+  control of all instances of the struct, or else he must document a contract
+  (like Microsoft has done for `ValueTask` above) and hope that people stick to
+  it.
+
 And again, at the end of the day, even with `ValueTask` and all its tricks, if
 the awaiter returns `false` from `IsCompleted` then there is going to be at
 least one heap allocation and dynamic dispatch.

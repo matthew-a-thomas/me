@@ -495,6 +495,52 @@ recycled. You can only recycle the tokens if you have full control over the
 <code class="language-plaintext highlighter-rouge">ValueTask</code>s that are created with your <code class="language-plaintext highlighter-rouge">IValueTaskSource</code>. That limits the
 usefulness of this trick.</p>
 
+<p><strong>Edit September 29, 2021:</strong></p>
+<blockquote>
+  <p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1?view=net-5.0#remarks">The documentation for <code class="language-plaintext highlighter-rouge">ValueTask</code></a>
+  says:</p>
+
+  <blockquote>
+    <p>A <code class="language-plaintext highlighter-rouge">ValueTask&lt;TResult&gt;</code> instance may only be awaited once, and consumers may
+    not read <code class="language-plaintext highlighter-rouge">Result</code> until the instance has completed. If these limitations are
+    unacceptable, convert the <code class="language-plaintext highlighter-rouge">ValueTask&lt;TResult&gt;</code> to a <code class="language-plaintext highlighter-rouge">Task&lt;TResult&gt;</code> by
+    calling <code class="language-plaintext highlighter-rouge">AsTask</code>.</p>
+
+    <p>The following operations should never be performed on a <code class="language-plaintext highlighter-rouge">ValueTask&lt;TResult&gt;</code>
+    instance:</p>
+
+    <ul>
+      <li>Awaiting the instance multiple times.</li>
+      <li>Calling <code class="language-plaintext highlighter-rouge">AsTask</code> multiple times.</li>
+      <li>Using <code class="language-plaintext highlighter-rouge">.Result</code> or <code class="language-plaintext highlighter-rouge">.GetAwaiter().GetResult()</code> when the operation hasn’t
+    yet completed, or using them multiple times.</li>
+      <li>Using more than one of these techniques to consume the instance.</li>
+    </ul>
+
+    <p>If you do any of the above, the results are undefined.</p>
+  </blockquote>
+
+  <p>Now, I’m pretty sure these limitations do not apply if you create a
+  <code class="language-plaintext highlighter-rouge">ValueTask</code>
+  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1.-ctor?view=net-5.0#System_Threading_Tasks_ValueTask_1__ctor_System_Threading_Tasks_Task__0__">from a <code class="language-plaintext highlighter-rouge">Task</code></a>.
+  But do you see how even <code class="language-plaintext highlighter-rouge">ValueTask</code> has specific limitations?</p>
+
+  <p>These limitations necessarily exist because <code class="language-plaintext highlighter-rouge">ValueTask</code> is a <code class="language-plaintext highlighter-rouge">struct</code> (meaning
+  you use value semantics on it and instances probably live on the stack). It’s
+  very easy to create copies of C# <code class="language-plaintext highlighter-rouge">struct</code>s—just assign the <code class="language-plaintext highlighter-rouge">struct</code> to
+  another variable—but changing the state of one does not change the state
+  of the copies. In C# there <em>must</em> to be an <code class="language-plaintext highlighter-rouge">Action</code> continuation object, and a
+  reference to it <em>must</em> to be kept somewhere. Perhaps the ideal design would
+  only let there be a single reference so that once the continuation is executed
+  then that single reference can be discarded (which would be the signal that
+  the asynchronous operation has completed). But it’s impossible to do that in
+  C# with <code class="language-plaintext highlighter-rouge">struct</code>s because of how easy it is to copy <code class="language-plaintext highlighter-rouge">struct</code>s and because of
+  how disconnected they are once you do; the developer must either have full
+  control of all instances of the struct, or else he must document a contract
+  (like Microsoft has done for <code class="language-plaintext highlighter-rouge">ValueTask</code> above) and hope that people stick to
+  it.</p>
+</blockquote>
+
 <p>And again, at the end of the day, even with <code class="language-plaintext highlighter-rouge">ValueTask</code> and all its tricks, if
 the awaiter returns <code class="language-plaintext highlighter-rouge">false</code> from <code class="language-plaintext highlighter-rouge">IsCompleted</code> then there is going to be at
 least one heap allocation and dynamic dispatch.</p>

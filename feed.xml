@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-09-17T13:59:30+00:00</updated><id>/feed.xml</id><entry><title type="html">Short Circuit Protection</title><link href="/computers/2021/09/17/short-circuit.html" rel="alternate" type="text/html" title="Short Circuit Protection" /><published>2021-09-17T00:00:00+00:00</published><updated>2021-09-17T00:00:00+00:00</updated><id>/computers/2021/09/17/short-circuit</id><content type="html" xml:base="/computers/2021/09/17/short-circuit.html">&lt;p&gt;My PC power supply recently bit the dust. It was during a storm when the power
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-09-29T12:56:47+00:00</updated><id>/feed.xml</id><entry><title type="html">Short Circuit Protection</title><link href="/computers/2021/09/17/short-circuit.html" rel="alternate" type="text/html" title="Short Circuit Protection" /><published>2021-09-17T00:00:00+00:00</published><updated>2021-09-17T00:00:00+00:00</updated><id>/computers/2021/09/17/short-circuit</id><content type="html" xml:base="/computers/2021/09/17/short-circuit.html">&lt;p&gt;My PC power supply recently bit the dust. It was during a storm when the power
 cut out. My PC wouldn’t turn back on afterward. Maybe a power surge? At any
 rate, I ordered a new power supply and it finally arrived yesterday evening.&lt;/p&gt;
 
@@ -659,6 +659,52 @@ into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTas
 recycled. You can only recycle the tokens if you have full control over the
 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&lt;/code&gt;s that are created with your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IValueTaskSource&lt;/code&gt;. That limits the
 usefulness of this trick.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Edit September 29, 2021:&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1?view=net-5.0#remarks&quot;&gt;The documentation for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&lt;/code&gt;&lt;/a&gt;
+  says:&lt;/p&gt;
+
+  &lt;blockquote&gt;
+    &lt;p&gt;A &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&amp;lt;TResult&amp;gt;&lt;/code&gt; instance may only be awaited once, and consumers may
+    not read &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Result&lt;/code&gt; until the instance has completed. If these limitations are
+    unacceptable, convert the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&amp;lt;TResult&amp;gt;&lt;/code&gt; to a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Task&amp;lt;TResult&amp;gt;&lt;/code&gt; by
+    calling &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AsTask&lt;/code&gt;.&lt;/p&gt;
+
+    &lt;p&gt;The following operations should never be performed on a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&amp;lt;TResult&amp;gt;&lt;/code&gt;
+    instance:&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;Awaiting the instance multiple times.&lt;/li&gt;
+      &lt;li&gt;Calling &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AsTask&lt;/code&gt; multiple times.&lt;/li&gt;
+      &lt;li&gt;Using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.Result&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.GetAwaiter().GetResult()&lt;/code&gt; when the operation hasn’t
+    yet completed, or using them multiple times.&lt;/li&gt;
+      &lt;li&gt;Using more than one of these techniques to consume the instance.&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;p&gt;If you do any of the above, the results are undefined.&lt;/p&gt;
+  &lt;/blockquote&gt;
+
+  &lt;p&gt;Now, I’m pretty sure these limitations do not apply if you create a
+  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&lt;/code&gt;
+  &lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1.-ctor?view=net-5.0#System_Threading_Tasks_ValueTask_1__ctor_System_Threading_Tasks_Task__0__&quot;&gt;from a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Task&lt;/code&gt;&lt;/a&gt;.
+  But do you see how even &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&lt;/code&gt; has specific limitations?&lt;/p&gt;
+
+  &lt;p&gt;These limitations necessarily exist because &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&lt;/code&gt; is a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;struct&lt;/code&gt; (meaning
+  you use value semantics on it and instances probably live on the stack). It’s
+  very easy to create copies of C# &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;struct&lt;/code&gt;s—just assign the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;struct&lt;/code&gt; to
+  another variable—but changing the state of one does not change the state
+  of the copies. In C# there &lt;em&gt;must&lt;/em&gt; to be an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Action&lt;/code&gt; continuation object, and a
+  reference to it &lt;em&gt;must&lt;/em&gt; to be kept somewhere. Perhaps the ideal design would
+  only let there be a single reference so that once the continuation is executed
+  then that single reference can be discarded (which would be the signal that
+  the asynchronous operation has completed). But it’s impossible to do that in
+  C# with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;struct&lt;/code&gt;s because of how easy it is to copy &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;struct&lt;/code&gt;s and because of
+  how disconnected they are once you do; the developer must either have full
+  control of all instances of the struct, or else he must document a contract
+  (like Microsoft has done for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&lt;/code&gt; above) and hope that people stick to
+  it.&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;And again, at the end of the day, even with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ValueTask&lt;/code&gt; and all its tricks, if
 the awaiter returns &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;false&lt;/code&gt; from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IsCompleted&lt;/code&gt; then there is going to be at

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A peek under the hood of C#, and a complaint about Microsoft's documentation">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Async Method Builders Are Hard - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Async Method Builders Are Hard</h1>
+          
+          
+          <p><i>September 30, 2021&mdash;A peek under the hood of C#, and a complaint about Microsoft's documentation</i></p>
+          
+          <p>C# lets you use asynchronous methods and awaitable expressions. For example, in
+C# you can do this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+    <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">RunAsync</span><span class="p">();</span>
+        <span class="n">task</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">().</span><span class="nf">GetResult</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">RunAsync</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Just a second..."</span><span class="p">);</span>
+        <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">1</span><span class="p">));</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Ok!"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>…and your program will output “Just a second…”, then nothing will happen for
+one second, then it’ll output “Ok!”.</p>
+
+<p>Asynchronous methods are marked by the <code class="language-plaintext highlighter-rouge">async</code> keyword. Awaitable expressions
+involve the <code class="language-plaintext highlighter-rouge">await</code> keyword.</p>
+
+<p>But what types can an asynchronous method return?</p>
+
+<p>Any awaitable type that has an asynchronous method builder.</p>
+
+<h2 id="builder-type">Builder type</h2>
+
+<p>Microsoft’s documentation on asynchronous method builders pretty much is limited
+to this:</p>
+
+<p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types">https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types</a></p>
+
+<p>In summary, any type can be returned from an asynchronous method as long as it
+is:</p>
+
+<ul>
+  <li><a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#awaitable-expressions">An awaitable type</a></li>
+  <li>Decorated with the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.asyncmethodbuilderattribute?view=net-5.0"><code class="language-plaintext highlighter-rouge">AsyncMethodBuilder</code></a>
+attribute</li>
+  <li>And the attribute points to a <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#builder-type">builder type</a></li>
+</ul>
+
+<h2 id="documentation-woes">Documentation woes</h2>
+
+<p>But Microsoft’s documentation isn’t even correct.</p>
+
+<p>Of the builder type <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)">it says</a>:</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">AwaitUnsafeOnCompleted()</code> should call <code class="language-plaintext highlighter-rouge">awaiter.OnCompleted(action)</code></p>
+</blockquote>
+
+<p>That’s not correct. It should call <code class="language-plaintext highlighter-rouge">awaiter.UnsafeOnCompleted(action)</code>. That’s
+what Microsoft itself <a href="https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101">does</a>.</p>
+
+<p>Also, it says:</p>
+
+<blockquote>
+  <p>If the state machine is implemented as a <code class="language-plaintext highlighter-rouge">struct</code>, then
+  <code class="language-plaintext highlighter-rouge">builder.SetStateMachine(stateMachine)</code> is called with a boxed instance of the
+  state machine that the builder can cache if necessary.</p>
+</blockquote>
+
+<p>And that’s not correct, either. <a href="https://dotnetfiddle.net/bwBmFj">See?</a> (Make
+sure you run that code on your local PC; .NET Fiddle doesn’t run it correctly.)</p>
+
+<h2 id="implementation-woes">Implementation woes</h2>
+
+<p>Can <em>you</em> tell me why the below code is a perfectly fine example of an async
+method builder in Debug mode or if <code class="language-plaintext highlighter-rouge">CustomAwaitableAsyncMethodBuilder</code> is
+changed to a <code class="language-plaintext highlighter-rouge">class</code>, but otherwise will hang and never complete?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="n">nullable</span> <span class="n">enable</span>
+<span class="k">namespace</span> <span class="nn">BrokenAsyncMethodBuilder</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+    <span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+    <span class="k">using</span> <span class="nn">System.Runtime.CompilerServices</span><span class="p">;</span>
+    <span class="k">using</span> <span class="nn">System.Threading</span><span class="p">;</span>
+    <span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
+
+    <span class="p">[</span><span class="nf">AsyncMethodBuilder</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">CustomAwaitableAsyncMethodBuilder</span><span class="p">&lt;&gt;))]</span>
+    <span class="k">public</span> <span class="k">readonly</span> <span class="k">struct</span> <span class="nc">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+    <span class="p">{</span>
+        <span class="k">readonly</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">_valueTask</span><span class="p">;</span>
+
+        <span class="k">public</span> <span class="nf">CustomAwaitable</span><span class="p">(</span><span class="n">ValueTask</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">valueTask</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_valueTask</span> <span class="p">=</span> <span class="n">valueTask</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="n">ValueTaskAwaiter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="nf">GetAwaiter</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">_valueTask</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">struct</span> <span class="nc">CustomAwaitableAsyncMethodBuilder</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+    <span class="c1">//     ^^^^^^ Only works if you change this to `class` or run in Debug mode</span>
+    <span class="p">{</span>
+        <span class="err">#</span><span class="n">region</span> <span class="n">fields</span>
+
+        <span class="n">Exception</span><span class="p">?</span> <span class="n">_exception</span><span class="p">;</span>
+        <span class="kt">bool</span> <span class="n">_hasResult</span><span class="p">;</span>
+        <span class="n">SpinLock</span> <span class="n">_lock</span><span class="p">;</span>
+        <span class="n">T</span><span class="p">?</span> <span class="n">_result</span><span class="p">;</span>
+        <span class="n">TaskCompletionSource</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;?</span> <span class="n">_source</span><span class="p">;</span>
+
+        <span class="err">#</span><span class="n">endregion</span>
+
+        <span class="err">#</span><span class="n">region</span> <span class="n">properties</span>
+
+        <span class="k">public</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Task</span>
+        <span class="p">{</span>
+            <span class="k">get</span>
+            <span class="p">{</span>
+                <span class="kt">var</span> <span class="n">lockTaken</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+                <span class="k">try</span>
+                <span class="p">{</span>
+                    <span class="n">_lock</span><span class="p">.</span><span class="nf">Enter</span><span class="p">(</span><span class="k">ref</span> <span class="n">lockTaken</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">_exception</span> <span class="k">is</span> <span class="n">not</span> <span class="k">null</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="k">new</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">ValueTask</span><span class="p">.</span><span class="n">FromException</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">_exception</span><span class="p">));</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">_hasResult</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="k">new</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">ValueTask</span><span class="p">.</span><span class="nf">FromResult</span><span class="p">(</span><span class="n">_result</span><span class="p">!));</span>
+                    <span class="k">return</span> <span class="k">new</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span>
+                        <span class="k">new</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span>
+                            <span class="p">(</span><span class="n">_source</span> <span class="p">??=</span> <span class="k">new</span> <span class="n">TaskCompletionSource</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">TaskCreationOptions</span><span class="p">.</span><span class="n">RunContinuationsAsynchronously</span><span class="p">))</span>
+                            <span class="p">.</span><span class="n">Task</span>
+                        <span class="p">)</span>
+                    <span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">finally</span>
+                <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">lockTaken</span><span class="p">)</span>
+                        <span class="n">_lock</span><span class="p">.</span><span class="nf">Exit</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="n">AwaitOnCompleted</span><span class="p">&lt;</span><span class="n">TAwaiter</span><span class="p">,</span> <span class="n">TStateMachine</span><span class="p">&gt;(</span>
+            <span class="k">ref</span> <span class="n">TAwaiter</span> <span class="n">awaiter</span><span class="p">,</span>
+            <span class="k">ref</span> <span class="n">TStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span>
+            <span class="k">where</span> <span class="n">TAwaiter</span> <span class="p">:</span> <span class="n">INotifyCompletion</span>
+            <span class="k">where</span> <span class="n">TStateMachine</span> <span class="p">:</span> <span class="n">IAsyncStateMachine</span> <span class="p">=&gt;</span>
+            <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(</span><span class="n">stateMachine</span><span class="p">.</span><span class="n">MoveNext</span><span class="p">);</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="n">AwaitUnsafeOnCompleted</span><span class="p">&lt;</span><span class="n">TAwaiter</span><span class="p">,</span> <span class="n">TStateMachine</span><span class="p">&gt;(</span>
+            <span class="k">ref</span> <span class="n">TAwaiter</span> <span class="n">awaiter</span><span class="p">,</span>
+            <span class="k">ref</span> <span class="n">TStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span>
+            <span class="k">where</span> <span class="n">TAwaiter</span> <span class="p">:</span> <span class="n">ICriticalNotifyCompletion</span>
+            <span class="k">where</span> <span class="n">TStateMachine</span> <span class="p">:</span> <span class="n">IAsyncStateMachine</span> <span class="p">=&gt;</span>
+            <span class="n">awaiter</span><span class="p">.</span><span class="nf">UnsafeOnCompleted</span><span class="p">(</span><span class="n">stateMachine</span><span class="p">.</span><span class="n">MoveNext</span><span class="p">);</span>
+
+        <span class="err">#</span><span class="n">endregion</span>
+
+        <span class="err">#</span><span class="n">region</span> <span class="n">methods</span>
+
+        <span class="k">public</span> <span class="k">static</span> <span class="n">CustomAwaitableAsyncMethodBuilder</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">()</span>
+        <span class="p">{</span>
+            <span class="n">_lock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SpinLock</span><span class="p">(</span><span class="n">Debugger</span><span class="p">.</span><span class="n">IsAttached</span><span class="p">)</span>
+        <span class="p">};</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="nf">SetException</span><span class="p">(</span><span class="n">Exception</span> <span class="n">exception</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">lockTaken</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+            <span class="k">try</span>
+            <span class="p">{</span>
+                <span class="n">_lock</span><span class="p">.</span><span class="nf">Enter</span><span class="p">(</span><span class="k">ref</span> <span class="n">lockTaken</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">Volatile</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="k">ref</span> <span class="n">_source</span><span class="p">)</span> <span class="k">is</span> <span class="p">{}</span> <span class="n">source</span><span class="p">)</span>
+                <span class="p">{</span>
+                    <span class="n">source</span><span class="p">.</span><span class="nf">TrySetException</span><span class="p">(</span><span class="n">exception</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">else</span>
+                <span class="p">{</span>
+                    <span class="n">_exception</span> <span class="p">=</span> <span class="n">exception</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">finally</span>
+            <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">lockTaken</span><span class="p">)</span>
+                    <span class="n">_lock</span><span class="p">.</span><span class="nf">Exit</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="nf">SetResult</span><span class="p">(</span><span class="n">T</span> <span class="n">result</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">lockTaken</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+            <span class="k">try</span>
+            <span class="p">{</span>
+                <span class="n">_lock</span><span class="p">.</span><span class="nf">Enter</span><span class="p">(</span><span class="k">ref</span> <span class="n">lockTaken</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">Volatile</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="k">ref</span> <span class="n">_source</span><span class="p">)</span> <span class="k">is</span> <span class="p">{}</span> <span class="n">source</span><span class="p">)</span>
+                <span class="p">{</span>
+                    <span class="n">source</span><span class="p">.</span><span class="nf">TrySetResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">else</span>
+                <span class="p">{</span>
+                    <span class="n">_result</span> <span class="p">=</span> <span class="n">result</span><span class="p">;</span>
+                    <span class="n">_hasResult</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">finally</span>
+            <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">lockTaken</span><span class="p">)</span>
+                    <span class="n">_lock</span><span class="p">.</span><span class="nf">Exit</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="nf">SetStateMachine</span><span class="p">(</span><span class="n">IAsyncStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span> <span class="p">{}</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="n">Start</span><span class="p">&lt;</span><span class="n">TStateMachine</span><span class="p">&gt;(</span><span class="k">ref</span> <span class="n">TStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span>
+            <span class="k">where</span> <span class="n">TStateMachine</span> <span class="p">:</span> <span class="n">IAsyncStateMachine</span> <span class="p">=&gt;</span> <span class="n">stateMachine</span><span class="p">.</span><span class="nf">MoveNext</span><span class="p">();</span>
+
+        <span class="err">#</span><span class="n">endregion</span>
+    <span class="p">}</span>
+
+    <span class="k">class</span> <span class="nc">Program</span>
+    <span class="p">{</span>
+        <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Main</span><span class="p">()</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">expected</span> <span class="p">=</span> <span class="n">Guid</span><span class="p">.</span><span class="nf">NewGuid</span><span class="p">().</span><span class="nf">ToString</span><span class="p">();</span>
+            <span class="k">async</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="nf">GetValueAsync</span><span class="p">()</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Yield</span><span class="p">();</span>
+                <span class="k">return</span> <span class="n">expected</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="kt">var</span> <span class="n">actual</span> <span class="p">=</span> <span class="k">await</span> <span class="nf">GetValueAsync</span><span class="p">();</span>
+
+            <span class="k">if</span> <span class="p">(!</span><span class="nf">ReferenceEquals</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">actual</span><span class="p">))</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">();</span>
+
+            <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Done!"</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><a href="https://stackoverflow.com/a/69397857/3063273">Here’s the answer</a>. Guess how
+long it took me to figure that one out? I was pondering this <em>for a day or so</em>
+before I posted the question on StackOverflow. And then the only way I found out
+was by using <a href="https://github.com/icsharpcode/ILSpy">ILSpy</a> on the compiled .dll,
+and then only by configuring ILSpy in a specific way.</p>
+
+<p>How are people supposed to know this stuff?</p>
+
+<h3 id="inevitable-heap-allocations">Inevitable heap allocations</h3>
+
+<p>Not long ago I wrote “Async and Await in C# vs Rust”. In that article
+<a href="/programming/2021/09/16/async-await-csharp-rust.html#:~:text=async%2Fawait%20system%3A-,C%23%20awaitable%20expressions%20are,something%20on%20the%20heap.,-And%20invoking%20an">I pointed out</a>:</p>
+
+<blockquote>
+  <p>C# awaitable expressions are composed with callbacks. These callbacks have the
+  type <code class="language-plaintext highlighter-rouge">Action</code>, which is a delegate. To package something (e.g. a step in a
+  state machine) up into an <code class="language-plaintext highlighter-rouge">Action</code> you have to put something on the heap.</p>
+</blockquote>
+
+<p>Well, the exact same thing rears its head in async method builders. Async method
+builders themselves <em>must</em> create a boxed reference to the async state machine
+at some point. Otherwise you run into the above problem.</p>
+
+<p>The StackOverflow answer I linked to above has enough detail to figure out why.
+But basically it comes down to the fact that the async state machines are driven
+forward by <code class="language-plaintext highlighter-rouge">Action</code> delegates. It’s the other side of the same coin.</p>
+
+<p>Not only is it impossible to compose awaitable expressions without heap
+allocations, it’s not even possible to have an <code class="language-plaintext highlighter-rouge">async</code> method at all without
+heap allocations.</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>Microsoft’s implementation of async/await has some flaws. You might not think
+they’re very serious, but I think you’ll at least agree that C#’s async method
+builders are hard to implement!</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2021&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

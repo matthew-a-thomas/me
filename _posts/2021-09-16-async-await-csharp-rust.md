@@ -509,7 +509,7 @@ usefulness of this trick.
   you use value semantics on it and instances probably live on the stack). It's
   very easy to create copies of C# `struct`s&mdash;just assign the `struct` to
   another variable&mdash;but changing the state of one does not change the state
-  of the copies. In C# there _must_ to be an `Action` continuation object, and a
+  of the copies. In C# there _must_ be an `Action` continuation object, and a
   reference to it _must_ to be kept somewhere. Perhaps the ideal design would
   only let there be a single reference so that once the continuation is executed
   then that single reference can be discarded (which would be the signal that

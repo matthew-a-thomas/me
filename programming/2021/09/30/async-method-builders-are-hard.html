@@ -78,29 +78,31 @@ attribute</li>
   <li>And the attribute points to a <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#builder-type">builder type</a></li>
 </ul>
 
-<h2 id="documentation-woes">Documentation woes</h2>
+<h2 id="documentation-woes"><del>Documentation woes</del></h2>
 
-<p>But Microsoft’s documentation isn’t even correct.</p>
+<p><del>But Microsoft’s documentation isn’t even correct.</del></p>
 
-<p>Of the builder type <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)">it says</a>:</p>
+<p><del>Of the builder type <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)">it says</a>:</del></p>
 
 <blockquote>
-  <p><code class="language-plaintext highlighter-rouge">AwaitUnsafeOnCompleted()</code> should call <code class="language-plaintext highlighter-rouge">awaiter.OnCompleted(action)</code></p>
+  <p><del><code class="language-plaintext highlighter-rouge">AwaitUnsafeOnCompleted()</code> should call <code class="language-plaintext highlighter-rouge">awaiter.OnCompleted(action)</code></del></p>
 </blockquote>
 
-<p>That’s not correct. It should call <code class="language-plaintext highlighter-rouge">awaiter.UnsafeOnCompleted(action)</code>. That’s
-what Microsoft itself <a href="https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101">does</a>.</p>
+<p><del>That’s not correct. It should call <code class="language-plaintext highlighter-rouge">awaiter.UnsafeOnCompleted(action)</code>. That’s
+what Microsoft itself <a href="https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101">does</a>.</del></p>
 
-<p>Also, it says:</p>
+<p><del>Also, it says:</del></p>
 
 <blockquote>
-  <p>If the state machine is implemented as a <code class="language-plaintext highlighter-rouge">struct</code>, then
+  <p><del>If the state machine is implemented as a <code class="language-plaintext highlighter-rouge">struct</code>, then
   <code class="language-plaintext highlighter-rouge">builder.SetStateMachine(stateMachine)</code> is called with a boxed instance of the
-  state machine that the builder can cache if necessary.</p>
+  state machine that the builder can cache if necessary.</del></p>
 </blockquote>
 
-<p>And that’s not correct, either. <a href="https://dotnetfiddle.net/bwBmFj">See?</a> (Make
-sure you run that code on your local PC; .NET Fiddle doesn’t run it correctly.)</p>
+<p><del>And that’s not correct, either. <a href="https://dotnetfiddle.net/bwBmFj">See?</a> (Make
+sure you run that code on your local PC; .NET Fiddle doesn’t run it correctly.)</del></p>
+
+<p><em>Edit: These mistakes will be fixed once <a href="https://github.com/dotnet/csharplang/pull/5253">PR 5253</a> goes live.</em></p>
 
 <h2 id="implementation-woes">Implementation woes</h2>
 

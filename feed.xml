@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-09-30T21:15:07+00:00</updated><id>/feed.xml</id><entry><title type="html">Async Method Builders Are Hard</title><link href="/programming/2021/09/30/async-method-builders-are-hard.html" rel="alternate" type="text/html" title="Async Method Builders Are Hard" /><published>2021-09-30T00:00:00+00:00</published><updated>2021-09-30T00:00:00+00:00</updated><id>/programming/2021/09/30/async-method-builders-are-hard</id><content type="html" xml:base="/programming/2021/09/30/async-method-builders-are-hard.html">&lt;p&gt;C# lets you use asynchronous methods and awaitable expressions. For example, in
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-10-12T12:41:57+00:00</updated><id>/feed.xml</id><entry><title type="html">Async Method Builders Are Hard</title><link href="/programming/2021/09/30/async-method-builders-are-hard.html" rel="alternate" type="text/html" title="Async Method Builders Are Hard" /><published>2021-09-30T00:00:00+00:00</published><updated>2021-09-30T00:00:00+00:00</updated><id>/programming/2021/09/30/async-method-builders-are-hard</id><content type="html" xml:base="/programming/2021/09/30/async-method-builders-are-hard.html">&lt;p&gt;C# lets you use asynchronous methods and awaitable expressions. For example, in
 C# you can do this:&lt;/p&gt;
 
 &lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
@@ -48,29 +48,31 @@ attribute&lt;/li&gt;
   &lt;li&gt;And the attribute points to a &lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#builder-type&quot;&gt;builder type&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&quot;documentation-woes&quot;&gt;Documentation woes&lt;/h2&gt;
+&lt;h2 id=&quot;documentation-woes&quot;&gt;&lt;del&gt;Documentation woes&lt;/del&gt;&lt;/h2&gt;
 
-&lt;p&gt;But Microsoft’s documentation isn’t even correct.&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;But Microsoft’s documentation isn’t even correct.&lt;/del&gt;&lt;/p&gt;
 
-&lt;p&gt;Of the builder type &lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)&quot;&gt;it says&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;Of the builder type &lt;a href=&quot;https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)&quot;&gt;it says&lt;/a&gt;:&lt;/del&gt;&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AwaitUnsafeOnCompleted()&lt;/code&gt; should call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;awaiter.OnCompleted(action)&lt;/code&gt;&lt;/p&gt;
+  &lt;p&gt;&lt;del&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AwaitUnsafeOnCompleted()&lt;/code&gt; should call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;awaiter.OnCompleted(action)&lt;/code&gt;&lt;/del&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;That’s not correct. It should call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;awaiter.UnsafeOnCompleted(action)&lt;/code&gt;. That’s
-what Microsoft itself &lt;a href=&quot;https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101&quot;&gt;does&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;That’s not correct. It should call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;awaiter.UnsafeOnCompleted(action)&lt;/code&gt;. That’s
+what Microsoft itself &lt;a href=&quot;https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101&quot;&gt;does&lt;/a&gt;.&lt;/del&gt;&lt;/p&gt;
 
-&lt;p&gt;Also, it says:&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;Also, it says:&lt;/del&gt;&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;If the state machine is implemented as a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;struct&lt;/code&gt;, then
+  &lt;p&gt;&lt;del&gt;If the state machine is implemented as a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;struct&lt;/code&gt;, then
   &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;builder.SetStateMachine(stateMachine)&lt;/code&gt; is called with a boxed instance of the
-  state machine that the builder can cache if necessary.&lt;/p&gt;
+  state machine that the builder can cache if necessary.&lt;/del&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;And that’s not correct, either. &lt;a href=&quot;https://dotnetfiddle.net/bwBmFj&quot;&gt;See?&lt;/a&gt; (Make
-sure you run that code on your local PC; .NET Fiddle doesn’t run it correctly.)&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;And that’s not correct, either. &lt;a href=&quot;https://dotnetfiddle.net/bwBmFj&quot;&gt;See?&lt;/a&gt; (Make
+sure you run that code on your local PC; .NET Fiddle doesn’t run it correctly.)&lt;/del&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Edit: These mistakes will be fixed once &lt;a href=&quot;https://github.com/dotnet/csharplang/pull/5253&quot;&gt;PR 5253&lt;/a&gt; goes live.&lt;/em&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;implementation-woes&quot;&gt;Implementation woes&lt;/h2&gt;
 

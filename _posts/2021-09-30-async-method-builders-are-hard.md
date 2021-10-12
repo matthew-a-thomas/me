@@ -53,25 +53,27 @@ is:
    attribute
  * And the attribute points to a [builder type](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#builder-type)
 
-## Documentation woes
+## ~~Documentation woes~~
 
-But Microsoft's documentation isn't even correct.
+~~But Microsoft's documentation isn't even correct.~~
 
-Of the builder type [it says](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)):
+~~Of the builder type [it says](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)):~~
 
-> `AwaitUnsafeOnCompleted()` should call `awaiter.OnCompleted(action)`
+> ~~`AwaitUnsafeOnCompleted()` should call `awaiter.OnCompleted(action)`~~
 
-That's not correct. It should call `awaiter.UnsafeOnCompleted(action)`. That's
-what Microsoft itself [does](https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101).
+~~That's not correct. It should call `awaiter.UnsafeOnCompleted(action)`. That's
+what Microsoft itself [does](https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101).~~
 
-Also, it says:
+~~Also, it says:~~
 
-> If the state machine is implemented as a `struct`, then
+> ~~If the state machine is implemented as a `struct`, then
   `builder.SetStateMachine(stateMachine)` is called with a boxed instance of the
-  state machine that the builder can cache if necessary.
+  state machine that the builder can cache if necessary.~~
 
-And that's not correct, either. [See?](https://dotnetfiddle.net/bwBmFj) (Make
-sure you run that code on your local PC; .NET Fiddle doesn't run it correctly.)
+~~And that's not correct, either. [See?](https://dotnetfiddle.net/bwBmFj) (Make
+sure you run that code on your local PC; .NET Fiddle doesn't run it correctly.)~~
+
+_Edit: These mistakes will be fixed once [PR 5253](https://github.com/dotnet/csharplang/pull/5253) goes live._
 
 ## Implementation woes
 

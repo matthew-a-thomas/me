@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Musings about favoring either inheritance or composition">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Inheritance - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Inheritance</h1>
+          
+          
+          <p><i>October 12, 2021&mdash;Musings about favoring either inheritance or composition</i></p>
+          
+          <p>Inheritance is <em>subtyping</em> plus <em>subclassing</em>. It is
+<strong>a domain-specific taxonomy with behavior and semantics</strong>. And “semantics”
+means dependencies, an interface, and a name. Inheritance is a kind of an “is a”
+relationship, as in “a baby <em>is</em> a person”.</p>
+
+<p>Here is a UML diagram of inheritance:</p>
+
+<p><img src="/assets/img/inheritance/uml.png" alt="UML diagram of inheritance" class="img-fluid" /></p>
+
+<h2 id="the-good">The good</h2>
+
+<p>When you need a domain-specific taxonomy with behavior and semantics, then there
+really is nothing quite as suited to the task as inheritance.</p>
+
+<h2 id="the-bad">The bad</h2>
+
+<p>When you use inheritance you get <em>all</em> of that. Even if you’d rather not have it
+all.</p>
+
+<p>And can you think of a single time you have <em>needed</em> to glue both semantics and
+behavior onto a taxonomy? Was it <em>impossible</em> to accomplish that task without
+inheritance?</p>
+
+<p>The only times that come to mind for me are when inheritance was forced on me
+by a design that already used and required it. I used to think inheritance was
+the best solution to a lot of problems, but looking back I can tell that things
+would have been better if done differently.</p>
+
+<h3 id="behavior-vs-semantics">Behavior vs semantics</h3>
+
+<p>Behavior is what the thing does. Semantics is what it looks like (its public
+methods and properties).</p>
+
+<p>What if you only want the semantics of a thing but not its behavior?</p>
+
+<p>Here’s an example of using inheritance to get the semantics of a thing when you
+don’t care about its behavior:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// A thing that can drive on roads</span>
+<span class="k">abstract</span> <span class="k">class</span> <span class="nc">Car</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">abstract</span> <span class="kt">double</span> <span class="n">WheelSize</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span> <span class="c1">// In inches</span>
+
+  <span class="k">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're driving </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH, which means the wheels are turning at </span><span class="p">{</span><span class="n">speed</span> <span class="p">*</span> <span class="m">1056</span> <span class="p">/</span> <span class="n">WheelSize</span> <span class="p">/</span> <span class="n">Math</span><span class="p">.</span><span class="n">PI</span> <span class="p">/</span> <span class="m">2.0</span><span class="p">}</span><span class="s"> RPM!"</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="nf">Honk</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Honk!"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// A thing that cars can drive on</span>
+<span class="k">class</span> <span class="nc">Road</span>
+<span class="p">{</span>
+  <span class="kt">double</span> <span class="n">_speedLimit</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">Road</span><span class="p">(</span><span class="kt">double</span> <span class="n">speedLimit</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_speedLimit</span> <span class="p">=</span> <span class="n">speedLimit</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="n">Car</span> <span class="n">car</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">car</span><span class="p">.</span><span class="nf">Drive</span><span class="p">(</span><span class="n">_speedLimit</span><span class="p">);</span>
+    <span class="n">car</span><span class="p">.</span><span class="nf">Honk</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// You can go fast on highways</span>
+<span class="k">class</span> <span class="nc">Highway</span> <span class="p">:</span> <span class="n">Road</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="nf">Highway</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="m">70.0</span><span class="p">)</span>
+  <span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// You have to go slow on driveways</span>
+<span class="k">class</span> <span class="nc">Driveway</span> <span class="p">:</span> <span class="n">Road</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="nf">Driveway</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="m">5.0</span><span class="p">)</span>
+  <span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// A taxiway is a road, is it not?</span>
+<span class="k">class</span> <span class="nc">Taxiway</span> <span class="p">:</span> <span class="n">Road</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="nf">Taxiway</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="m">30.0</span><span class="p">)</span> <span class="c1">// Speed limit for planes</span>
+  <span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// Planes need to operate on taxiways, so I guess it's a car</span>
+<span class="k">abstract</span> <span class="k">class</span> <span class="nc">Plane</span> <span class="p">:</span> <span class="n">Car</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Planes do not drive like normal cars</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">speed</span> <span class="p">&lt;</span> <span class="m">50.0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're taxiing at </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH!"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're flying at </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH!"</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Honk</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// Planes do not have horns</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Notice how <code class="language-plaintext highlighter-rouge">Plane</code> is implemented. It uses <em>none</em> of the behavior of the
+underlying <code class="language-plaintext highlighter-rouge">Car</code> class. The only reason it inherits from <code class="language-plaintext highlighter-rouge">Car</code> is so that it
+can operate on a <code class="language-plaintext highlighter-rouge">Taxiway</code> (which is a kind of road)—it needs the
+semantics of a <code class="language-plaintext highlighter-rouge">Car</code>. But it gets all the baggage of a <code class="language-plaintext highlighter-rouge">Car</code> as well.</p>
+
+<h3 id="constructor-parameters-and-other-dependencies">Constructor parameters and other dependencies</h3>
+
+<p>What about constructor parameters?</p>
+
+<p>They’re part of the semantics, too—the constructor is often a
+publicly-facing member.</p>
+
+<p>Have you ever added a constructor parameter? Perhaps to refactor and encapsulate
+some behavior after you realized it was repeated all over the place?</p>
+
+<p>Inheritance hierarchies tend to get deeper over time. And the deeper it gets,
+the harder it is to change constructor parameters.</p>
+
+<p>And sometimes the behavior that uses the constructor parameter is totally
+ignored in child classes—what a waste of effort!</p>
+
+<p>Or how about refactoring a base class. Think about the effort that is required
+to do that when there are hundreds of derived classes. You have to understand
+<em>exactly</em> what your change means in the context of every single one of those
+classes. I’ve had to do that multiple times. It’s no fun!</p>
+
+<h3 id="crossing-domain-boundaries">Crossing domain boundaries</h3>
+
+<p>Let’s continue the above example. Planes have to inherit from <code class="language-plaintext highlighter-rouge">Car</code> because they
+operate on taxiways (which is a kind of road).</p>
+
+<p>What about float planes?</p>
+
+<p><a href="https://commons.wikimedia.org/wiki/File:DeHavilland_Single_Otter_Harbour_Air.jpg"><img src="/assets/img/inheritance/DeHavilland_Single_Otter_Harbour_Air.jpg" alt="A float plane" class="img-fluid" /></a></p>
+
+<p><em>Image from <a href="https://commons.wikimedia.org/wiki/File:DeHavilland_Single_Otter_Harbour_Air.jpg">Wikimedia Commons</a></em></p>
+
+<p>That’s definitely a plane. And it’s operating on a waterway.</p>
+
+<p>They can sometimes operate on land, too. See?</p>
+
+<p><a href="https://www.vikingair.com/twin-otter-series-400/twin-otter-answers/can-floatplane-land-ground"><img src="/assets/img/inheritance/Viktoria Amphibs_landing_gear.jpg" alt="A float plane with wheels" class="img-fluid" /></a></p>
+
+<p><em>Image from <a href="https://www.vikingair.com/twin-otter-series-400/twin-otter-answers/can-floatplane-land-ground">Viking Air</a></em></p>
+
+<p>Okay, let’s implement waterways and float planes:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// A thing that can operate on waterways</span>
+<span class="k">class</span> <span class="nc">Watercraft</span>
+<span class="p">{</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+
+<span class="c1">// It would be strange to call a waterway a "road", wouldn't it?</span>
+<span class="k">class</span> <span class="nc">Waterway</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="n">Watercraft</span> <span class="n">watercraft</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="p">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// A particular kind of watercraft. It's definitely not a car</span>
+<span class="k">class</span> <span class="nc">Speedboat</span> <span class="p">:</span> <span class="n">Watercraft</span>
+<span class="p">{</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+
+<span class="c1">// A plane that can operate on the waterways</span>
+<span class="k">class</span> <span class="nc">FloatPlane</span> <span class="p">:</span> <span class="p">?????</span>
+<span class="p">{</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>From what class should <code class="language-plaintext highlighter-rouge">FloatPlane</code> inherit?</p>
+
+<p>If it inherits from <code class="language-plaintext highlighter-rouge">Plane</code> then it cannot operate on waterways. And if it
+inherits from <code class="language-plaintext highlighter-rouge">Watercraft</code> then it cannot operate on taxiways. And C# won’t let
+you inherit from both.</p>
+
+<p>Have you ever found yourself <a href="https://stackoverflow.com/search?q=c%23+multiple+inheritance">wishing for multiple inheritance in C#</a>?
+I bet you were trying to use inheritance to cross domains.</p>
+
+<h2 id="the-fixes">The fixes</h2>
+
+<p>One fix that would enable you to cross between taxonomies would be to create
+adapter classes that inherit from one taxonomy while delegating to an instance
+of the other. But that’s just composition in ugly disguise.</p>
+
+<p>Which brings me to my favorite fix: <strong>composition</strong>.</p>
+
+<p>When something is “composed” of other things, that means it has those other
+things. Composition is a “has a” relationship. As in “a plane <em>has</em> an engine”.</p>
+
+<p>I favor composition over inheritance. Why relegate composition to only those
+times when you need to hack up an inheritance hierarchy?</p>
+
+<h3 id="behavior-vs-semantics-1">Behavior vs semantics</h3>
+
+<p>Do you want the semantics of being eligible to operate on a road?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Something that can operate on a road</span>
+<span class="k">interface</span> <span class="nc">IRoadWorthy</span>
+<span class="p">{</span>
+  <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// A road</span>
+<span class="k">sealed</span> <span class="k">class</span> <span class="nc">Road</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="kt">double</span> <span class="n">_speed</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">Road</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_speed</span> <span class="p">=</span> <span class="n">speed</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="n">IRoadWorthy</span> <span class="n">thing</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">thing</span><span class="p">.</span><span class="nf">Operate</span><span class="p">(</span><span class="n">_speed</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Creates highways</span>
+<span class="k">sealed</span> <span class="k">class</span> <span class="nc">HighwayFactory</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="n">Road</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">Road</span><span class="p">(</span><span class="m">70.0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Creates driveways</span>
+<span class="k">sealed</span> <span class="k">class</span> <span class="nc">DrivewayFactory</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="n">Road</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">Road</span><span class="p">(</span><span class="m">5.0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Creates taxiways</span>
+<span class="k">sealed</span> <span class="k">class</span> <span class="nc">TaxiwayFactory</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="n">Road</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">Road</span><span class="p">(</span><span class="m">30.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Do you want the behavior of a car?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">sealed</span> <span class="k">class</span> <span class="nc">Car</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're driving at </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH!"</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Honk</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Honk honk!"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Do you want to be able to operate a car on a road in a particular way?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">sealed</span> <span class="k">class</span> <span class="nc">DrivingHonkingCarToRoadWorthyAdapter</span> <span class="p">:</span> <span class="n">IRoadWorthy</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">Car</span> <span class="n">_car</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">DrivingHonkingCarToRoadWorthyAdapter</span><span class="p">(</span><span class="n">Car</span> <span class="n">car</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_car</span> <span class="p">=</span> <span class="n">car</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_car</span><span class="p">.</span><span class="nf">Drive</span><span class="p">(</span><span class="n">speed</span><span class="p">);</span>
+    <span class="n">_car</span><span class="p">.</span><span class="nf">Honk</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Do you want a float plane to operate on a road in a particular way?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">sealed</span> <span class="k">class</span> <span class="nc">FloatPlane</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Crash</span><span class="p">(</span><span class="kt">string</span> <span class="n">reason</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Fly</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Float</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">RollOnWheels</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">SkimWater</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">sealed</span> <span class="k">class</span> <span class="nc">MustNotFlyFloatPlaneToRoadWorthyAdapter</span> <span class="p">:</span> <span class="n">IRoadWorthy</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">FloatPlane</span> <span class="n">_floatPlane</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">MustNotFlyFloatPlaneToRoadWorthyAdapter</span><span class="p">(</span><span class="n">FloatPlane</span> <span class="n">floatPlane</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_floatPlane</span> <span class="p">=</span> <span class="n">floatPlane</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">speed</span> <span class="p">&lt;=</span> <span class="m">50.0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">_floatPlane</span><span class="p">.</span><span class="nf">RollOnWheels</span><span class="p">(</span><span class="n">speed</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="n">_floatPlane</span><span class="p">.</span><span class="nf">Crash</span><span class="p">(</span><span class="s">"Too fast to stay on the road"</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="but-there-are-too-many-classes">“But there are too many classes!”</h3>
+
+<p>Did you notice how many more classes there are now than there were before? There
+is basically one class for each behavior and also for each kind of usage of the
+behavior.</p>
+
+<p>Actually, you should count them. There aren’t as many more as you might think
+(make sure to remember that <code class="language-plaintext highlighter-rouge">Speedboat</code>, <code class="language-plaintext highlighter-rouge">Waterway</code>, and <code class="language-plaintext highlighter-rouge">Watercraft</code> don’t have
+equivalents in the above composition example).</p>
+
+<p>But even if there were dozens more classes, would that be a bad thing?</p>
+
+<p>The classes will tend to be smaller. They’ll tend to be easier to understand at
+a glance. Often, everything you need to know fits on a single screen.</p>
+
+<p>The classes will tend to do less. And just by doing less they will be less prone
+to bugs. And smaller <a href="https://martinfowler.com/bliki/HumbleObject.html">humbler</a>
+classes tend to be more <em>unit testable</em>.</p>
+
+<p>The classes will tend to change less. If you use composition then you’ll find
+that you are either creating or deleting classes more than you are modifying
+them. And the fewer the modifications, the fewer the regressions.</p>
+
+<p>The classes will tend to be less affected by change. They cannot be affected by
+changes upstream in the inheritance hierarchy, because there is no inheritance
+hierarchy. As you tailor classes to specific aspects (and then compose those
+aspects instead of using inheritance) then you’ll find that there are fewer
+dependencies between classes. And the fewer the dependencies, the lower the
+likelihood of a dependency introducing a breaking change.</p>
+
+<p>And with good design these things will remain true as your codebase grows
+to arbitrary complexity and thousands of source code files.</p>
+
+<p>Now, you can definitely go overboard with layer upon layer of interfaces and
+abstractions—I’m guilty of that!—but that doesn’t <em>necessarily</em>
+happen when you favor composition over inheritance. And neither is that
+<em>necessarily</em> prevented by using inheritance.</p>
+
+<p>In fact, I have found more than one misuse of inheritance that encouraged
+copy-and-paste instead of encapsulation-and-reuse, and that encouraged
+needlessly large and deep inheritance hierarchies (read: needlessly many
+classes). And I have personally misused inheritance to create needlessly many
+layers of abstraction.</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>There is more that could be said, perhaps about how interfaces should be
+tailored to the interface’s consumer, or the value of unit testing, or how to
+make behavior unit-testable, or how following the <a href="https://en.wikipedia.org/wiki/SOLID">SOLID</a>
+principles (especially Single Responsibility!) naturally leads to composition
+and unit-testability, or the best ways to create an escape hatch from
+inheritance without disturbing too much.</p>
+
+<p>But the point is: <strong>Why are you favoring inheritance over composition? Are you misusing inheritance?</strong></p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2021&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

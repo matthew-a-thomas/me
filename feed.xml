@@ -1,4 +1,388 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-10-12T12:41:57+00:00</updated><id>/feed.xml</id><entry><title type="html">Async Method Builders Are Hard</title><link href="/programming/2021/09/30/async-method-builders-are-hard.html" rel="alternate" type="text/html" title="Async Method Builders Are Hard" /><published>2021-09-30T00:00:00+00:00</published><updated>2021-09-30T00:00:00+00:00</updated><id>/programming/2021/09/30/async-method-builders-are-hard</id><content type="html" xml:base="/programming/2021/09/30/async-method-builders-are-hard.html">&lt;p&gt;C# lets you use asynchronous methods and awaitable expressions. For example, in
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-10-12T15:30:50+00:00</updated><id>/feed.xml</id><entry><title type="html">Inheritance</title><link href="/programming/2021/10/12/inheritance.html" rel="alternate" type="text/html" title="Inheritance" /><published>2021-10-12T00:00:00+00:00</published><updated>2021-10-12T00:00:00+00:00</updated><id>/programming/2021/10/12/inheritance</id><content type="html" xml:base="/programming/2021/10/12/inheritance.html">&lt;p&gt;Inheritance is &lt;em&gt;subtyping&lt;/em&gt; plus &lt;em&gt;subclassing&lt;/em&gt;. It is
+&lt;strong&gt;a domain-specific taxonomy with behavior and semantics&lt;/strong&gt;. And “semantics”
+means dependencies, an interface, and a name. Inheritance is a kind of an “is a”
+relationship, as in “a baby &lt;em&gt;is&lt;/em&gt; a person”.&lt;/p&gt;
+
+&lt;p&gt;Here is a UML diagram of inheritance:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/inheritance/uml.png&quot; alt=&quot;UML diagram of inheritance&quot; class=&quot;img-fluid&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;the-good&quot;&gt;The good&lt;/h2&gt;
+
+&lt;p&gt;When you need a domain-specific taxonomy with behavior and semantics, then there
+really is nothing quite as suited to the task as inheritance.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-bad&quot;&gt;The bad&lt;/h2&gt;
+
+&lt;p&gt;When you use inheritance you get &lt;em&gt;all&lt;/em&gt; of that. Even if you’d rather not have it
+all.&lt;/p&gt;
+
+&lt;p&gt;And can you think of a single time you have &lt;em&gt;needed&lt;/em&gt; to glue both semantics and
+behavior onto a taxonomy? Was it &lt;em&gt;impossible&lt;/em&gt; to accomplish that task without
+inheritance?&lt;/p&gt;
+
+&lt;p&gt;The only times that come to mind for me are when inheritance was forced on me
+by a design that already used and required it. I used to think inheritance was
+the best solution to a lot of problems, but looking back I can tell that things
+would have been better if done differently.&lt;/p&gt;
+
+&lt;h3 id=&quot;behavior-vs-semantics&quot;&gt;Behavior vs semantics&lt;/h3&gt;
+
+&lt;p&gt;Behavior is what the thing does. Semantics is what it looks like (its public
+methods and properties).&lt;/p&gt;
+
+&lt;p&gt;What if you only want the semantics of a thing but not its behavior?&lt;/p&gt;
+
+&lt;p&gt;Here’s an example of using inheritance to get the semantics of a thing when you
+don’t care about its behavior:&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// A thing that can drive on roads&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Car&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WheelSize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// In inches&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$&quot;We&apos;re driving &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; MPH, which means the wheels are turning at &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1056&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WheelSize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PI&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; RPM!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Honk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Honk!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// A thing that cars can drive on&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Road&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_speedLimit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Road&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speedLimit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_speedLimit&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speedLimit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Car&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_speedLimit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Honk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// You can go fast on highways&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Highway&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Road&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Highway&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;base&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;70.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// You have to go slow on driveways&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Driveway&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Road&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Driveway&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;base&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;5.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// A taxiway is a road, is it not?&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Taxiway&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Road&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Taxiway&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;base&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;30.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Speed limit for planes&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Planes need to operate on taxiways, so I guess it&apos;s a car&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Plane&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Car&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Planes do not drive like normal cars&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;50.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$&quot;We&apos;re taxiing at &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; MPH!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$&quot;We&apos;re flying at &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; MPH!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Honk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Planes do not have horns&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Notice how &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Plane&lt;/code&gt; is implemented. It uses &lt;em&gt;none&lt;/em&gt; of the behavior of the
+underlying &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Car&lt;/code&gt; class. The only reason it inherits from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Car&lt;/code&gt; is so that it
+can operate on a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Taxiway&lt;/code&gt; (which is a kind of road)—it needs the
+semantics of a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Car&lt;/code&gt;. But it gets all the baggage of a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Car&lt;/code&gt; as well.&lt;/p&gt;
+
+&lt;h3 id=&quot;constructor-parameters-and-other-dependencies&quot;&gt;Constructor parameters and other dependencies&lt;/h3&gt;
+
+&lt;p&gt;What about constructor parameters?&lt;/p&gt;
+
+&lt;p&gt;They’re part of the semantics, too—the constructor is often a
+publicly-facing member.&lt;/p&gt;
+
+&lt;p&gt;Have you ever added a constructor parameter? Perhaps to refactor and encapsulate
+some behavior after you realized it was repeated all over the place?&lt;/p&gt;
+
+&lt;p&gt;Inheritance hierarchies tend to get deeper over time. And the deeper it gets,
+the harder it is to change constructor parameters.&lt;/p&gt;
+
+&lt;p&gt;And sometimes the behavior that uses the constructor parameter is totally
+ignored in child classes—what a waste of effort!&lt;/p&gt;
+
+&lt;p&gt;Or how about refactoring a base class. Think about the effort that is required
+to do that when there are hundreds of derived classes. You have to understand
+&lt;em&gt;exactly&lt;/em&gt; what your change means in the context of every single one of those
+classes. I’ve had to do that multiple times. It’s no fun!&lt;/p&gt;
+
+&lt;h3 id=&quot;crossing-domain-boundaries&quot;&gt;Crossing domain boundaries&lt;/h3&gt;
+
+&lt;p&gt;Let’s continue the above example. Planes have to inherit from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Car&lt;/code&gt; because they
+operate on taxiways (which is a kind of road).&lt;/p&gt;
+
+&lt;p&gt;What about float planes?&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://commons.wikimedia.org/wiki/File:DeHavilland_Single_Otter_Harbour_Air.jpg&quot;&gt;&lt;img src=&quot;/assets/img/inheritance/DeHavilland_Single_Otter_Harbour_Air.jpg&quot; alt=&quot;A float plane&quot; class=&quot;img-fluid&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Image from &lt;a href=&quot;https://commons.wikimedia.org/wiki/File:DeHavilland_Single_Otter_Harbour_Air.jpg&quot;&gt;Wikimedia Commons&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;That’s definitely a plane. And it’s operating on a waterway.&lt;/p&gt;
+
+&lt;p&gt;They can sometimes operate on land, too. See?&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.vikingair.com/twin-otter-series-400/twin-otter-answers/can-floatplane-land-ground&quot;&gt;&lt;img src=&quot;/assets/img/inheritance/Viktoria Amphibs_landing_gear.jpg&quot; alt=&quot;A float plane with wheels&quot; class=&quot;img-fluid&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Image from &lt;a href=&quot;https://www.vikingair.com/twin-otter-series-400/twin-otter-answers/can-floatplane-land-ground&quot;&gt;Viking Air&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Okay, let’s implement waterways and float planes:&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// A thing that can operate on waterways&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Watercraft&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// It would be strange to call a waterway a &quot;road&quot;, wouldn&apos;t it?&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Waterway&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Operate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Watercraft&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;watercraft&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// A particular kind of watercraft. It&apos;s definitely not a car&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Speedboat&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Watercraft&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// A plane that can operate on the waterways&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;FloatPlane&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;?????&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;From what class should &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FloatPlane&lt;/code&gt; inherit?&lt;/p&gt;
+
+&lt;p&gt;If it inherits from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Plane&lt;/code&gt; then it cannot operate on waterways. And if it
+inherits from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Watercraft&lt;/code&gt; then it cannot operate on taxiways. And C# won’t let
+you inherit from both.&lt;/p&gt;
+
+&lt;p&gt;Have you ever found yourself &lt;a href=&quot;https://stackoverflow.com/search?q=c%23+multiple+inheritance&quot;&gt;wishing for multiple inheritance in C#&lt;/a&gt;?
+I bet you were trying to use inheritance to cross domains.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-fixes&quot;&gt;The fixes&lt;/h2&gt;
+
+&lt;p&gt;One fix that would enable you to cross between taxonomies would be to create
+adapter classes that inherit from one taxonomy while delegating to an instance
+of the other. But that’s just composition in ugly disguise.&lt;/p&gt;
+
+&lt;p&gt;Which brings me to my favorite fix: &lt;strong&gt;composition&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;When something is “composed” of other things, that means it has those other
+things. Composition is a “has a” relationship. As in “a plane &lt;em&gt;has&lt;/em&gt; an engine”.&lt;/p&gt;
+
+&lt;p&gt;I favor composition over inheritance. Why relegate composition to only those
+times when you need to hack up an inheritance hierarchy?&lt;/p&gt;
+
+&lt;h3 id=&quot;behavior-vs-semantics-1&quot;&gt;Behavior vs semantics&lt;/h3&gt;
+
+&lt;p&gt;Do you want the semantics of being eligible to operate on a road?&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Something that can operate on a road&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;IRoadWorthy&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Operate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// A road&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Road&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;readonly&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Road&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_speed&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Operate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IRoadWorthy&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;thing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Operate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Creates highways&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HighwayFactory&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Road&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Road&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;70.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Creates driveways&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DrivewayFactory&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Road&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Road&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;5.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Creates taxiways&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TaxiwayFactory&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Road&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Road&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;30.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Do you want the behavior of a car?&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Car&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$&quot;We&apos;re driving at &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; MPH!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Honk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Honk honk!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Do you want to be able to operate a car on a road in a particular way?&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DrivingHonkingCarToRoadWorthyAdapter&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IRoadWorthy&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;readonly&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Car&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DrivingHonkingCarToRoadWorthyAdapter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Car&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_car&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Operate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Drive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_car&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Honk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Do you want a float plane to operate on a road in a particular way?&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;FloatPlane&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Crash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reason&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Fly&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;RollOnWheels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;SkimWater&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MustNotFlyFloatPlaneToRoadWorthyAdapter&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IRoadWorthy&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;readonly&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FloatPlane&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_floatPlane&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MustNotFlyFloatPlaneToRoadWorthyAdapter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FloatPlane&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;floatPlane&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_floatPlane&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;floatPlane&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Operate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;50.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;_floatPlane&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;RollOnWheels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;speed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;_floatPlane&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Crash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Too fast to stay on the road&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;but-there-are-too-many-classes&quot;&gt;“But there are too many classes!”&lt;/h3&gt;
+
+&lt;p&gt;Did you notice how many more classes there are now than there were before? There
+is basically one class for each behavior and also for each kind of usage of the
+behavior.&lt;/p&gt;
+
+&lt;p&gt;Actually, you should count them. There aren’t as many more as you might think
+(make sure to remember that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Speedboat&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Waterway&lt;/code&gt;, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Watercraft&lt;/code&gt; don’t have
+equivalents in the above composition example).&lt;/p&gt;
+
+&lt;p&gt;But even if there were dozens more classes, would that be a bad thing?&lt;/p&gt;
+
+&lt;p&gt;The classes will tend to be smaller. They’ll tend to be easier to understand at
+a glance. Often, everything you need to know fits on a single screen.&lt;/p&gt;
+
+&lt;p&gt;The classes will tend to do less. And just by doing less they will be less prone
+to bugs. And smaller &lt;a href=&quot;https://martinfowler.com/bliki/HumbleObject.html&quot;&gt;humbler&lt;/a&gt;
+classes tend to be more &lt;em&gt;unit testable&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;The classes will tend to change less. If you use composition then you’ll find
+that you are either creating or deleting classes more than you are modifying
+them. And the fewer the modifications, the fewer the regressions.&lt;/p&gt;
+
+&lt;p&gt;The classes will tend to be less affected by change. They cannot be affected by
+changes upstream in the inheritance hierarchy, because there is no inheritance
+hierarchy. As you tailor classes to specific aspects (and then compose those
+aspects instead of using inheritance) then you’ll find that there are fewer
+dependencies between classes. And the fewer the dependencies, the lower the
+likelihood of a dependency introducing a breaking change.&lt;/p&gt;
+
+&lt;p&gt;And with good design these things will remain true as your codebase grows
+to arbitrary complexity and thousands of source code files.&lt;/p&gt;
+
+&lt;p&gt;Now, you can definitely go overboard with layer upon layer of interfaces and
+abstractions—I’m guilty of that!—but that doesn’t &lt;em&gt;necessarily&lt;/em&gt;
+happen when you favor composition over inheritance. And neither is that
+&lt;em&gt;necessarily&lt;/em&gt; prevented by using inheritance.&lt;/p&gt;
+
+&lt;p&gt;In fact, I have found more than one misuse of inheritance that encouraged
+copy-and-paste instead of encapsulation-and-reuse, and that encouraged
+needlessly large and deep inheritance hierarchies (read: needlessly many
+classes). And I have personally misused inheritance to create needlessly many
+layers of abstraction.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
+
+&lt;p&gt;There is more that could be said, perhaps about how interfaces should be
+tailored to the interface’s consumer, or the value of unit testing, or how to
+make behavior unit-testable, or how following the &lt;a href=&quot;https://en.wikipedia.org/wiki/SOLID&quot;&gt;SOLID&lt;/a&gt;
+principles (especially Single Responsibility!) naturally leads to composition
+and unit-testability, or the best ways to create an escape hatch from
+inheritance without disturbing too much.&lt;/p&gt;
+
+&lt;p&gt;But the point is: &lt;strong&gt;Why are you favoring inheritance over composition? Are you misusing inheritance?&lt;/strong&gt;&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">Async Method Builders Are Hard</title><link href="/programming/2021/09/30/async-method-builders-are-hard.html" rel="alternate" type="text/html" title="Async Method Builders Are Hard" /><published>2021-09-30T00:00:00+00:00</published><updated>2021-09-30T00:00:00+00:00</updated><id>/programming/2021/09/30/async-method-builders-are-hard</id><content type="html" xml:base="/programming/2021/09/30/async-method-builders-are-hard.html">&lt;p&gt;C# lets you use asynchronous methods and awaitable expressions. For example, in
 C# you can do this:&lt;/p&gt;
 
 &lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
@@ -2865,268 +3249,4 @@ few other limited cases.&lt;/p&gt;
 
 &lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
 
-&lt;p&gt;Thinking in terms of bounding boxes should get you most of the way there.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">Who Is Jesus?</title><link href="/bible/2020/12/13/who-is-jesus.html" rel="alternate" type="text/html" title="Who Is Jesus?" /><published>2020-12-13T00:00:00+00:00</published><updated>2020-12-13T00:00:00+00:00</updated><id>/bible/2020/12/13/who-is-jesus</id><content type="html" xml:base="/bible/2020/12/13/who-is-jesus.html">&lt;p&gt;Every year we celebrate Christmas. But what is so much more special about Jesus
-that we celebrate &lt;em&gt;His&lt;/em&gt; birthday instead of anyone else?&lt;/p&gt;
-
-&lt;p&gt;To quote the song,&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;This, this is Christ the King&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;But He isn’t just any king. He is…&lt;/p&gt;
-
-&lt;h2 id=&quot;the-promised-son-of-david&quot;&gt;The promised Son of David&lt;/h2&gt;
-
-&lt;p&gt;Here’s &lt;a href=&quot;https://www.esv.org/search/?q=2 Samuel 7:4&amp;ndash;17&quot; target=&quot;_blank&quot;&gt;2 Samuel 7:4–17&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;But that same night the word of the LORD came to Nathan, “Go and tell my
-  servant David, ‘Thus says the LORD: Would you build me a house to dwell in? I
-  have not lived in a house since the day I brought up the people of Israel from
-  Egypt to this day, but I have been moving about in a tent for my dwelling. In
-  all places where I have moved with all the people of Israel, did I speak a
-  word with any of the judges of Israel, whom I commanded to shepherd my people
-  Israel, saying, “Why have you not built me a house of cedar?”’ Now, therefore,
-  thus you shall say to my servant David, ‘Thus says the LORD of hosts, I took
-  you from the pasture, from following the sheep, that you should be prince over
-  my people Israel. And I have been with you wherever you went and have cut off
-  all your enemies from before you. And I will make for you a great name, like
-  the name of the great ones of the earth. And I will appoint a place for my
-  people Israel and will plant them, so that they may dwell in their own place
-  and be disturbed no more. And violent men shall afflict them no more, as
-  formerly, from the time that I appointed judges over my people Israel. And I
-  will give you rest from all your enemies. &lt;strong&gt;Moreover, the LORD declares to you
-  that the LORD will make you a house. When your days are fulfilled and you lie
-  down with your fathers, I will raise up your offspring after you, who shall
-  come from your body, and I will establish his kingdom. He shall build a house
-  for my name, and I will establish the throne of his kingdom forever. &lt;em&gt;I will
-  be to him a father, and he shall be to me a son&lt;/em&gt;. When he commits iniquity, I
-  will discipline him with the rod of men, with the stripes of the sons of men,
-  but my steadfast love will not depart from him, as I took it from Saul, whom I
-  put away from before you. And your house and your kingdom shall be made sure
-  forever before me. Your throne shall be established forever.&lt;/strong&gt;’” In accordance
-  with all these words, and in accordance with all this vision, Nathan spoke to
-  David.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;God promised that there would be a man to sit on David’s throne &lt;em&gt;forever&lt;/em&gt;.&lt;/p&gt;
-
-&lt;p&gt;Did you catch how God said this man would “be to me a son”? That’s where the
-title “Son of God” comes from. Which means Jesus is also…&lt;/p&gt;
-
-&lt;h2 id=&quot;the-son-of-god&quot;&gt;The Son of God&lt;/h2&gt;
-
-&lt;p&gt;Here’s &lt;a href=&quot;https://www.esv.org/search/?q=Psalm 2:7&amp;ndash;12&quot; target=&quot;_blank&quot;&gt;Psalm 2:7–12&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;I will tell of the decree:
-	The LORD said to me, “&lt;strong&gt;You are my Son&lt;/strong&gt;; today I have begotten you. Ask of me,
-  and I will make the nations your heritage, and the ends of the earth your
-  possession. You shall break them with a rod of iron and dash them in pieces
-  like a potter’s vessel.” Now therefore, O kings, be wise; be warned, O rulers
-  of the earth. Serve the LORD with fear, and rejoice with trembling. Kiss &lt;strong&gt;the
-  Son&lt;/strong&gt;, lest he be angry, and you perish in the way, for his wrath is quickly
-  kindled. Blessed are all who take refuge in him.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Do you see the strong connection between rulership and the title “Son of God”?&lt;/p&gt;
-
-&lt;p&gt;That’s all behind the voice that came from heaven during Jesus’s baptism in
-&lt;a href=&quot;https://www.esv.org/search/?q=Matthew 3:13&amp;ndash;17&quot; target=&quot;_blank&quot;&gt;Matthew 3:13–17&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Then Jesus came from Galilee to the Jordan to John, to be baptized by him.
-  John would have prevented him, saying, “I need to be baptized by you, and do
-  you come to me?” But Jesus answered him, “Let it be so now, for thus it is
-  fitting for us to fulfill all righteousness.” Then he consented. And when
-  Jesus was baptized, immediately he went up from the water, and behold, the
-  heavens were opened to him, and he saw the Spirit of God descending like a
-  dove and coming to rest on him; and behold, &lt;strong&gt;a voice from heaven said, “This
-  is my beloved Son, with whom I am well pleased.”&lt;/strong&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Not only is Jesus the Son of God, He is also…&lt;/p&gt;
-
-&lt;h2 id=&quot;the-son-of-man&quot;&gt;The Son of Man&lt;/h2&gt;
-
-&lt;p&gt;Remember &lt;a href=&quot;https://www.esv.org/search/?q=Daniel 7:13&amp;ndash;14&quot; target=&quot;_blank&quot;&gt;Daniel 7:13–14&lt;/a&gt;?&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;“I saw in the night visions, and behold, with the clouds of heaven there came
-  one like &lt;strong&gt;a son of man&lt;/strong&gt;, and he came to the Ancient of Days and was
-  presented before him. And to him was given dominion and glory and a kingdom,
-  that all peoples, nations, and languages should serve him; his dominion is an
-  everlasting dominion, which shall not pass away, and his kingdom one that
-  shall not be destroyed.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This title also has strong connections to rulership and authority.&lt;/p&gt;
-
-&lt;p&gt;Jesus loved to apply this title to himself. Recall
-&lt;a href=&quot;https://www.esv.org/search/?q=Mark 14:61&amp;ndash;62&quot; target=&quot;_blank&quot;&gt;Mark 14:61–62&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The high priest asked Jesus, “Are you the Christ, the Son of the Blessed?” And
-  Jesus said, “I am, and you will see &lt;strong&gt;the Son of Man&lt;/strong&gt; seated at the right
-  hand of Power, and coming with the clouds of heaven.”&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;the-promised-offspring-of-adam-and-eve&quot;&gt;The promised offspring of Adam and Eve&lt;/h2&gt;
-
-&lt;p&gt;Here’s &lt;a href=&quot;https://www.esv.org/search/?q=Genesis 3:14&amp;ndash;15&quot; target=&quot;_blank&quot;&gt;Genesis 3:14–15&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The LORD God said to the serpent, “Because you have done this, cursed are you
-  above all livestock and above all beasts of the field; on your belly you shall
-  go, and dust you shall eat all the days of your life. &lt;strong&gt;I will put enmity
-  between you and the woman, and between your offspring and her offspring; he
-  shall bruise your head, and you shall bruise his heel.&lt;/strong&gt;”&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Jesus bruised the head of Satan by utterly defeating him, like
-&lt;a href=&quot;https://www.esv.org/search/?q=Hebrews 2:14&amp;ndash;15&quot; target=&quot;_blank&quot;&gt;Hebrews 2:14–15&lt;/a&gt; says:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Since therefore the children share in flesh and blood, he himself likewise
-  partook of the same things, that through death he might destroy the one who
-  has the power of death, that is, the devil, and deliver all those who through
-  fear of death were subject to lifelong slavery.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In other words Jesus isn’t just a king. He is also a redeemer. Which means He
-purchases something. But He isn’t just any redeemer, He is the one God promised
-would deliver Adam and Eve’s children from their sin.&lt;/p&gt;
-
-&lt;p&gt;This isn’t the only time God promised such a one. Jesus is also…&lt;/p&gt;
-
-&lt;h2 id=&quot;the-promised-offspring-of-abraham&quot;&gt;The promised offspring of Abraham&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=Genesis 12:1&amp;ndash;3&quot; target=&quot;_blank&quot;&gt;Genesis 12:1–3&lt;/a&gt; is talking about Jesus
-when it says:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Now the LORD said to Abram, “Go from your country and your kindred and your
-  father’s house to the land that I will show you. And I will make of you a
-  great nation, and I will bless you and make your name great, so that you will
-  be a blessing. I will bless those who bless you, and him who dishonors you I
-  will curse, and &lt;strong&gt;in you all the families of the earth shall be blessed.&lt;/strong&gt;”&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;That’s talking about an offspring of Abraham by whom the nations would be
-blessed. This is what Paul meant when he wrote
-&lt;a href=&quot;https://www.esv.org/search/?q=Galatians 3:7&amp;ndash;9&quot; target=&quot;_blank&quot;&gt;Galatians 3:7–9&lt;/a&gt; and
-&lt;a href=&quot;https://www.esv.org/search/?q=Galatians 3:16&quot; target=&quot;_blank&quot;&gt;Galatians 3:16&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Know then that it is those of faith who are the sons of Abraham. And the
-  Scripture, foreseeing that God would justify the Gentiles by faith, preached
-  the gospel beforehand to Abraham, saying, “In you shall all the nations be
-  blessed.” So then, those who are of faith are blessed along with Abraham, the
-  man of faith.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Now the promises were made to Abraham and to his offspring. It does not say,
-  “And to offsprings,” referring to many, but referring to one, “And to your
-  offspring,” who is Christ.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This blessing on the nations came through Jesus’s bloody death, which also makes
-Him…&lt;/p&gt;
-
-&lt;h2 id=&quot;the-lamb-of-god&quot;&gt;The Lamb of God&lt;/h2&gt;
-
-&lt;p&gt;Remember Abraham and Isaac, how Abraham told Isaac that God would provide the
-sacrificial lamb? That was pointing forward to Jesus.&lt;/p&gt;
-
-&lt;p&gt;Remember Passover? The blood of a lamb marked the doorposts of people whom God
-passed over in His judgment. That was pointing forward to Jesus.&lt;/p&gt;
-
-&lt;p&gt;This is why John the Baptist said (in
-&lt;a href=&quot;https://www.esv.org/search/?q=John 1:29&quot; target=&quot;_blank&quot;&gt;John 1:29&lt;/a&gt;):&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The next day [John] saw Jesus coming toward him, and said, “Behold, the Lamb
-  of God, who takes away the sin of the world!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This is what Peter meant in
-&lt;a href=&quot;https://www.esv.org/search/?q=1 Peter 1:18&amp;ndash;19&quot; target=&quot;_blank&quot;&gt;1 Peter 1:18–19&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You were ransomed from the futile ways inherited from your forefathers, not
-  with perishable things such as silver or gold, but with the precious blood of
-  Christ, &lt;strong&gt;like that of a lamb without blemish or spot&lt;/strong&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This is what John saw in &lt;a href=&quot;https://www.esv.org/search/?q=Revelation 5&quot; target=&quot;_blank&quot;&gt;Revelation 5&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Then I saw in the right hand of him who was seated on the throne a scroll
-  written within and on the back, sealed with seven seals. And I saw a mighty
-  angel proclaiming with a loud voice, “Who is worthy to open the scroll and
-  break its seals?” And no one in heaven or on earth or under the earth was able
-  to open the scroll or to look into it, and I began to weep loudly because no
-  one was found worthy to open the scroll or to look into it. And one of the
-  elders said to me, “Weep no more; behold, the Lion of the tribe of Judah, the
-  Root of David, has conquered, so that he can open the scroll and its seven
-  seals.” And between the throne and the four living creatures and among the
-  elders I saw &lt;strong&gt;a Lamb standing, as though it had been slain&lt;/strong&gt;, with seven
-  horns and with seven eyes, which are the seven spirits of God sent out into
-  all the earth. And he went and took the scroll from the right hand of him who
-  was seated on the throne. And when he had taken the scroll, the four living
-  creatures and the twenty-four elders fell down before the Lamb, each holding a
-  harp, and golden bowls full of incense, which are the prayers of the saints.
-  And they sang a new song, saying, “Worthy are you to take the scroll and to
-  open its seals, for you were slain, and &lt;strong&gt;by your blood you ransomed people&lt;/strong&gt;
-  for God	from every tribe and language and people and nation, and you have made
-  them a kingdom and priests to our God, and they shall reign on the earth.”
-  Then I looked, and I heard around the throne and the living creatures and the
-  elders the voice of many angels, numbering myriads of myriads and thousands of
-  thousands, saying with a loud voice, “&lt;strong&gt;Worthy is the Lamb who was slain&lt;/strong&gt;, to
-  receive power and wealth and wisdom and might and honor and glory and
-  blessing!” And I heard every creature in heaven and on earth and under the
-  earth and in the sea, and all that is in them, saying, “To him who sits on the
-  throne &lt;strong&gt;and to the Lamb&lt;/strong&gt; be blessing and honor and glory and might forever
-  and ever!” And the four living creatures said, “Amen!” and the elders fell
-  down and worshiped.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;And it isn’t idolatrous to worship Jesus because He is…&lt;/p&gt;
-
-&lt;h2 id=&quot;god-incarnate&quot;&gt;God incarnate&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.esv.org/search/?q=John 1:1&amp;ndash;3&quot; target=&quot;_blank&quot;&gt;John 1:1–3&lt;/a&gt; and
-&lt;a href=&quot;https://www.esv.org/search/?q=John 1:14&amp;ndash;18&quot; target=&quot;_blank&quot;&gt;John 1:14–18&lt;/a&gt; say:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;In the beginning was the Word, and the Word was with God, and the Word was
-  God. He was in the beginning with God. All things were made through him, and
-  without him was not any thing made that was made.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;And the Word became flesh and dwelt among us, and we have seen his glory,
-  glory as of the only Son from the Father, full of grace and truth. (John bore
-  witness about him, and cried out, “This was he of whom I said, ‘He who comes
-  after me ranks before me, because he was before me.’”) For from his fullness
-  we have all received, grace upon grace. For the law was given through Moses;
-  grace and truth came through Jesus Christ. No one has ever seen God; the only
-  God, who is at the Father’s side, he has made him known.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
-
-&lt;p&gt;Jesus is he of whom it was said in
-&lt;a href=&quot;https://www.esv.org/search/?q=Isaiah 9:6&amp;ndash;7&quot; target=&quot;_blank&quot;&gt;Isaiah 9:6–7&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For to us a child is born, to us a son is given; and the government shall be
-  upon his shoulder, and his name shall be called Wonderful Counselor, Mighty
-  God, Everlasting Father, Prince of Peace. Of the increase of his government
-  and of peace there will be no end, on the throne of David and over his
-  kingdom, to establish it and to uphold it with justice and with righteousness
-  from this time forth and forevermore. The zeal of the LORD of hosts will do
-  this.&lt;/p&gt;
-&lt;/blockquote&gt;</content><author><name></name></author><category term="bible" /></entry></feed>
+&lt;p&gt;Thinking in terms of bounding boxes should get you most of the way there.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry></feed>

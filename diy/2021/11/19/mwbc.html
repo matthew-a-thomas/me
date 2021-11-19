@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Learn with me">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Multi-Wire Branch Circuit - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Multi-Wire Branch Circuit</h1>
+          
+          
+          <p><i>November 19, 2021&mdash;Learn with me</i></p>
+          
+          <p>I’m having an electrical sub panel installed in my garage. I’ve always wanted
+more lights and outlets than the current circuits can handle. And plus I’m
+beginning to need 240V for power tools.</p>
+
+<p>As I plan ahead I’m having to learn about all the different outlets, wire
+gauges, breakers, and circuits related to both 120V and 240V.</p>
+
+<p>One thing I’m learning about is something called a multi-wire branch circuit
+(MWBC).</p>
+
+<h2 id="what-is-a-mwbc">What is a MWBC</h2>
+
+<p>A MWBC gives you two circuits that are out of phase and share a neutral.</p>
+
+<p>Here in the United States the electrical service that comes into your house is
+essentially a MWBC. Generally half of the 120V appliances will be on one leg and
+the other half will be on the other leg. Bigger appliances that require 240V
+service, like an electric stove or HVAC system, will be wired across both legs.
+Like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Transformer | Electrical panel | Appliances
+
++120V ------ ------------------ ---+-------------+
+                                    \             \
+                                     | Fridge      |
+                                    /              |
+Neutral ---- ------------------ ---+               | Stove
+                                    \              |
+                                     | Microwave   |
+                                    /             /
+-120V ------ ------------------ ---+-------------+
+</code></pre></div></div>
+
+<p>Notice how the 120V fridge and microwave share a common neutral?</p>
+
+<h2 id="how-does-it-work">How does it work?</h2>
+
+<p>It’s important that the two 120V legs are exactly out of phase. When they are
+out of phase then the neutral line only has to carry the <em>difference</em> in current
+between the two legs. But if the two legs are in phase then it has to carry the
+<em>sum</em> of the currents.</p>
+
+<p>In a MWBC (where the 120V legs are out of phase) you can use the same gauge wire
+for the neutral as for the two legs. In other words you can use a single 12/3
+copper wire to feed two 20A 120V circuits. The highest load the neutral will see
+is when one leg is using a lot of current and the other is using none.
+Paradoxically, the neutral will see zero current when both legs are using
+exactly the same amount of current.</p>
+
+<p>But if the legs were in phase then the neutral would have to be sized to carry
+twice the capacity of the legs. The highest load the neutral would see in that
+case is when both legs are using a lot of current. And the neutral would only
+ever see zero current when neither leg is using any current.</p>
+
+<p>Here’s why: in a MWBC if the two legs are using the same amount of current then
+the same amount of current will be flowing into one leg as <em>out</em> the other,
+because they are exactly out of phase. But if they were in phase then the same
+amount of current would be flowing into one leg as <em>into</em> the other, and those
+two currents have nowhere to go but through the neutral.</p>
+
+<h2 id="how-do-you-make-one">How do you make one?</h2>
+
+<p>Pick an amperage, like 20A. Get a 20A double pole breaker and some 12/3 (which
+is rated for 20A) and a NEMA 5-20 (which is rated for 120V 20A) duplex outlet.
+The 12/3 will have four conductors in it:</p>
+<ul>
+  <li>Black - one 120V leg</li>
+  <li>White - neutral</li>
+  <li>Red - the other 120V leg</li>
+  <li>Bare copper - ground</li>
+</ul>
+
+<p>Because you’re using a double pole breaker then the black and red lines will be
+out of phase.</p>
+
+<p>Break the hot tab on your duplex outlet so that the hot side of the two
+receptacles are no longer electrically connected.</p>
+
+<p>Then wire it like this:</p>
+<ul>
+  <li>Black -&gt; one receptacle</li>
+  <li>Neutral -&gt; shared neutral</li>
+  <li>Red -&gt; the other receptacle</li>
+  <li>Ground -&gt; shared ground</li>
+</ul>
+
+<p>Tada! You now have an outlet that can pump 20A out of both receptacles at once!</p>
+
+<h2 id="rules">Rules</h2>
+
+<p>In addition to all the rules for normal wiring, a MWBC additionally has these
+requirements:</p>
+
+<p>When you flip a breaker it has to turn off both legs. This is to prevent any
+nasty surprises when someone flips the breaker to do work inside the outlet’s
+box—you want both legs to be dead, not just one of them. A double pole
+breaker solves this.</p>
+
+<p>You also must take care that you don’t lose the neutral. If you want a MWBC to
+feed multiple outlets (not just multiple receptacles, but multiple outlets in a
+room) then you have to wire them together in a way that keeps the neutral
+connected for all the other outlets if you remove an outlet, or if the neutral
+breaks or falls off of an outlet. If you lose the neutral on our example MWBC
+above then there will still be 240V between the two hot sides of the receptacles
+exactly as there was before. Which in theory is fine without the neutral if both
+receptacles are pulling the exact same amount of current. But as soon as there
+is a current imbalance then there will be a voltage imbalance—one device
+might see 200V while the other only sees 40V—a good way to start a fire.
+You also get odd behavior such as lights only working while the toaster is on.
+Wiring the outlets in with pigtails helps to keep the integrity of the neutral
+line independent of the integrity of the outlet.</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>A MWBC has to be wired properly to work. But it can be a useful way to get lots
+of power out of a single duplex outlet. Or a useful way to put a NEMA 6-20
+outlet in the same box as a duplex NEMA 5-20 outlet with only a single 12/3
+wire.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2021&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

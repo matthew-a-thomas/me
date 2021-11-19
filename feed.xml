@@ -1,4 +1,121 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-10-12T18:33:56+00:00</updated><id>/feed.xml</id><entry><title type="html">Inheritance</title><link href="/programming/2021/10/12/inheritance.html" rel="alternate" type="text/html" title="Inheritance" /><published>2021-10-12T00:00:00+00:00</published><updated>2021-10-12T00:00:00+00:00</updated><id>/programming/2021/10/12/inheritance</id><content type="html" xml:base="/programming/2021/10/12/inheritance.html">&lt;p&gt;Inheritance is &lt;em&gt;subtyping&lt;/em&gt; plus &lt;em&gt;subclassing&lt;/em&gt;. It is
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-11-19T20:49:10+00:00</updated><id>/feed.xml</id><entry><title type="html">Multi-Wire Branch Circuit</title><link href="/diy/2021/11/19/mwbc.html" rel="alternate" type="text/html" title="Multi-Wire Branch Circuit" /><published>2021-11-19T00:00:00+00:00</published><updated>2021-11-19T00:00:00+00:00</updated><id>/diy/2021/11/19/mwbc</id><content type="html" xml:base="/diy/2021/11/19/mwbc.html">&lt;p&gt;I’m having an electrical sub panel installed in my garage. I’ve always wanted
+more lights and outlets than the current circuits can handle. And plus I’m
+beginning to need 240V for power tools.&lt;/p&gt;
+
+&lt;p&gt;As I plan ahead I’m having to learn about all the different outlets, wire
+gauges, breakers, and circuits related to both 120V and 240V.&lt;/p&gt;
+
+&lt;p&gt;One thing I’m learning about is something called a multi-wire branch circuit
+(MWBC).&lt;/p&gt;
+
+&lt;h2 id=&quot;what-is-a-mwbc&quot;&gt;What is a MWBC&lt;/h2&gt;
+
+&lt;p&gt;A MWBC gives you two circuits that are out of phase and share a neutral.&lt;/p&gt;
+
+&lt;p&gt;Here in the United States the electrical service that comes into your house is
+essentially a MWBC. Generally half of the 120V appliances will be on one leg and
+the other half will be on the other leg. Bigger appliances that require 240V
+service, like an electric stove or HVAC system, will be wired across both legs.
+Like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Transformer | Electrical panel | Appliances
+
++120V ------ ------------------ ---+-------------+
+                                    \             \
+                                     | Fridge      |
+                                    /              |
+Neutral ---- ------------------ ---+               | Stove
+                                    \              |
+                                     | Microwave   |
+                                    /             /
+-120V ------ ------------------ ---+-------------+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Notice how the 120V fridge and microwave share a common neutral?&lt;/p&gt;
+
+&lt;h2 id=&quot;how-does-it-work&quot;&gt;How does it work?&lt;/h2&gt;
+
+&lt;p&gt;It’s important that the two 120V legs are exactly out of phase. When they are
+out of phase then the neutral line only has to carry the &lt;em&gt;difference&lt;/em&gt; in current
+between the two legs. But if the two legs are in phase then it has to carry the
+&lt;em&gt;sum&lt;/em&gt; of the currents.&lt;/p&gt;
+
+&lt;p&gt;In a MWBC (where the 120V legs are out of phase) you can use the same gauge wire
+for the neutral as for the two legs. In other words you can use a single 12/3
+copper wire to feed two 20A 120V circuits. The highest load the neutral will see
+is when one leg is using a lot of current and the other is using none.
+Paradoxically, the neutral will see zero current when both legs are using
+exactly the same amount of current.&lt;/p&gt;
+
+&lt;p&gt;But if the legs were in phase then the neutral would have to be sized to carry
+twice the capacity of the legs. The highest load the neutral would see in that
+case is when both legs are using a lot of current. And the neutral would only
+ever see zero current when neither leg is using any current.&lt;/p&gt;
+
+&lt;p&gt;Here’s why: in a MWBC if the two legs are using the same amount of current then
+the same amount of current will be flowing into one leg as &lt;em&gt;out&lt;/em&gt; the other,
+because they are exactly out of phase. But if they were in phase then the same
+amount of current would be flowing into one leg as &lt;em&gt;into&lt;/em&gt; the other, and those
+two currents have nowhere to go but through the neutral.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-do-you-make-one&quot;&gt;How do you make one?&lt;/h2&gt;
+
+&lt;p&gt;Pick an amperage, like 20A. Get a 20A double pole breaker and some 12/3 (which
+is rated for 20A) and a NEMA 5-20 (which is rated for 120V 20A) duplex outlet.
+The 12/3 will have four conductors in it:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Black - one 120V leg&lt;/li&gt;
+  &lt;li&gt;White - neutral&lt;/li&gt;
+  &lt;li&gt;Red - the other 120V leg&lt;/li&gt;
+  &lt;li&gt;Bare copper - ground&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Because you’re using a double pole breaker then the black and red lines will be
+out of phase.&lt;/p&gt;
+
+&lt;p&gt;Break the hot tab on your duplex outlet so that the hot side of the two
+receptacles are no longer electrically connected.&lt;/p&gt;
+
+&lt;p&gt;Then wire it like this:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Black -&amp;gt; one receptacle&lt;/li&gt;
+  &lt;li&gt;Neutral -&amp;gt; shared neutral&lt;/li&gt;
+  &lt;li&gt;Red -&amp;gt; the other receptacle&lt;/li&gt;
+  &lt;li&gt;Ground -&amp;gt; shared ground&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Tada! You now have an outlet that can pump 20A out of both receptacles at once!&lt;/p&gt;
+
+&lt;h2 id=&quot;rules&quot;&gt;Rules&lt;/h2&gt;
+
+&lt;p&gt;In addition to all the rules for normal wiring, a MWBC additionally has these
+requirements:&lt;/p&gt;
+
+&lt;p&gt;When you flip a breaker it has to turn off both legs. This is to prevent any
+nasty surprises when someone flips the breaker to do work inside the outlet’s
+box—you want both legs to be dead, not just one of them. A double pole
+breaker solves this.&lt;/p&gt;
+
+&lt;p&gt;You also must take care that you don’t lose the neutral. If you want a MWBC to
+feed multiple outlets (not just multiple receptacles, but multiple outlets in a
+room) then you have to wire them together in a way that keeps the neutral
+connected for all the other outlets if you remove an outlet, or if the neutral
+breaks or falls off of an outlet. If you lose the neutral on our example MWBC
+above then there will still be 240V between the two hot sides of the receptacles
+exactly as there was before. Which in theory is fine without the neutral if both
+receptacles are pulling the exact same amount of current. But as soon as there
+is a current imbalance then there will be a voltage imbalance—one device
+might see 200V while the other only sees 40V—a good way to start a fire.
+You also get odd behavior such as lights only working while the toaster is on.
+Wiring the outlets in with pigtails helps to keep the integrity of the neutral
+line independent of the integrity of the outlet.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
+
+&lt;p&gt;A MWBC has to be wired properly to work. But it can be a useful way to get lots
+of power out of a single duplex outlet. Or a useful way to put a NEMA 6-20
+outlet in the same box as a duplex NEMA 5-20 outlet with only a single 12/3
+wire.&lt;/p&gt;</content><author><name></name></author><category term="diy" /></entry><entry><title type="html">Inheritance</title><link href="/programming/2021/10/12/inheritance.html" rel="alternate" type="text/html" title="Inheritance" /><published>2021-10-12T00:00:00+00:00</published><updated>2021-10-12T00:00:00+00:00</updated><id>/programming/2021/10/12/inheritance</id><content type="html" xml:base="/programming/2021/10/12/inheritance.html">&lt;p&gt;Inheritance is &lt;em&gt;subtyping&lt;/em&gt; plus &lt;em&gt;subclassing&lt;/em&gt;. It is
 &lt;strong&gt;a domain-specific taxonomy with behavior and semantics&lt;/strong&gt;. And “semantics”
 means dependencies, an interface, and a name. Inheritance is a kind of an “is a”
 relationship, as in “a baby &lt;em&gt;is&lt;/em&gt; a person”.&lt;/p&gt;
@@ -2859,26 +2976,4 @@ codes applied to files.&lt;/p&gt;
 &lt;p&gt;&lt;a href=&quot;https://github.com/matthew-a-thomas/cs-fountain-codes&quot;&gt;https://github.com/matthew-a-thomas/cs-fountain-codes&lt;/a&gt;—simulated
 performance of a few different fountain codes (or fountain-code-esque things).
 The graphs on that page can be pretty confusing. Open an issue in that
-repository if anything isn’t clear.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry><entry><title type="html">The Dark Ages Are Now</title><link href="/misc/2021/06/22/dark-ages-are-now.html" rel="alternate" type="text/html" title="The Dark Ages Are Now" /><published>2021-06-22T00:00:00+00:00</published><updated>2021-06-22T00:00:00+00:00</updated><id>/misc/2021/06/22/dark-ages-are-now</id><content type="html" xml:base="/misc/2021/06/22/dark-ages-are-now.html">&lt;p&gt;I have emails from as recent as 2011 proving that I went to a few
-&lt;a href=&quot;https://en.wikipedia.org/wiki/LAN_party&quot;&gt;LAN parties&lt;/a&gt; with some friends. I have
-records of receipts, chat conversations about what PC upgrades we’d be making
-for the events, what video games we were going to play. It was good clean fun.&lt;/p&gt;
-
-&lt;p&gt;And &lt;em&gt;I&lt;/em&gt; know for a fact that it happened. So do they.&lt;/p&gt;
-
-&lt;p&gt;But &lt;em&gt;you&lt;/em&gt; try searching for
-&lt;a href=&quot;https://www.google.com/search?q=ragelan+owensboro&quot;&gt;“RAGElan Owensboro”&lt;/a&gt;. What
-do you find?&lt;/p&gt;
-
-&lt;p&gt;Nothing.&lt;/p&gt;
-
-&lt;p&gt;That was only a decade ago. One hundred years from now who is going to know that
-it happened?&lt;/p&gt;
-
-&lt;p&gt;Nobody.&lt;/p&gt;
-
-&lt;h2 id=&quot;the-point&quot;&gt;The point&lt;/h2&gt;
-
-&lt;p&gt;If I wanted to make a point I would say spend some time on
-&lt;a href=&quot;https://biblehub.com/matthew/16-18.htm&quot;&gt;something&lt;/a&gt; that is guaranteed to still
-be around more than one hundred million years from now. Like the Lord’s church.&lt;/p&gt;</content><author><name></name></author><category term="misc" /></entry></feed>
+repository if anything isn’t clear.&lt;/p&gt;</content><author><name></name></author><category term="programming" /></entry></feed>

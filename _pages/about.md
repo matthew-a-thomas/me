@@ -16,5 +16,5 @@ You can email me:
 
 ## Feedback
 
-Feel free to email me (email address above) or
-[create an issue on GitHub](https://github.com/matthew-a-thomas/me/issues/new){:target="_blank"}.
+Feel free to email me (email address above) or start
+[a discussion on GitHub](https://github.com/matthew-a-thomas/me/discussions/new){:target="_blank"}.

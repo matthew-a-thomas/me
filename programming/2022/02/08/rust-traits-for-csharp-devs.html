@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Explained for C# developers">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Rust Traits - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Rust Traits</h1>
+          
+          
+          <p><i>February 08, 2022&mdash;Explained for C# developers</i></p>
+          
+          <p>The <a href="https://www.rust-lang.org/">Rust</a> programming language relies heavily on
+<em>traits</em>. But what are they? How do they compare to C#’s interfaces?</p>
+
+<p>In a nutshell, a trait is like a C# interface:</p>
+<ul>
+  <li>Multiple types can implement it</li>
+  <li>You can write code that abstracts over it</li>
+  <li>You can do dynamic dispatch with it</li>
+  <li>You can write default methods for it</li>
+</ul>
+
+<p>…but it is also <em>not</em> like a C# interface:</p>
+<ul>
+  <li>You can implement a trait for a foreign type</li>
+  <li>A trait can have associated types</li>
+</ul>
+
+<p>Let’s look at each of these in turn.</p>
+
+<h2 id="like-a-c-interface">Like a C# interface</h2>
+
+<p>The similarities are simple. So I’ll go quick.</p>
+
+<h3 id="multiple-types-can-implement-it">Multiple types can implement it</h3>
+
+<p>In C#, multiple types can implement an interface:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IFoo</span>
+<span class="p">{</span>
+  <span class="k">void</span> <span class="nf">Bar</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="nc">ThingA</span> <span class="p">:</span> <span class="n">IFoo</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Bar</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Thing A"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="nc">ThingB</span> <span class="p">:</span> <span class="n">IFoo</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Bar</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Thing B"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The same is true of traits in Rust:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Foo</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">ThingA</span> <span class="p">{}</span>
+
+<span class="k">impl</span> <span class="n">Foo</span> <span class="k">for</span> <span class="n">ThingA</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"Thing A"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">ThingB</span> <span class="p">{}</span>
+
+<span class="k">impl</span> <span class="n">Foo</span> <span class="k">for</span> <span class="n">ThingB</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"Thing B"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="you-can-write-code-that-abstracts-over-it">You can write code that abstracts over it</h3>
+
+<p>In C# you can abstract over an interface:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IBinaryOperator</span>
+<span class="p">{</span>
+  <span class="kt">double</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="nc">Add</span> <span class="p">:</span> <span class="n">IBinaryOperator</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="kt">double</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">a</span> <span class="p">+</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="nc">Multiply</span> <span class="p">:</span> <span class="n">IBinaryOperator</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="kt">double</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">a</span> <span class="p">*</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="kt">double</span> <span class="n">Apply</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">T</span> <span class="n">op</span><span class="p">,</span> <span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">IBinaryOperator</span> <span class="p">=&gt;</span>
+  <span class="n">op</span><span class="p">.</span><span class="nf">Operate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And the same is true of Rust’s traits:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">BinaryOperator</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">operate</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="nb">Add</span> <span class="p">{}</span>
+
+<span class="k">impl</span> <span class="n">BinaryOperator</span> <span class="k">for</span> <span class="nb">Add</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">operate</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span> <span class="p">{</span>
+    <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">Multiply</span> <span class="p">{}</span>
+
+<span class="k">impl</span> <span class="n">BinaryOperator</span> <span class="k">for</span> <span class="n">Multiply</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">operate</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span> <span class="p">{</span>
+    <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="n">apply</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">&gt;</span><span class="p">(</span><span class="n">op</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span> <span class="p">{</span>
+  <span class="n">op</span><span class="nf">.operate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="you-can-do-dynamic-dispatch-with-it">You can do dynamic dispatch with it</h3>
+
+<p>Dynamic dispatch happens so often in C# that we usually don’t notice it. But
+here’s an example of dynamic vs static dispatch in action:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IFoo</span>
+<span class="p">{</span>
+  <span class="k">void</span> <span class="nf">Bar</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">DynamicDispatch</span><span class="p">(</span><span class="n">IFoo</span> <span class="n">foo</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">foo</span><span class="p">.</span><span class="nf">bar</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">static</span> <span class="k">void</span> <span class="n">StaticDispatch</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">T</span> <span class="n">foo</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">IFoo</span>
+  <span class="p">{</span>
+    <span class="n">foo</span><span class="p">.</span><span class="nf">bar</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Here’s the same picture in Rust:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Foo</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">dynamic_dispatch</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">dyn</span> <span class="n">Foo</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">foo</span><span class="nf">.bar</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="n">static_dispatch</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">Foo</span><span class="o">&gt;</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">foo</span><span class="nf">.bar</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="you-can-write-default-methods-for-it">You can write default methods for it</h3>
+
+<p>One of the recent versions of C# added default interface implementations. I’m
+writing this off the cuff, but I think it looks like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IFoo</span>
+<span class="p">{</span>
+  <span class="k">void</span> <span class="nf">Bar</span><span class="p">();</span>
+
+  <span class="k">void</span> <span class="nf">Baz</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nf">Bar</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">Thing</span> <span class="p">:</span> <span class="n">IFoo</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Bar</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="c1">// This is the only method we're required to implement</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>It’s very similar in Rust:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Foo</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">);</span>
+
+  <span class="k">fn</span> <span class="nf">baz</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">self</span><span class="nf">.bar</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">Thing</span> <span class="p">{}</span>
+
+<span class="k">impl</span> <span class="n">Foo</span> <span class="k">for</span> <span class="n">Thing</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c">// This is the only method we're required to implement</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="not-like-a-c-interface">Not like a C# interface</h2>
+
+<p>In my opinion this is where Rust’s trait system really begins to shine.</p>
+
+<h3 id="you-can-implement-a-trait-for-a-foreign-type">You can implement a trait for a foreign type</h3>
+
+<p>In C#, when you use a type from some package you found on Nuget or in the
+framework (or anywhere for that matter), you’re stuck with whatever interfaces
+they decided to implement on that type.</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+<span class="p">{</span>
+  <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="n">DoImportantStuff</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">indexable</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Very important things happen here. We don't want to repeat ourselves so</span>
+    <span class="c1">// we've encapsulated the behavior into this function and we're trying to</span>
+    <span class="c1">// make it work for multiple types by abstracting with generics.</span>
+  <span class="p">}</span>
+
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">WontWork</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">array</span> <span class="p">=</span> <span class="k">new</span><span class="p">[]</span> <span class="p">{</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">7</span><span class="p">,</span> <span class="m">11</span> <span class="p">};</span>
+    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="n">array</span><span class="p">);</span> <span class="c1">// Compile error: the array doesn't implement the interface!</span>
+    <span class="kt">var</span> <span class="n">span</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsSpan</span><span class="p">();</span>
+    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="n">span</span><span class="p">);</span> <span class="c1">// Compile error: Span doesn't implement the interface!</span>
+    <span class="kt">var</span> <span class="n">memory</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsMemory</span><span class="p">();</span>
+    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="n">memory</span><span class="p">);</span> <span class="c1">// Compile error: Memory doesn't implement the interface!</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The adapter pattern will come to your rescue:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ArrayReadableIndexAdapter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">T</span><span class="p">[]</span> <span class="n">_array</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">ArrayReadableIndexAdapter</span><span class="p">(</span><span class="n">T</span><span class="p">[]</span> <span class="n">array</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_array</span> <span class="p">=</span> <span class="n">array</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">=&gt;</span> <span class="n">_array</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="k">ref</span> <span class="k">struct</span> <span class="nc">SpanReadableIndexAdapter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">Span</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">_span</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">SpanReadableIndexAdapter</span><span class="p">(</span><span class="n">Span</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">span</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_span</span> <span class="p">=</span> <span class="n">span</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">=&gt;</span> <span class="n">_span</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="nc">MemoryReadableIndexAdapter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">Memory</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">_memory</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">MemoryReadableIndexAdapter</span><span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">memory</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_memory</span> <span class="p">=</span> <span class="n">memory</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">=&gt;</span> <span class="n">_memory</span><span class="p">.</span><span class="n">Span</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="n">DoImportantStuff</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">indexable</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Same important stuff as before</span>
+  <span class="p">}</span>
+
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">WillWork</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">array</span> <span class="p">=</span> <span class="k">new</span><span class="p">[]</span> <span class="p">{</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">7</span><span class="p">,</span> <span class="m">11</span> <span class="p">};</span>
+    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="k">new</span> <span class="nf">ArrayReadableIndexAdapter</span><span class="p">(</span><span class="n">array</span><span class="p">));</span>
+    <span class="kt">var</span> <span class="n">span</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsSpan</span><span class="p">();</span>
+    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="k">new</span> <span class="nf">SpanReadableIndexAdapter</span><span class="p">(</span><span class="n">span</span><span class="p">));</span>
+    <span class="kt">var</span> <span class="n">memory</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsMemory</span><span class="p">();</span>
+    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="k">new</span> <span class="nf">MemoryReadableIndexAdapter</span><span class="p">(</span><span class="n">memory</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But the adapter pattern comes with a cost. Do you see all the boilerplate? We
+were trying to follow the <a href="https://en.wikipedia.org/wiki/Interface_segregation_principle">Interface Segregation Principle</a>
+which says:</p>
+<blockquote>
+  <p>ISP splits interfaces that are very large into smaller and more specific ones
+  so that <strong>clients will only have to know about the methods that are of
+  interest to them</strong>.</p>
+</blockquote>
+
+<p>Indeed we were following it, because the <code class="language-plaintext highlighter-rouge">IReadableIndex&lt;T&gt;</code> interface exposes
+the absolute minimum surface area needed for our “important stuff” method. But
+to do so we had to introduce a <em>lot</em> of boilerplate!</p>
+
+<p>Rust makes this much easier!</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">Idx</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">// Implement for arrays</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="k">const</span> <span class="n">N</span><span class="p">:</span> <span class="nb">usize</span><span class="o">&gt;</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="k">for</span> <span class="p">[</span><span class="n">T</span><span class="p">;</span> <span class="n">N</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
+    <span class="o">&amp;</span><span class="k">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// Implement for lists</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="k">for</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
+    <span class="o">&amp;</span><span class="k">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// etc</span>
+
+<span class="c">// Now just use the trait!</span>
+<span class="k">fn</span> <span class="n">do_important_stuff</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">indexable</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c">// Important code here</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>(The astute reader will notice that Rust already has <a href="https://doc.rust-lang.org/core/ops/trait.Index.html">this trait</a>)</p>
+
+<p>Did you notice how it was possible to implement the trait for <em>foreign</em> types?
+It doesn’t matter that we don’t have access to the source code of <code class="language-plaintext highlighter-rouge">[T; N]</code> or
+<code class="language-plaintext highlighter-rouge">Vec&lt;T&gt;</code>. We could still make those types implement this trait, and we didn’t
+have to introduce any additional types!</p>
+
+<p>It is often much easier in Rust to <em>tailor interfaces to consumers</em>.</p>
+
+<p>To me it seems Microsoft has fallen in love with a form of programming by
+convention which they usually apply
+<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support">like this</a>:</p>
+<blockquote>
+  <p>The language will provide an instance indexer member with a single parameter
+  of type <code class="language-plaintext highlighter-rouge">Range</code> for types which meet the following criteria:</p>
+  <ul>
+    <li>The type is Countable.</li>
+    <li>The type has an accessible member named <code class="language-plaintext highlighter-rouge">Slice</code> which has two parameters of
+  type <code class="language-plaintext highlighter-rouge">int</code>.</li>
+    <li>The type does not have an instance indexer which takes a single <code class="language-plaintext highlighter-rouge">Range</code> as
+  the first parameter. The <code class="language-plaintext highlighter-rouge">Range</code> must be the only parameter or the remaining
+  parameters must be optional.</li>
+  </ul>
+
+  <p>For such types, the language will bind as if there is an indexer member of the
+  form <code class="language-plaintext highlighter-rouge">T this[Range range]</code> where <code class="language-plaintext highlighter-rouge">T</code> is the return type of the <code class="language-plaintext highlighter-rouge">Slice</code> method
+  including any <code class="language-plaintext highlighter-rouge">ref</code> style annotations. The new member will also have matching
+  accessibility with <code class="language-plaintext highlighter-rouge">Slice</code>.</p>
+</blockquote>
+
+<p>Ignore the minutiae. The thing I want you to notice is how they didn’t bother to
+give us an interface for this new functionality. Instead they said “if you put
+this here and name this other thing a certain way then the compiler will
+magically do this”. <em>They gave us no help with abstracting over this behavior in
+C#.</em> If you wanted to write code that would work for “range-aware” types then
+you’d have to create an interface and adapters for all the different types. (And
+once you’ve done that then who cares about <em>implicit</em> range support?)</p>
+
+<p>The benefit that Rust’s traits would bring to this situation is there would be
+far less boilerplate and <em>no additional types</em> needed to abstract over the very
+same feature! Actually, they have already
+<a href="https://doc.rust-lang.org/core/ops/trait.Index.html#impl-Index%3CI%3E-1">done</a>
+<a href="https://doc.rust-lang.org/core/ops/struct.Range.html#impl-SliceIndex%3C%5BT%5D%3E">this</a>.</p>
+
+<h3 id="a-trait-can-have-associated-types">A trait can have associated types</h3>
+
+<p>In C#, an interface may have:</p>
+<ul>
+  <li>Methods</li>
+  <li>Properties (which are just syntax sugar for methods)</li>
+</ul>
+
+<p>But in Rust, a trait may have:</p>
+<ul>
+  <li>Methods</li>
+  <li>Associated types</li>
+</ul>
+
+<p>For example, how would you represent this in C#?</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nb">Add</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">:</span> <span class="n">Rhs</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">Foo</span> <span class="p">{}</span>
+
+<span class="k">struct</span> <span class="n">Bar</span> <span class="p">{}</span>
+
+<span class="k">struct</span> <span class="n">Baz</span> <span class="p">{}</span>
+
+<span class="k">impl</span> <span class="nb">Add</span><span class="o">&lt;</span><span class="n">Bar</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Foo</span> <span class="p">{</span>
+  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Baz</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">:</span> <span class="n">Bar</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Baz</span> <span class="p">{</span>
+    <span class="c">// Make a baz from this foo and the given bar</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="n">Foo</span> <span class="p">{};</span>
+<span class="k">let</span> <span class="n">bar</span> <span class="o">=</span> <span class="n">Bar</span> <span class="p">{};</span>
+<span class="k">let</span> <span class="n">baz</span><span class="p">:</span> <span class="n">Baz</span> <span class="o">=</span> <span class="n">foo</span> <span class="o">+</span> <span class="n">bar</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>I think in C# the interface would have to look like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IAdd</span><span class="p">&lt;</span><span class="n">TRight</span><span class="p">,</span> <span class="n">TOut</span><span class="p">&gt;</span>
+<span class="p">{</span>
+  <span class="n">TOut</span> <span class="nf">Add</span><span class="p">(</span><span class="n">TRight</span> <span class="n">right</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But then you have a second generic type parameter that you have to carry
+everywhere.</p>
+
+<p>Rust’s associated types are great for hiding generic types in certain
+situations. You can even have associated <em>constants</em> (although support for that
+isn’t yet complete).</p>
+
+<hr />
+
+<p><em>Caution: the code in this article was written off the cuff and on the fly. It
+probably won’t compile.</em></p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

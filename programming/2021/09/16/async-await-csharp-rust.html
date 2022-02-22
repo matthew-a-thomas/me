@@ -96,8 +96,8 @@ written off the cuff and should only be taken for inspiration.</em></p>
 <span class="p">}</span>
 
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">future</span> <span class="o">=</span> <span class="nf">run</span><span class="p">();</span> <span class="c">// Doesn't print anything</span>
-    <span class="nf">block_on</span><span class="p">(</span><span class="n">future</span><span class="p">);</span> <span class="c">// Blocks as it prints "Just a second...", delays for one second, and then prints "Ok!"</span>
+    <span class="k">let</span> <span class="n">future</span> <span class="o">=</span> <span class="nf">run</span><span class="p">();</span> <span class="c1">// Doesn't print anything</span>
+    <span class="nf">block_on</span><span class="p">(</span><span class="n">future</span><span class="p">);</span> <span class="c1">// Blocks as it prints "Just a second...", delays for one second, and then prints "Ok!"</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -112,7 +112,7 @@ keyword:</p>
 </code></pre></div></div>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="k">async</span> <span class="k">fn</span> <span class="nf">run</span><span class="p">()</span>
-<span class="c">// ^^^^^</span>
+<span class="c1">// ^^^^^</span>
 </code></pre></div></div>
 
 <p>And the <strong>awaitable expressions</strong> in both languages involve the <code class="language-plaintext highlighter-rouge">await</code> keyword:</p>
@@ -123,8 +123,8 @@ keyword:</p>
 </code></pre></div></div>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="nn">task</span><span class="p">::</span><span class="nf">sleep</span><span class="p">(</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="k">.await</span><span class="p">;</span>
-<span class="c">//                                     ^^^^^^ keyword</span>
-<span class="c">// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expression</span>
+<span class="c1">//                                     ^^^^^^ keyword</span>
+<span class="c1">// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expression</span>
 </code></pre></div></div>
 
 <p>Functionally, C#’s tasks are pretty similar to Rust’s futures. They’re both
@@ -586,7 +586,7 @@ zero-cost abstraction. So dynamic dispatch and heap allocation are definitely
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">Future</span> <span class="p">{</span>
     <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
-    <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="nb">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="k">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -600,7 +600,7 @@ zero-cost abstraction. So dynamic dispatch and heap allocation are definitely
 <span class="k">impl</span> <span class="n">Future</span> <span class="k">for</span> <span class="n">OneShotTimer</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="p">();</span>
 
-  <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="nb">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="k">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">match</span> <span class="k">self</span><span class="py">.completed</span> <span class="p">{</span>
       <span class="k">true</span> <span class="k">=&gt;</span> <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">(()),</span>
       <span class="k">false</span> <span class="k">=&gt;</span> <span class="p">{</span>
@@ -611,8 +611,8 @@ zero-cost abstraction. So dynamic dispatch and heap allocation are definitely
 <span class="p">}</span>
 
 <span class="k">impl</span> <span class="n">OneShotTimer</span> <span class="p">{</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">schedule</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Self</span> <span class="p">{</span>
-    <span class="c">// Do stuff like wire up the .waker to be notified when the timer goes off</span>
+  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">schedule</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+    <span class="c1">// Do stuff like wire up the .waker to be notified when the timer goes off</span>
     <span class="o">...</span>
   <span class="p">}</span>
 <span class="p">}</span>
@@ -667,7 +667,7 @@ result of both of them only once they’ve completed:</p>
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">A</span> <span class="p">:</span> <span class="n">Future</span><span class="p">,</span> <span class="n">B</span> <span class="p">:</span> <span class="n">Future</span><span class="o">&gt;</span> <span class="n">Future</span> <span class="k">for</span> <span class="n">Joined</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="p">(</span><span class="nn">A</span><span class="p">::</span><span class="n">Output</span><span class="p">,</span> <span class="nn">B</span><span class="p">::</span><span class="n">Output</span><span class="p">);</span>
 
-  <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="n">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="n">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="nb">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="k">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">match</span> <span class="k">self</span><span class="na">.0</span> <span class="p">{</span>
       <span class="nn">FutureOrResult</span><span class="p">::</span><span class="nf">Future</span><span class="p">(</span><span class="n">future_a</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="k">match</span> <span class="n">future_a</span><span class="nf">.poll</span><span class="p">(</span><span class="n">cx</span><span class="p">)</span> <span class="p">{</span>
         <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">(</span><span class="n">result_a</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="k">match</span> <span class="k">self</span><span class="na">.1</span><span class="nf">.poll</span><span class="p">(</span><span class="n">cx</span><span class="p">)</span> <span class="p">{</span>

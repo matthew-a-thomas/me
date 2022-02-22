@@ -185,7 +185,7 @@ here’s an example of dynamic vs static dispatch in action:</p>
   <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="k">fn</span> <span class="nf">dynamic_dispatch</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">dyn</span> <span class="n">Foo</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">fn</span> <span class="nf">dynamic_dispatch</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">dyn</span> <span class="n">Foo</span><span class="p">)</span> <span class="p">{</span>
   <span class="n">foo</span><span class="nf">.bar</span><span class="p">();</span>
 <span class="p">}</span>
 
@@ -232,7 +232,7 @@ writing this off the cuff, but I think it looks like this:</p>
 
 <span class="k">impl</span> <span class="n">Foo</span> <span class="k">for</span> <span class="n">Thing</span> <span class="p">{</span>
   <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c">// This is the only method we're required to implement</span>
+    <span class="c1">// This is the only method we're required to implement</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
@@ -347,30 +347,30 @@ to do so we had to introduce a <em>lot</em> of boilerplate!</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
-    <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">Idx</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">Idx</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="c">// Implement for arrays</span>
+<span class="c1">// Implement for arrays</span>
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="k">const</span> <span class="n">N</span><span class="p">:</span> <span class="nb">usize</span><span class="o">&gt;</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="k">for</span> <span class="p">[</span><span class="n">T</span><span class="p">;</span> <span class="n">N</span><span class="p">]</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
-  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
     <span class="o">&amp;</span><span class="k">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="c">// Implement for lists</span>
+<span class="c1">// Implement for lists</span>
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="k">for</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
-  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nn">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
+  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
     <span class="o">&amp;</span><span class="k">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
   <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="c">// etc</span>
+<span class="c1">// etc</span>
 
-<span class="c">// Now just use the trait!</span>
+<span class="c1">// Now just use the trait!</span>
 <span class="k">fn</span> <span class="n">do_important_stuff</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">indexable</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c">// Important code here</span>
+  <span class="c1">// Important code here</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -436,7 +436,7 @@ same feature! Actually, they have already
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nb">Add</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
-  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">:</span> <span class="n">Rhs</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
+  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">:</span> <span class="n">Rhs</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="k">struct</span> <span class="n">Foo</span> <span class="p">{}</span>
@@ -448,7 +448,7 @@ same feature! Actually, they have already
 <span class="k">impl</span> <span class="nb">Add</span><span class="o">&lt;</span><span class="n">Bar</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Foo</span> <span class="p">{</span>
   <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Baz</span><span class="p">;</span>
   <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">:</span> <span class="n">Bar</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Baz</span> <span class="p">{</span>
-    <span class="c">// Make a baz from this foo and the given bar</span>
+    <span class="c1">// Make a baz from this foo and the given bar</span>
   <span class="p">}</span>
 <span class="p">}</span>
 

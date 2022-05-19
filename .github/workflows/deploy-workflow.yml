@@ -34,6 +34,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
           GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/_site"
           cd _site
           touch .nojekyll
           git config user.name "${GITHUB_ACTOR}"

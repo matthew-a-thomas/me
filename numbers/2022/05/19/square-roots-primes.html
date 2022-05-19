@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Why square roots are used in trial division">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Square Roots and Primes - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Square Roots and Primes</h1>
+          
+          
+          <p><i>May 19, 2022&mdash;Why square roots are used in trial division</i></p>
+          
+          <p>At the end of
+<a href="/programming/2020/10/27/making-primes-rust.html">Making Prime Numbers in Rust</a>
+I explained how to make a prime number generator. It used trial division. You’ll
+notice that I don’t bother trying to divide the candidate number by any prime
+larger than its square root.</p>
+
+<p>Why the square root?</p>
+
+<h2 id="graphical-answer">Graphical answer</h2>
+
+<div class="d-flex flex-column">
+  <div>100 divided by <span id="divisor-output">10</span></div>
+  <input type="range" id="divisor" min="1" value="10" />
+  <div>...equals <span id="quotient-output">10</span></div>
+  <input type="range" id="quotient" min="1" step="0.1" value="10" disabled="" />
+</div>
+<script>
+  const divisor = document.getElementById('divisor');
+  const divisorOutput = document.getElementById('divisor-output');
+  const quotient = document.getElementById('quotient');
+  const quotientOutput = document.getElementById('quotient-output');
+  function updateQuotient() {
+    quotient.value = 100 / divisor.value;
+    divisorOutput.innerHTML = divisor.value;
+    quotientOutput.innerHTML = quotient.value;
+  }
+  divisor.addEventListener('input', updateQuotient);
+</script>
+
+<p><br />
+Play with the top slider for a bit.</p>
+
+<p>Do you get it yet?</p>
+
+<p>Here’s a hint: once you’ve figured out that \(100 \div 2 = 50\), you then also
+know that \(100 \div 50 = 2\). There’s no need to also divide by 50 because you
+already know that answer.</p>
+
+<p>The same goes for all these:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>100 divided by</th>
+      <th>equals</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>33.3</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>20</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>14.3</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>9.1</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>7.7</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>5.9</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>5.3</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>What do you notice about each of those pairs of numbers?</p>
+
+<p>The square root is always at least as large as one of them.</p>
+
+<p>Once you’ve divided by primes up through the square root then you already know
+the answers for all the primes larger than the square root. So there’s no need
+to also divide by those larger primes.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

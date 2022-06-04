@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-03T19:10:13-05:00</updated><id>/feed.xml</id><entry><title type="html">Loading Loose XAML</title><link href="/programming/2022/06/03/loading-loose-xaml.html" rel="alternate" type="text/html" title="Loading Loose XAML" /><published>2022-06-03T00:00:00-05:00</published><updated>2022-06-03T00:00:00-05:00</updated><id>/programming/2022/06/03/loading-loose-xaml</id><content type="html" xml:base="/programming/2022/06/03/loading-loose-xaml.html"><![CDATA[<p>Suppose you have a custom thingy like this:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-03T19:18:42-05:00</updated><id>/feed.xml</id><entry><title type="html">Loading Loose XAML</title><link href="/programming/2022/06/03/loading-loose-xaml.html" rel="alternate" type="text/html" title="Loading Loose XAML" /><published>2022-06-03T00:00:00-05:00</published><updated>2022-06-03T00:00:00-05:00</updated><id>/programming/2022/06/03/loading-loose-xaml</id><content type="html" xml:base="/programming/2022/06/03/loading-loose-xaml.html"><![CDATA[<p>Suppose you have a custom thingy like this:</p>
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
 
@@ -117,7 +117,7 @@ or
 <a href="https://docs.microsoft.com/en-us/dotnet/desktop/xaml-services/xarguments-directive"><code class="language-plaintext highlighter-rouge">x:Arguments</code></a>
 directives.</p>
 
-<p>If you do that then remember to add include the
+<p>If you do that then remember to include the
 <code class="language-plaintext highlighter-rouge">xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"</code> namespace in your XAML.</p>
 
 <h3 id="xamlxmlreadersettingslocalassembly-is-important"><code class="language-plaintext highlighter-rouge">XamlXmlReaderSettings.LocalAssembly</code> is important</h3>

@@ -1,4 +1,139 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-05-19T12:59:29-05:00</updated><id>/feed.xml</id><entry><title type="html">Square Roots and Primes</title><link href="/numbers/2022/05/19/square-roots-primes.html" rel="alternate" type="text/html" title="Square Roots and Primes" /><published>2022-05-19T00:00:00-05:00</published><updated>2022-05-19T00:00:00-05:00</updated><id>/numbers/2022/05/19/square-roots-primes</id><content type="html" xml:base="/numbers/2022/05/19/square-roots-primes.html"><![CDATA[<p>At the end of
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-03T19:10:13-05:00</updated><id>/feed.xml</id><entry><title type="html">Loading Loose XAML</title><link href="/programming/2022/06/03/loading-loose-xaml.html" rel="alternate" type="text/html" title="Loading Loose XAML" /><published>2022-06-03T00:00:00-05:00</published><updated>2022-06-03T00:00:00-05:00</updated><id>/programming/2022/06/03/loading-loose-xaml</id><content type="html" xml:base="/programming/2022/06/03/loading-loose-xaml.html"><![CDATA[<p>Suppose you have a custom thingy like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
+
+<span class="k">sealed</span> <span class="k">class</span> <span class="nc">CustomThingy</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Property</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>…and you declare it in some XAML:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;CustomThingy</span> <span class="na">xmlns=</span><span class="s">"clr-namespace:LooseXaml"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;CustomThingy.Property&gt;</span>Hello, world!<span class="nt">&lt;/CustomThingy.Property&gt;</span>
+<span class="nt">&lt;/CustomThingy&gt;</span>
+</code></pre></div></div>
+
+<p>…and that XAML is in a file named “EmbeddedResource.xaml”, which is an
+embedded resource:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+    &lt;PropertyGroup&gt;
+        &lt;OutputType&gt;WinExe&lt;/OutputType&gt;
+        &lt;TargetFramework&gt;net6.0-windows&lt;/TargetFramework&gt;
+        &lt;Nullable&gt;enable&lt;/Nullable&gt;
+        &lt;UseWPF&gt;true&lt;/UseWPF&gt;
+    &lt;/PropertyGroup&gt;
+
+    &lt;ItemGroup&gt;
+      &lt;Page Remove="EmbeddedResource.xaml" /&gt;
+      &lt;EmbeddedResource Include="EmbeddedResource.xaml" /&gt;
+    &lt;/ItemGroup&gt;
+
+&lt;/Project&gt;
+</code></pre></div></div>
+
+<p>Did you know you can parse and instantiate it?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
+
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Windows</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">App</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">OnStartup</span><span class="p">(</span><span class="n">StartupEventArgs</span> <span class="n">e</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">type</span> <span class="p">=</span> <span class="nf">GetType</span><span class="p">();</span>
+        <span class="kt">var</span> <span class="n">assembly</span> <span class="p">=</span> <span class="n">type</span><span class="p">.</span><span class="n">Assembly</span><span class="p">;</span>
+        <span class="k">using</span> <span class="nn">var</span> <span class="n">stream</span> <span class="p">=</span> <span class="n">assembly</span><span class="p">.</span><span class="nf">GetManifestResourceStream</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="s">"EmbeddedResource.xaml"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">stream</span> <span class="k">is</span> <span class="k">null</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Wrong resource name"</span><span class="p">);</span>
+        <span class="k">using</span> <span class="nn">var</span> <span class="n">reader</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StreamReader</span><span class="p">(</span><span class="n">stream</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">loader</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Loader</span><span class="p">();</span>
+        <span class="kt">var</span> <span class="n">customThingy</span> <span class="p">=</span> <span class="n">loader</span><span class="p">.</span><span class="n">Load</span><span class="p">&lt;</span><span class="n">CustomThingy</span><span class="p">&gt;(</span>
+            <span class="n">reader</span><span class="p">,</span>
+            <span class="n">assembly</span><span class="p">,</span>
+            <span class="k">new</span> <span class="p">[]</span> <span class="p">{</span> <span class="n">assembly</span> <span class="p">}</span>
+        <span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">customThingy</span> <span class="k">is</span> <span class="k">null</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Failed to load it. Are you sure that XAML declares a CustomThingy?"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">customThingy</span><span class="p">.</span><span class="n">Property</span> <span class="p">!=</span> <span class="s">"Hello, world!"</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Loaded it, but its property is wrong for some reason"</span><span class="p">);</span>
+        <span class="n">Trace</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"It works!"</span><span class="p">);</span>
+        <span class="n">Environment</span><span class="p">.</span><span class="nf">Exit</span><span class="p">(</span><span class="m">0</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="the-loader">The loader</h2>
+
+<p>Here’s how:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
+
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Reflection</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Xaml</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">Loader</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="n">T</span><span class="p">?</span> <span class="n">Load</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span>
+        <span class="n">TextReader</span> <span class="n">textReader</span><span class="p">,</span>
+        <span class="n">Assembly</span> <span class="n">localAssembly</span><span class="p">,</span>
+        <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Assembly</span><span class="p">&gt;</span> <span class="n">assemblies</span><span class="p">)</span>
+        <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="k">class</span>
+    <span class="err">{</span>
+        <span class="nc">var</span> <span class="n">context</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">XamlSchemaContext</span><span class="p">(</span><span class="n">assemblies</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">settings</span> <span class="p">=</span> <span class="k">new</span> <span class="n">XamlXmlReaderSettings</span>
+        <span class="p">{</span>
+            <span class="n">LocalAssembly</span> <span class="p">=</span> <span class="n">localAssembly</span><span class="p">,</span>
+            <span class="n">ProvideLineInfo</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span>
+            <span class="n">AllowProtectedMembersOnRoot</span> <span class="p">=</span> <span class="k">true</span>
+        <span class="p">};</span>
+        <span class="k">using</span> <span class="nn">var</span> <span class="n">xamlXmlReader</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">XamlXmlReader</span><span class="p">(</span>
+            <span class="n">textReader</span><span class="p">,</span>
+            <span class="n">context</span><span class="p">,</span>
+            <span class="n">settings</span>
+        <span class="p">);</span>
+        <span class="kt">var</span> <span class="n">root</span> <span class="p">=</span> <span class="n">XamlServices</span><span class="p">.</span><span class="nf">Load</span><span class="p">(</span><span class="n">xamlXmlReader</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">root</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="things-to-remember">Things to remember</h2>
+
+<h3 id="xaml-only-supports-parameterless-constructors">XAML only supports parameterless constructors</h3>
+
+<p>Well, technically you can use the
+<a href="https://docs.microsoft.com/en-us/dotnet/desktop/xaml-services/xfactorymethod-directive"><code class="language-plaintext highlighter-rouge">x:FactoryMethod</code></a>
+or
+<a href="https://docs.microsoft.com/en-us/dotnet/desktop/xaml-services/xarguments-directive"><code class="language-plaintext highlighter-rouge">x:Arguments</code></a>
+directives.</p>
+
+<p>If you do that then remember to add include the
+<code class="language-plaintext highlighter-rouge">xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"</code> namespace in your XAML.</p>
+
+<h3 id="xamlxmlreadersettingslocalassembly-is-important"><code class="language-plaintext highlighter-rouge">XamlXmlReaderSettings.LocalAssembly</code> is important</h3>
+
+<p>According to
+<a href="https://docs.microsoft.com/en-us/dotnet/desktop/wpf/advanced/xaml-namespaces-and-namespace-mapping-for-wpf-xaml?view=netframeworkdesktop-4.8#mapping-to-current-assemblies">Microsoft’s documentation</a>
+you can omit the <code class="language-plaintext highlighter-rouge">;assembly=YourAssembly</code> part of
+<code class="language-plaintext highlighter-rouge">xmlns="clr-namespace:YourNamespace;assembly=YourAssembly"</code>.</p>
+
+<p>When you do then it’ll assume you’re talking about the current assembly. Which
+is what <code class="language-plaintext highlighter-rouge">XamlXmlReaderSettings.LocalAssembly</code> points to. So you need to set that
+property to the current assembly.</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>You can use XAML for more than just WPF!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[How to parse and load XAML from an embedded resource]]></summary></entry><entry><title type="html">Square Roots and Primes</title><link href="/numbers/2022/05/19/square-roots-primes.html" rel="alternate" type="text/html" title="Square Roots and Primes" /><published>2022-05-19T00:00:00-05:00</published><updated>2022-05-19T00:00:00-05:00</updated><id>/numbers/2022/05/19/square-roots-primes</id><content type="html" xml:base="/numbers/2022/05/19/square-roots-primes.html"><![CDATA[<p>At the end of
 <a href="/programming/2020/10/27/making-primes-rust.html">Making Prime Numbers in Rust</a>
 I explained how to make a prime number generator. It used trial division. You’ll
 notice that I don’t bother trying to divide the candidate number by any prime
@@ -2456,343 +2591,4 @@ That’s not true of C#’s tasks (or any other possible awaitable type).</p>
 polled. Because they are polled they can be composed with static dispatch
 instead of callbacks.</p>
 
-<p>Polled futures are great!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Why Rust futures are better because they are polled]]></summary></entry><entry><title type="html">Introducing Contemporary Worship Into a Traditional Church</title><link href="/christian/2021/08/30/critique-josh-hunt.html" rel="alternate" type="text/html" title="Introducing Contemporary Worship Into a Traditional Church" /><published>2021-08-30T00:00:00-05:00</published><updated>2021-08-30T00:00:00-05:00</updated><id>/christian/2021/08/30/critique-josh-hunt</id><content type="html" xml:base="/christian/2021/08/30/critique-josh-hunt.html"><![CDATA[<p>According to the Wayback Machine<a href="https://web.archive.org/web/19970429135814/https://www.joshhunt.com/contemp.html">*</a>,
-Josh Hunt wrote
-<a href="https://www.joshhunt.com/contemp.html">“Introducing Contemporary Worship Into a Traditional Church”</a>
-in 1997 (or sometime before then). In internet years it’s older than dirt, but
-it’s still up on his website and the content is still very relevant today. I
-think his line of thinking lives on in 2021.</p>
-
-<p>I want to think critically about his article by focusing on a few points:</p>
-
-<ul>
-  <li>What is his motivation?</li>
-  <li>What was the outcome?</li>
-  <li>What scriptural basis does he have?</li>
-</ul>
-
-<h2 id="his-motivation">His motivation</h2>
-
-<p>On his page which <a href="https://www.joshhunt.com/articles.htm">lists his articles</a>,
-this one appears with the heading “How to Introduce a Contemporary Service in a
-Traditional Church and Double Your Attendance”.</p>
-
-<p>Within the article itself he says:</p>
-
-<blockquote>
-  <p>I had this feeling in my gut that contemporary music would make a big
-  difference in reaching the post World War II crowd.</p>
-</blockquote>
-
-<blockquote>
-  <p>I grew up on the mission field and knew that to reach people, you have to eat
-  their food, dress their dress, and <em>play their music</em>.</p>
-</blockquote>
-
-<blockquote>
-  <p>Was there a way we could harness the power of contemporary music for the use
-  of the kingdom and do it in the traditional church God had called us to?</p>
-</blockquote>
-
-<p>It’s clear that his motivation is growth in numbers through “reaching” a
-different demographic.</p>
-
-<h2 id="the-outcome-in-his-own-words">The outcome in his own words</h2>
-
-<blockquote>
-  <p>We searched for a way to make these two odd bedfellows coexist. Was there a
-  way we could harness the power of contemporary music for the use of the
-  kingdom and do it in the traditional church God had called us to? And really,
-  we wanted more than coexistence. We wanted both groups to appreciate the other
-  out of a spirit of Christian unity. Were these pipe dreams? Had all our
-  learning driven us mad?</p>
-
-  <p>Five years later, we tentatively suggest that this wedding is possible. This
-  is the true story of the successes and failures of trying to introduce
-  contemporary worship into a forty year old, traditional Baptist church.</p>
-</blockquote>
-
-<p>Josh Hunt says that after five years, these things have happened:</p>
-
-<ul>
-  <li>They harnessed “the power of contemporary music for the use of the kingdom”</li>
-  <li>They did that within a formerly-traditional church</li>
-  <li>There is Christian unity between the traditional and the contemporary groups</li>
-</ul>
-
-<p>What does he mean by these things?</p>
-
-<h3 id="the-power-of-contemporary-music">The power of contemporary music</h3>
-
-<p>It’s not immediately clear what he means by this. Presumably he means the
-<em>attractive</em> power of contemporary music. It draws people who like it.</p>
-
-<p>I bet it was the same in the late 90s as it is now: younger people like
-contemporary music and tend to be happy to migrate to a contemporary church that
-suites their taste.</p>
-
-<p>I find support for this when he says:</p>
-
-<blockquote>
-  <p>There is a limit to how far you can stretch this service and still appeal to
-  traditional people.</p>
-</blockquote>
-
-<blockquote>
-  <p>Contemporary attracts contemporary.</p>
-</blockquote>
-
-<p>So I think he means they have harnessed the power of contemporary music to
-attract a younger crowd.</p>
-
-<p>As you read his article you can get a feel for some of the prices they have paid
-(and continue to pay). And I interact with some of those things below. But it’s
-clear that Josh attributes the growth in numbers directly to their change in
-music style. They added a different music style, and that brought in a different
-generation.</p>
-
-<h3 id="within-a-formerly-traditional-church">Within a <em>formerly</em>-traditional church</h3>
-
-<p>Josh uses the present tense when he calls his church “traditional”. However,
-it’s clear from what he has written that it was no longer traditional at the
-time of his writing.</p>
-
-<p>First, Josh views contemporary and traditional worship as mutually exclusive.
-True, he has a whole paragraph on how to blend aspects of both. But then he
-says:</p>
-
-<blockquote>
-  <p>Lesson # 3: <strong>don’t try to mix formats</strong>. If you prefer one style over the
-  other, there is always a tendency to want to keep the some movement of one
-  toward the other. We have learned the hard way to <strong>avoid this tendency</strong>.
-  <strong>Once two formats are established, people know what they want, the come to
-  the service they want, and they don’t like surprises</strong>.</p>
-
-  <p>This is the beauty of the multi-congregational approach. We don’t have to get
-  people to change their worship in order to reach people who want more
-  contemporary worship. All we have to do is get them to grant permission for
-  another type of worship to exist. Our people will do this <strong>as long as we
-  don’t gradually introduce more and more contemporary elements into traditional
-  services</strong>.</p>
-
-  <p>We can do this because we do not believe that one format is inherently better
-  than the other. God does not prefer contemporary worship over traditional.
-  They both have strategic value. Many of my neighbors, who are mostly retired
-  couples, <strong>will not be reached through contemporary music. They want their
-  church to sound like church. We want to have a high quality traditional
-  worship because we believe it is pleasing to God and strategically valuable in
-  ministering to our community. With this conviction firmly in place, it frees
-  us from the temptation of allowing a service’s format to drift. Of course, not
-  to worry. If it drifts much, people will let you know</strong>.</p>
-</blockquote>
-
-<p>Do you see how traditional and contemporary worship are mutually exclusive, even
-within Josh’s success story?</p>
-
-<p>Later he says:</p>
-
-<blockquote>
-  <p>Be careful about what you do with special, all-church events. If you say with
-  your lips that choirs are just as good as vocal bands but you invite the vocal
-  band to sing for Easter and Christmas every year, you are sending two
-  messages. We have had to be very careful that these major inter-congregational
-  events are handled in an even-handed way. People are watching to see what kind
-  of invitations their group gets, and what kinds the other guys get. Actions
-  speak louder than words.</p>
-</blockquote>
-
-<p>Do you see how careful Josh says they have to be when these two groups interact?</p>
-
-<p>Also:</p>
-
-<blockquote>
-  <p>I have a nagging feeling that the difference between a contemporary mind set
-  and a traditional mind set goes deeper than music. As stated earlier, part of
-  me wonders if this won’t end up being <strong>a ten year birthing process of a new
-  church. People who like contemporary music tend to have different opinions on
-  a wide variety of things</strong>, such as denominational loyalty, church government,
-  how money is spent, and ethical issues such as drinking in moderation.</p>
-</blockquote>
-
-<p>Did you catch how he dressed up the phrase “slow church split”?</p>
-
-<p>In Josh’s words they have:</p>
-
-<ul>
-  <li>Two mutually exclusive worship services</li>
-  <li>Two distinctly different groups of people</li>
-  <li>Tension anytime these two groups interact</li>
-  <li>On a trajectory to split</li>
-</ul>
-
-<p>What do you call one organization with these attributes? Traditional?
-Contemporary? To me it sounds a lot like one traditional church and one
-contemporary church meeting in the same building at different times and
-sometimes doing things together, and at some point in the future they very well
-might decide to part ways.</p>
-
-<p>Whatever you call that organization, it’s certainly no longer what it was.</p>
-
-<h3 id="christian-unity-between-the-traditional-and-the-contemporary-groups">Christian unity between the traditional and the contemporary groups</h3>
-
-<p>Josh has a strange way of defining “Christian unity”. Again, in Josh’s words
-they have:</p>
-
-<ul>
-  <li>Two mutually exclusive worship services</li>
-  <li>Two distinctly different groups of people</li>
-  <li>Tension anytime these two groups interact</li>
-  <li>On a trajectory to split</li>
-</ul>
-
-<p>His article is also full of examples of conflict being resolved by acquiescence
-(the pulpit placement), people being repelled to the other service/group (the
-piano player who didn’t really like contemporary music), unresolved issues, and
-effectively a church split in the making (however amicable it has been).</p>
-
-<p>What kind of unity is that? I think Josh’s definition of “Christian unity” is
-“uneasy ceasefire”. Strange.</p>
-
-<h2 id="what-is-this-church-like-in-2021">What is this church like in 2021?</h2>
-
-<p>You have to do a bit of sleuthing to find out which church Josh Hunt was talking
-about. I <em>think</em> I found it. On <a href="https://www.joshhunt.com/bio.htm">his bio</a> he
-says that he served as Minister of Education at Calvary Baptist Church, Las
-Cruces, New Mexico.</p>
-
-<blockquote>
-  <p>During the eleven years he served this church, they went from one service and
-  one Sunday School to four services and four Sunday Schools. Overall attendance
-  nearly tripled.</p>
-</blockquote>
-
-<p><a href="https://cbclascruces.org/about/constitution">Calvary Baptist’s constitution</a>
-says they were incorporated on July 21, 1951. In 1997 (apparently when Josh
-wrote this article) the church would have been 46 years old. And recall he wrote
-it to summarize the previous five years of “trying to introduce contemporary
-worship into a forty year old, traditional Baptist church”. 46 minus 5 = 41,
-close enough to “forty years old”.</p>
-
-<p>It’s difficult to discern the character of a church from a distance. Not to
-mention it’s easy to be condemning so it’s kind of risky. But let’s assume this
-is the church he was talking about. If so, then a few things are definitely
-true:</p>
-
-<ul>
-  <li>The church is still around</li>
-  <li>It <a href="https://cbclascruces.org/about/service-times">has two services</a>. That
-aligns with what Josh said in his article (although it is different than four
-services like his bio says—but keep in mind quite a bit of time has
-passed since Josh Hunt was there, and also COVID is a thing)</li>
-  <li><a href="https://cbclascruces.org/ministries/worship-arts">Evidently</a> it still uses
-contemporary music</li>
-</ul>
-
-<h3 id="they-only-got-one-shot">They only got one shot</h3>
-
-<p>In Josh’s words, his church more than doubled in numbers by embracing
-contemporary music. That happened with Calvary Baptist, but it didn’t happen
-again—they’re still two-service, not eight-service or sixteen-service. And
-they didn’t go back to traditional music. So Josh’s advice for them was:</p>
-
-<ul>
-  <li>Single use only. Once you’ve embraced contemporary music then that’s it. It’s
-not like you can embrace it <em>again</em> because you’ve already used that trick
-and are there. It’s not a goose that lays golden eggs</li>
-  <li>A one-way street. Josh details no plan for going back to traditional worship
-if the church wanted it, and after 24 years the church Josh was talking about
-hasn’t gone back</li>
-</ul>
-
-<h3 id="whats-next-for-churches-like-this">What’s next for churches like this?</h3>
-
-<p>I want to focus on the first point. How would this church double in numbers
-again? What tricks or untapped resources remain for it? If doubling your numbers
-is why you (like Josh Hunt) are embracing contemporary music, then what are you
-going to do once you’re there?</p>
-
-<p>Will you find ways to become content with your size (isn’t that self defeating)?
-Will you decide it’s more important to focus on growing your congregation in
-<em>depth</em> (so you’re telling me the numbers aren’t important after all)? Will you
-find more groups to “reach” and continue tacking on more services to suit all
-these different groups? Will you be too bogged down by internal strife generated
-by the transition (was it worth it)?</p>
-
-<p>Surely God has given his church a better growth plan than this.</p>
-
-<h2 id="where-is-the-bible">Where is the Bible?</h2>
-
-<p>I don’t see a single Bible verse. Instead, Josh’s article is full of appeals
-to… well, read it for yourself. Here’s how he concludes his article:</p>
-
-<blockquote>
-  <p>On the positive side, let me be clear I am positively enthusiastic about our
-  journey into contemporary worship. <strong>It has allowed us to use our resources
-  more efficiently</strong>. Contemporary worship is not the only way we could have
-  five weekend services, but it is one way.</p>
-
-  <p><strong>It has allowed us to reach people faster than ever before</strong>. We filled a 250
-  seat auditorium in 18 months using contemporary worship. And, we have
-  <strong>reached into a different segment of the population</strong>. Contemporary worship
-  not only reaches people, it reaches people we probably could not reach with a
-  traditional worship service alone. Much of this has to do with music. We hope
-  in time to have additional worship formats–country music perhaps.</p>
-
-  <p>I think the <strong>contemporary worship helps the people it reaches to worship
-  better</strong> than they would in a traditional worship. It is true of me. I worship
-  better with contemporary music than I do with traditional music because I am
-  not fighting against my own tastes.</p>
-
-  <p><strong>I just like contemporary worship</strong>. I think church leaders need better
-  reasons than personal taste to do something. However, I think it would be very
-  difficult to start a contemporary service unless the leadership did enjoy it.
-  It would be impossible for me to help with a country service. Philosophically,
-  I would have no problem, as long as they didn’t ask me to come or pay for the
-  steel guitars.</p>
-</blockquote>
-
-<p>To summarize, Josh says contemporary music:</p>
-
-<ul>
-  <li>Is more efficient</li>
-  <li>Has wider, quicker reach</li>
-  <li>Frees people’s worship</li>
-  <li>Suits his personal taste</li>
-</ul>
-
-<p>But again, where is the Bible in any of this?</p>
-
-<p>Does the Bible have anything to say about how important a church’s <em>efficiency</em>
-is, or whether it’s more important to be <em>effective</em>, or what it even means to
-be efficient or effective in “kingdom” work?</p>
-
-<p>Does the Bible have anything to say about how to “reach” people, what “reaching”
-them even means, and whether the weekly gathering of God’s people should be for
-evangelism or for mutual encouragement of people who are already saved?</p>
-
-<p>Does the Bible have anything to say about whether people’s personal tastes in
-worship are good and need to be “freed” or if there are any dangers and they
-need to be changed?</p>
-
-<p>Does the Bible have anything to say about what Christian unity is?</p>
-
-<p>There is not a single Bible verse referenced in his entire article. Would Josh
-be able to use scripture to back up his claims about efficiency, effectiveness,
-freedom, and worship? Or does he only have subjective pragmatism on his side?</p>
-
-<h2 id="the-point">The point</h2>
-
-<p>If you want to tack on another service and fill your auditorium by attracting
-more people, then maybe Josh’s advice is for you. Just keep in mind it might
-come at the cost he outlined:</p>
-
-<ul>
-  <li>Alienated members</li>
-  <li>Uneasy ceasefires</li>
-  <li>Disunity</li>
-</ul>
-
-<p>Do you want this for your church?</p>
-
-<p>I also suspect there’s a lesson to be learned here about come-and-see
-philosophies of evangelism. Maybe I’ll explore that later.</p>]]></content><author><name></name></author><category term="christian" /><summary type="html"><![CDATA[A critique of Josh Hunt's article]]></summary></entry></feed>
+<p>Polled futures are great!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Why Rust futures are better because they are polled]]></summary></entry></feed>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="How to parse and load XAML from an embedded resource">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Loading Loose XAML - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Loading Loose XAML</h1>
+          
+          
+          <p><i>June 03, 2022&mdash;How to parse and load XAML from an embedded resource</i></p>
+          
+          <p>Suppose you have a custom thingy like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
+
+<span class="k">sealed</span> <span class="k">class</span> <span class="nc">CustomThingy</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Property</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>…and you declare it in some XAML:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;CustomThingy</span> <span class="na">xmlns=</span><span class="s">"clr-namespace:LooseXaml"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;CustomThingy.Property&gt;</span>Hello, world!<span class="nt">&lt;/CustomThingy.Property&gt;</span>
+<span class="nt">&lt;/CustomThingy&gt;</span>
+</code></pre></div></div>
+
+<p>…and that XAML is in a file named “EmbeddedResource.xaml”, which is an
+embedded resource:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+    &lt;PropertyGroup&gt;
+        &lt;OutputType&gt;WinExe&lt;/OutputType&gt;
+        &lt;TargetFramework&gt;net6.0-windows&lt;/TargetFramework&gt;
+        &lt;Nullable&gt;enable&lt;/Nullable&gt;
+        &lt;UseWPF&gt;true&lt;/UseWPF&gt;
+    &lt;/PropertyGroup&gt;
+
+    &lt;ItemGroup&gt;
+      &lt;Page Remove="EmbeddedResource.xaml" /&gt;
+      &lt;EmbeddedResource Include="EmbeddedResource.xaml" /&gt;
+    &lt;/ItemGroup&gt;
+
+&lt;/Project&gt;
+</code></pre></div></div>
+
+<p>Did you know you can parse and instantiate it?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
+
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Windows</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">App</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">OnStartup</span><span class="p">(</span><span class="n">StartupEventArgs</span> <span class="n">e</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">type</span> <span class="p">=</span> <span class="nf">GetType</span><span class="p">();</span>
+        <span class="kt">var</span> <span class="n">assembly</span> <span class="p">=</span> <span class="n">type</span><span class="p">.</span><span class="n">Assembly</span><span class="p">;</span>
+        <span class="k">using</span> <span class="nn">var</span> <span class="n">stream</span> <span class="p">=</span> <span class="n">assembly</span><span class="p">.</span><span class="nf">GetManifestResourceStream</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="s">"EmbeddedResource.xaml"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">stream</span> <span class="k">is</span> <span class="k">null</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Wrong resource name"</span><span class="p">);</span>
+        <span class="k">using</span> <span class="nn">var</span> <span class="n">reader</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StreamReader</span><span class="p">(</span><span class="n">stream</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">loader</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Loader</span><span class="p">();</span>
+        <span class="kt">var</span> <span class="n">customThingy</span> <span class="p">=</span> <span class="n">loader</span><span class="p">.</span><span class="n">Load</span><span class="p">&lt;</span><span class="n">CustomThingy</span><span class="p">&gt;(</span>
+            <span class="n">reader</span><span class="p">,</span>
+            <span class="n">assembly</span><span class="p">,</span>
+            <span class="k">new</span> <span class="p">[]</span> <span class="p">{</span> <span class="n">assembly</span> <span class="p">}</span>
+        <span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">customThingy</span> <span class="k">is</span> <span class="k">null</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Failed to load it. Are you sure that XAML declares a CustomThingy?"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">customThingy</span><span class="p">.</span><span class="n">Property</span> <span class="p">!=</span> <span class="s">"Hello, world!"</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Loaded it, but its property is wrong for some reason"</span><span class="p">);</span>
+        <span class="n">Trace</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"It works!"</span><span class="p">);</span>
+        <span class="n">Environment</span><span class="p">.</span><span class="nf">Exit</span><span class="p">(</span><span class="m">0</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="the-loader">The loader</h2>
+
+<p>Here’s how:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
+
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Reflection</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Xaml</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">Loader</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="n">T</span><span class="p">?</span> <span class="n">Load</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span>
+        <span class="n">TextReader</span> <span class="n">textReader</span><span class="p">,</span>
+        <span class="n">Assembly</span> <span class="n">localAssembly</span><span class="p">,</span>
+        <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Assembly</span><span class="p">&gt;</span> <span class="n">assemblies</span><span class="p">)</span>
+        <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="k">class</span>
+    <span class="err">{</span>
+        <span class="nc">var</span> <span class="n">context</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">XamlSchemaContext</span><span class="p">(</span><span class="n">assemblies</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">settings</span> <span class="p">=</span> <span class="k">new</span> <span class="n">XamlXmlReaderSettings</span>
+        <span class="p">{</span>
+            <span class="n">LocalAssembly</span> <span class="p">=</span> <span class="n">localAssembly</span><span class="p">,</span>
+            <span class="n">ProvideLineInfo</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span>
+            <span class="n">AllowProtectedMembersOnRoot</span> <span class="p">=</span> <span class="k">true</span>
+        <span class="p">};</span>
+        <span class="k">using</span> <span class="nn">var</span> <span class="n">xamlXmlReader</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">XamlXmlReader</span><span class="p">(</span>
+            <span class="n">textReader</span><span class="p">,</span>
+            <span class="n">context</span><span class="p">,</span>
+            <span class="n">settings</span>
+        <span class="p">);</span>
+        <span class="kt">var</span> <span class="n">root</span> <span class="p">=</span> <span class="n">XamlServices</span><span class="p">.</span><span class="nf">Load</span><span class="p">(</span><span class="n">xamlXmlReader</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">root</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="things-to-remember">Things to remember</h2>
+
+<h3 id="xaml-only-supports-parameterless-constructors">XAML only supports parameterless constructors</h3>
+
+<p>Well, technically you can use the
+<a href="https://docs.microsoft.com/en-us/dotnet/desktop/xaml-services/xfactorymethod-directive"><code class="language-plaintext highlighter-rouge">x:FactoryMethod</code></a>
+or
+<a href="https://docs.microsoft.com/en-us/dotnet/desktop/xaml-services/xarguments-directive"><code class="language-plaintext highlighter-rouge">x:Arguments</code></a>
+directives.</p>
+
+<p>If you do that then remember to add include the
+<code class="language-plaintext highlighter-rouge">xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"</code> namespace in your XAML.</p>
+
+<h3 id="xamlxmlreadersettingslocalassembly-is-important"><code class="language-plaintext highlighter-rouge">XamlXmlReaderSettings.LocalAssembly</code> is important</h3>
+
+<p>According to
+<a href="https://docs.microsoft.com/en-us/dotnet/desktop/wpf/advanced/xaml-namespaces-and-namespace-mapping-for-wpf-xaml?view=netframeworkdesktop-4.8#mapping-to-current-assemblies">Microsoft’s documentation</a>
+you can omit the <code class="language-plaintext highlighter-rouge">;assembly=YourAssembly</code> part of
+<code class="language-plaintext highlighter-rouge">xmlns="clr-namespace:YourNamespace;assembly=YourAssembly"</code>.</p>
+
+<p>When you do then it’ll assume you’re talking about the current assembly. Which
+is what <code class="language-plaintext highlighter-rouge">XamlXmlReaderSettings.LocalAssembly</code> points to. So you need to set that
+property to the current assembly.</p>
+
+<h2 id="the-point">The point</h2>
+
+<p>You can use XAML for more than just WPF!</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

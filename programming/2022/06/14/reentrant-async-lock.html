@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A correct implementation">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Reentrant Async Lock - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Reentrant Async Lock</h1>
+          
+          
+          <p><i>June 14, 2022&mdash;A correct implementation</i></p>
+          
+          <p>Max Fedotov
+<a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a">wrote</a>:</p>
+<blockquote>
+  <p>If you need a reentrant async lock — you are out of luck and would have to
+  get rid of lock reentry in your code-base instead.</p>
+</blockquote>
+
+<p>I’m here to tell you that you are <em>not</em> out of luck. You just need to try harder
+;)</p>
+
+<p>Here’s how we’ll have our cake and eat it too:</p>
+
+<ol>
+  <li>Make a custom <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></li>
+  <li>Make that <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> awaitable</li>
+  <li>Use some special semantics</li>
+</ol>
+
+<h2 id="custom-synchronizationcontext">Custom <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></h2>
+
+<p>First, implement a <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> that executes its bits of work
+one-at-a-time. Sort of like a <code class="language-plaintext highlighter-rouge">Dispatcher</code> in WPF.</p>
+
+<p>Here’s one I threw together:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System.Collections.Concurrent</span><span class="p">;</span>
+
+<span class="c1">/// &lt;summary&gt;</span>
+<span class="c1">/// A &lt;see cref="SynchronizationContext"/&gt; in which units of work are executed one-at-a-time on the thread pool.</span>
+<span class="c1">/// &lt;/summary&gt;</span>
+<span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">WorkQueue</span> <span class="p">:</span> <span class="n">SynchronizationContext</span>
+<span class="p">{</span>
+    <span class="c1">/// &lt;summary&gt;</span>
+    <span class="c1">/// Exposes exceptions thrown on this &lt;see cref="SynchronizationContext"/&gt;.</span>
+    <span class="c1">/// &lt;/summary&gt;</span>
+    <span class="k">public</span> <span class="k">event</span> <span class="n">Action</span><span class="p">&lt;</span><span class="n">Exception</span><span class="p">&gt;?</span> <span class="n">ExceptionThrown</span><span class="p">;</span>
+
+    <span class="k">readonly</span> <span class="n">Queue</span><span class="p">&lt;</span><span class="n">Entry</span><span class="p">&gt;</span> <span class="n">_entries</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+    <span class="k">readonly</span> <span class="kt">object</span> <span class="n">_gate</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+    <span class="kt">bool</span> <span class="n">_isPumping</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">Action</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">?&gt;</span> <span class="n">PumpDelegate</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">SendOrPostCallback</span> <span class="n">SetManualResetEventSlimDelegate</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">ConcurrentBag</span><span class="p">&lt;</span><span class="n">ManualResetEventSlim</span><span class="p">&gt;</span> <span class="n">UnusedManualResetEvents</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+    <span class="k">static</span> <span class="nf">WorkQueue</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">PumpDelegate</span> <span class="p">=</span> <span class="n">Pump</span><span class="p">;</span>
+        <span class="n">SetManualResetEventSlimDelegate</span> <span class="p">=</span> <span class="n">SetManualResetEventSlim</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">/// &lt;summary&gt;</span>
+    <span class="c1">/// Returns a new &lt;see cref="WorkQueue"/&gt;.</span>
+    <span class="c1">/// &lt;/summary&gt;</span>
+    <span class="k">public</span> <span class="k">override</span> <span class="n">SynchronizationContext</span> <span class="nf">CreateCopy</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">WorkQueue</span><span class="p">();</span>
+
+    <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Post</span><span class="p">(</span><span class="n">SendOrPostCallback</span> <span class="n">d</span><span class="p">,</span> <span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">lock</span> <span class="p">(</span><span class="n">_gate</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_entries</span><span class="p">.</span><span class="nf">Enqueue</span><span class="p">(</span><span class="k">new</span> <span class="nf">Entry</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">state</span><span class="p">));</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">_isPumping</span><span class="p">)</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="n">_isPumping</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">ThreadPool</span><span class="p">.</span><span class="nf">QueueUserWorkItem</span><span class="p">(</span><span class="n">PumpDelegate</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">void</span> <span class="nf">Pump</span><span class="p">(</span><span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">me</span> <span class="p">=</span> <span class="p">(</span><span class="n">WorkQueue</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="k">true</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">Entry</span> <span class="n">entry</span><span class="p">;</span>
+            <span class="k">lock</span> <span class="p">(</span><span class="n">me</span><span class="p">.</span><span class="n">_gate</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(!</span><span class="n">me</span><span class="p">.</span><span class="n">_entries</span><span class="p">.</span><span class="nf">TryDequeue</span><span class="p">(</span><span class="k">out</span> <span class="n">entry</span><span class="p">))</span>
+                <span class="p">{</span>
+                    <span class="n">me</span><span class="p">.</span><span class="n">_isPumping</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">try</span>
+            <span class="p">{</span>
+                <span class="n">entry</span><span class="p">.</span><span class="nf">Callback</span><span class="p">(</span><span class="n">entry</span><span class="p">.</span><span class="n">State</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">me</span><span class="p">.</span><span class="n">ExceptionThrown</span><span class="p">?.</span><span class="nf">Invoke</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Send</span><span class="p">(</span><span class="n">SendOrPostCallback</span> <span class="n">d</span><span class="p">,</span> <span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nf">Post</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">state</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(!</span><span class="n">UnusedManualResetEvents</span><span class="p">.</span><span class="nf">TryTake</span><span class="p">(</span><span class="k">out</span> <span class="kt">var</span> <span class="n">mre</span><span class="p">))</span>
+            <span class="n">mre</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ManualResetEventSlim</span><span class="p">();</span>
+        <span class="nf">Post</span><span class="p">(</span><span class="n">SetManualResetEventSlimDelegate</span><span class="p">,</span> <span class="n">mre</span><span class="p">);</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Reset</span><span class="p">();</span>
+        <span class="n">UnusedManualResetEvents</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">mre</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">void</span> <span class="nf">SetManualResetEventSlim</span><span class="p">(</span><span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">mre</span> <span class="p">=</span> <span class="p">(</span><span class="n">ManualResetEventSlim</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Set</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="n">record</span> <span class="k">struct</span> <span class="nc">Entry</span><span class="p">(</span><span class="n">SendOrPostCallback</span> <span class="n">Callback</span><span class="p">,</span> <span class="kt">object</span><span class="p">?</span> <span class="n">State</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="make-it-awaitable">Make it awaitable</h2>
+
+<p>I’ll leave it as an exercise for the reader to figure out how to implement
+<code class="language-plaintext highlighter-rouge">AwaitableSynchronizationContext</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">SynchronizationContextExtensions</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="n">AwaitableSynchronizationContext</span> <span class="nf">RunBelow</span><span class="p">(</span><span class="k">this</span> <span class="n">SynchronizationContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><a href="https://www.google.com/search?q=c%23+await+anything">Hint</a>.</p>
+
+<p>Okay, here are some big clues… the awaiter returned from
+<code class="language-plaintext highlighter-rouge">AwaitableSynchronizationContext.GetAwaiter()</code> needs to:</p>
+
+<ul>
+  <li>Return <code class="language-plaintext highlighter-rouge">false</code> from <code class="language-plaintext highlighter-rouge">IsCompleted</code></li>
+  <li>Pass the continuation from <code class="language-plaintext highlighter-rouge">OnCompleted</code> to <code class="language-plaintext highlighter-rouge">SynchronizationContext.Post</code></li>
+</ul>
+
+<h2 id="use-special-semantics">Use special semantics</h2>
+
+<p>And now the grand finale…</p>
+
+<p>When you want guarded access, just <code class="language-plaintext highlighter-rouge">await yourWorkQueue.RunBelow()</code>. It’ll be
+reentrant, asynchronous, and it provides mutual exclusion:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="n">Fact</span><span class="p">]</span>
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">SeeItIsPossible</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">var</span> <span class="n">isExclusive</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+    <span class="k">void</span> <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="kt">object</span> <span class="n">thing</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">isExclusive</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">();</span>
+        <span class="n">isExclusive</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+        <span class="k">try</span>
+        <span class="p">{</span>
+            <span class="n">Thread</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="m">10</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">finally</span>
+        <span class="p">{</span>
+            <span class="n">isExclusive</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kt">var</span> <span class="n">nonThreadSafeResource</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">object</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">asyncGuard</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">WorkQueue</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">exceptions</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Exception</span><span class="p">&gt;();</span>
+    <span class="n">asyncGuard</span><span class="p">.</span><span class="n">ExceptionThrown</span> <span class="p">+=</span> <span class="n">exceptions</span><span class="p">.</span><span class="n">Add</span><span class="p">;</span>
+    <span class="k">async</span> <span class="n">Task</span> <span class="nf">RecursivelyUseIt</span><span class="p">(</span><span class="kt">int</span> <span class="n">recursionLevel</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">recursionLevel</span> <span class="p">&gt;</span> <span class="m">10</span><span class="p">)</span>
+            <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+        <span class="k">else</span>
+            <span class="k">await</span> <span class="nf">RecursivelyUseIt</span><span class="p">(</span><span class="n">recursionLevel</span> <span class="p">+</span> <span class="m">1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">WhenAll</span><span class="p">(</span>
+        <span class="nf">RecursivelyUseIt</span><span class="p">(</span><span class="m">0</span><span class="p">),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">100</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+                <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="nf">Empty</span><span class="p">(</span><span class="n">exceptions</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

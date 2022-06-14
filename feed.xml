@@ -1,4 +1,188 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-03T19:18:42-05:00</updated><id>/feed.xml</id><entry><title type="html">Loading Loose XAML</title><link href="/programming/2022/06/03/loading-loose-xaml.html" rel="alternate" type="text/html" title="Loading Loose XAML" /><published>2022-06-03T00:00:00-05:00</published><updated>2022-06-03T00:00:00-05:00</updated><id>/programming/2022/06/03/loading-loose-xaml</id><content type="html" xml:base="/programming/2022/06/03/loading-loose-xaml.html"><![CDATA[<p>Suppose you have a custom thingy like this:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-14T16:47:55-05:00</updated><id>/feed.xml</id><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>Max Fedotov
+<a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a">wrote</a>:</p>
+<blockquote>
+  <p>If you need a reentrant async lock — you are out of luck and would have to
+  get rid of lock reentry in your code-base instead.</p>
+</blockquote>
+
+<p>I’m here to tell you that you are <em>not</em> out of luck. You just need to try harder
+;)</p>
+
+<p>Here’s how we’ll have our cake and eat it too:</p>
+
+<ol>
+  <li>Make a custom <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></li>
+  <li>Make that <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> awaitable</li>
+  <li>Use some special semantics</li>
+</ol>
+
+<h2 id="custom-synchronizationcontext">Custom <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></h2>
+
+<p>First, implement a <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> that executes its bits of work
+one-at-a-time. Sort of like a <code class="language-plaintext highlighter-rouge">Dispatcher</code> in WPF.</p>
+
+<p>Here’s one I threw together:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System.Collections.Concurrent</span><span class="p">;</span>
+
+<span class="c1">/// &lt;summary&gt;</span>
+<span class="c1">/// A &lt;see cref="SynchronizationContext"/&gt; in which units of work are executed one-at-a-time on the thread pool.</span>
+<span class="c1">/// &lt;/summary&gt;</span>
+<span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">WorkQueue</span> <span class="p">:</span> <span class="n">SynchronizationContext</span>
+<span class="p">{</span>
+    <span class="c1">/// &lt;summary&gt;</span>
+    <span class="c1">/// Exposes exceptions thrown on this &lt;see cref="SynchronizationContext"/&gt;.</span>
+    <span class="c1">/// &lt;/summary&gt;</span>
+    <span class="k">public</span> <span class="k">event</span> <span class="n">Action</span><span class="p">&lt;</span><span class="n">Exception</span><span class="p">&gt;?</span> <span class="n">ExceptionThrown</span><span class="p">;</span>
+
+    <span class="k">readonly</span> <span class="n">Queue</span><span class="p">&lt;</span><span class="n">Entry</span><span class="p">&gt;</span> <span class="n">_entries</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+    <span class="k">readonly</span> <span class="kt">object</span> <span class="n">_gate</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+    <span class="kt">bool</span> <span class="n">_isPumping</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">Action</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">?&gt;</span> <span class="n">PumpDelegate</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">SendOrPostCallback</span> <span class="n">SetManualResetEventSlimDelegate</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">ConcurrentBag</span><span class="p">&lt;</span><span class="n">ManualResetEventSlim</span><span class="p">&gt;</span> <span class="n">UnusedManualResetEvents</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+    <span class="k">static</span> <span class="nf">WorkQueue</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">PumpDelegate</span> <span class="p">=</span> <span class="n">Pump</span><span class="p">;</span>
+        <span class="n">SetManualResetEventSlimDelegate</span> <span class="p">=</span> <span class="n">SetManualResetEventSlim</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">/// &lt;summary&gt;</span>
+    <span class="c1">/// Returns a new &lt;see cref="WorkQueue"/&gt;.</span>
+    <span class="c1">/// &lt;/summary&gt;</span>
+    <span class="k">public</span> <span class="k">override</span> <span class="n">SynchronizationContext</span> <span class="nf">CreateCopy</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">WorkQueue</span><span class="p">();</span>
+
+    <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Post</span><span class="p">(</span><span class="n">SendOrPostCallback</span> <span class="n">d</span><span class="p">,</span> <span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">lock</span> <span class="p">(</span><span class="n">_gate</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_entries</span><span class="p">.</span><span class="nf">Enqueue</span><span class="p">(</span><span class="k">new</span> <span class="nf">Entry</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">state</span><span class="p">));</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">_isPumping</span><span class="p">)</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="n">_isPumping</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">ThreadPool</span><span class="p">.</span><span class="nf">QueueUserWorkItem</span><span class="p">(</span><span class="n">PumpDelegate</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">void</span> <span class="nf">Pump</span><span class="p">(</span><span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">me</span> <span class="p">=</span> <span class="p">(</span><span class="n">WorkQueue</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="k">true</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">Entry</span> <span class="n">entry</span><span class="p">;</span>
+            <span class="k">lock</span> <span class="p">(</span><span class="n">me</span><span class="p">.</span><span class="n">_gate</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(!</span><span class="n">me</span><span class="p">.</span><span class="n">_entries</span><span class="p">.</span><span class="nf">TryDequeue</span><span class="p">(</span><span class="k">out</span> <span class="n">entry</span><span class="p">))</span>
+                <span class="p">{</span>
+                    <span class="n">me</span><span class="p">.</span><span class="n">_isPumping</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">try</span>
+            <span class="p">{</span>
+                <span class="n">entry</span><span class="p">.</span><span class="nf">Callback</span><span class="p">(</span><span class="n">entry</span><span class="p">.</span><span class="n">State</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">me</span><span class="p">.</span><span class="n">ExceptionThrown</span><span class="p">?.</span><span class="nf">Invoke</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Send</span><span class="p">(</span><span class="n">SendOrPostCallback</span> <span class="n">d</span><span class="p">,</span> <span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nf">Post</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">state</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(!</span><span class="n">UnusedManualResetEvents</span><span class="p">.</span><span class="nf">TryTake</span><span class="p">(</span><span class="k">out</span> <span class="kt">var</span> <span class="n">mre</span><span class="p">))</span>
+            <span class="n">mre</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ManualResetEventSlim</span><span class="p">();</span>
+        <span class="nf">Post</span><span class="p">(</span><span class="n">SetManualResetEventSlimDelegate</span><span class="p">,</span> <span class="n">mre</span><span class="p">);</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Reset</span><span class="p">();</span>
+        <span class="n">UnusedManualResetEvents</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">mre</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">void</span> <span class="nf">SetManualResetEventSlim</span><span class="p">(</span><span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">mre</span> <span class="p">=</span> <span class="p">(</span><span class="n">ManualResetEventSlim</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Set</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="n">record</span> <span class="k">struct</span> <span class="nc">Entry</span><span class="p">(</span><span class="n">SendOrPostCallback</span> <span class="n">Callback</span><span class="p">,</span> <span class="kt">object</span><span class="p">?</span> <span class="n">State</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="make-it-awaitable">Make it awaitable</h2>
+
+<p>I’ll leave it as an exercise for the reader to figure out how to implement
+<code class="language-plaintext highlighter-rouge">AwaitableSynchronizationContext</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">SynchronizationContextExtensions</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="n">AwaitableSynchronizationContext</span> <span class="nf">RunBelow</span><span class="p">(</span><span class="k">this</span> <span class="n">SynchronizationContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><a href="https://www.google.com/search?q=c%23+await+anything">Hint</a>.</p>
+
+<p>Okay, here are some big clues… the awaiter returned from
+<code class="language-plaintext highlighter-rouge">AwaitableSynchronizationContext.GetAwaiter()</code> needs to:</p>
+
+<ul>
+  <li>Return <code class="language-plaintext highlighter-rouge">false</code> from <code class="language-plaintext highlighter-rouge">IsCompleted</code></li>
+  <li>Pass the continuation from <code class="language-plaintext highlighter-rouge">OnCompleted</code> to <code class="language-plaintext highlighter-rouge">SynchronizationContext.Post</code></li>
+</ul>
+
+<h2 id="use-special-semantics">Use special semantics</h2>
+
+<p>And now the grand finale…</p>
+
+<p>When you want guarded access, just <code class="language-plaintext highlighter-rouge">await yourWorkQueue.RunBelow()</code>. It’ll be
+reentrant, asynchronous, and it provides mutual exclusion:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="n">Fact</span><span class="p">]</span>
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">SeeItIsPossible</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">var</span> <span class="n">isExclusive</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+    <span class="k">void</span> <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="kt">object</span> <span class="n">thing</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">isExclusive</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">();</span>
+        <span class="n">isExclusive</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+        <span class="k">try</span>
+        <span class="p">{</span>
+            <span class="n">Thread</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="m">10</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">finally</span>
+        <span class="p">{</span>
+            <span class="n">isExclusive</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kt">var</span> <span class="n">nonThreadSafeResource</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">object</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">asyncGuard</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">WorkQueue</span><span class="p">();</span>
+    <span class="kt">var</span> <span class="n">exceptions</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Exception</span><span class="p">&gt;();</span>
+    <span class="n">asyncGuard</span><span class="p">.</span><span class="n">ExceptionThrown</span> <span class="p">+=</span> <span class="n">exceptions</span><span class="p">.</span><span class="n">Add</span><span class="p">;</span>
+    <span class="k">async</span> <span class="n">Task</span> <span class="nf">RecursivelyUseIt</span><span class="p">(</span><span class="kt">int</span> <span class="n">recursionLevel</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">recursionLevel</span> <span class="p">&gt;</span> <span class="m">10</span><span class="p">)</span>
+            <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+        <span class="k">else</span>
+            <span class="k">await</span> <span class="nf">RecursivelyUseIt</span><span class="p">(</span><span class="n">recursionLevel</span> <span class="p">+</span> <span class="m">1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">WhenAll</span><span class="p">(</span>
+        <span class="nf">RecursivelyUseIt</span><span class="p">(</span><span class="m">0</span><span class="p">),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">100</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+                <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="nf">Empty</span><span class="p">(</span><span class="n">exceptions</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[A correct implementation]]></summary></entry><entry><title type="html">Loading Loose XAML</title><link href="/programming/2022/06/03/loading-loose-xaml.html" rel="alternate" type="text/html" title="Loading Loose XAML" /><published>2022-06-03T00:00:00-05:00</published><updated>2022-06-03T00:00:00-05:00</updated><id>/programming/2022/06/03/loading-loose-xaml</id><content type="html" xml:base="/programming/2022/06/03/loading-loose-xaml.html"><![CDATA[<p>Suppose you have a custom thingy like this:</p>
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
 
@@ -847,85 +1031,7 @@ line independent of the integrity of the outlet.</p>
 <p>A MWBC has to be wired properly to work. But it can be a useful way to get lots
 of power out of a single duplex outlet. Or a useful way to put a NEMA 6-20
 outlet in the same box as a duplex NEMA 5-20 outlet with only a single 12/3
-wire.</p>]]></content><author><name></name></author><category term="diy" /><summary type="html"><![CDATA[Learn with me]]></summary></entry><entry><title type="html">Radial Arm Saw</title><link href="/tools/2021/10/12/ras.html" rel="alternate" type="text/html" title="Radial Arm Saw" /><published>2021-10-12T00:00:00-05:00</published><updated>2021-10-12T00:00:00-05:00</updated><id>/tools/2021/10/12/ras</id><content type="html" xml:base="/tools/2021/10/12/ras.html"><![CDATA[<p>I recently purchased a radial arm saw (RAS) from Craigslist.</p>
-
-<p>Here’s almost what it looks like:</p>
-
-<p><a href="https://commons.wikimedia.org/wiki/File:Radial_arm_saw_osha.jpg"><img src="/assets/img/ras/Radial_arm_saw_osha.jpg" alt="A radial arm saw" class="img-fluid" /></a></p>
-
-<p><em>Image from <a href="https://commons.wikimedia.org/wiki/File:Radial_arm_saw_osha.jpg">Wikimedia Commons</a></em></p>
-
-<p>I can’t post a picture of what it actually looks like because it’s made of a
-material that’s too difficult to photograph under the temperatures and pressures
-I can achieve in my garage.</p>
-
-<p>Just kidding. I can’t post a picture of it because it’s in pieces right now.</p>
-
-<p>But I’ll tell you how it works. The long thing at the top is called the “arm”.
-You can pull the spinning blade down that arm and through your fingers and also
-through the thing you want to cut. That kind of cut would usually be called a
-“crosscut”.</p>
-
-<p>Mine runs blades 10” in diameter—a 5” radius. The blade is attached directly
-to the motor which takes up some space. So in theory it can cut something up to
-~3” thick.</p>
-
-<p>What’s neat about a RAS is how many ways you can turn the blade. You can rotate
-it in all three axes. Obviously the blade spins around as it cuts, so that’s one
-axis. And you can rotate the motor in the other two axes. So basically you can
-put the blade at any angle you want. And the arm goes up and down and can be
-rotated, too. It can sort of do the job of two or three other dedicated tools. A
-RAS is supposed to be very flexible.</p>
-
-<p>This kind of saw was very popular a few decades ago. Probably because it’s so
-versatile and because it takes up so much less space than the two or three other
-tools it can sort of replace. That’s why I bought this used one. Since then
-they’ve fallen out of favor. They have the reputation of being too dangerous.
-But the people who love them and still have all their fingers say they’re not
-too dangerous if you keep it dialed in and use it correctly.</p>
-
-<p>My RAS is three decades old. I’m not sure how many decades the manufacturer of
-my RAS produced them. It’s not from DeWalt who started making them in the mid
-20s (as in the one-hundred-years-ago 20s), but still I guess thirty years old is
-pretty young for the design.</p>
-
-<p>But thirty years is plenty of time for there to have been <a href="https://www.cpsc.gov/Recalls/2001/CPSC-Emerson-Tool-Co-Announce-Recall-of-Craftsman-Radial-Arm-Saws-Sold-by-Sears-Roebuck-and-Co">a recall</a>
-for too many fingers cut off. Which brings me back to why my RAS is in pieces.</p>
-
-<p>One way I plan to help myself keep my fingers is by fine-tuning all its
-adjustments. I completely disassembled it, cleaned and degreased the parts that
-looked important, and as I put it back together I am adding new grease. I’m also
-tightening things that shouldn’t be loose, making sure I don’t over tighten
-things that only need to be snug, and sanding down spurs where there shouldn’t
-be any.</p>
-
-<p>Now I’m getting to the point where I can start aligning the blade to the table,
-to the <a href="https://en.wikipedia.org/wiki/Fence_(woodworking)">fence</a>, and to the
-arm. I’ll also align the table to the arm and the arm to the table. Then I’ll
-dial it all in with several strategic cuts.</p>
-
-<p>The idea is that a blade that cuts straight, true, smoothly, and precisely will
-not only be free of dramatic emergency room visits, but it’ll also make cuts
-that look really nice.</p>
-
-<p>Speaking of the strategy and technique for aligning a RAS, I cannot recommend
-a book on this subject more highly than Jon Eakes’s
-<a href="https://joneakes.com/learning-curve/75-radial-arm-saws">Fine Tuning Your Radial Arm Saw</a>.
-His book has been invaluable. It has tons of tips and tricks for getting it set
-up simply and effectively, and he walks you through a series of steps with
-enough detail to understand why without bogging you down in the minutiae. The
-pictures for my brand’s RAS are a little dated (the design must have changed)
-but you can still figure out how to apply the principle because he explains why
-it works.</p>
-
-<p>I also got some new blades. The blade that came with my purchase could very well
-be original to the saw. It wasn’t used heavily, but still it’s not super clean.
-Plus it has the wrong angles for crosscutting. Having a nice sharp clean blade
-with good angles is supposed to be another way to keep your fingers.</p>
-
-<p>Where am I on the <a href="https://www.gartner.com/en/research/methodologies/gartner-hype-cycle">Hype Cycle</a>?
-Things keep looking brighter, so I must not have crested the Peak of Inflated
-Expectations yet.</p>]]></content><author><name></name></author><category term="tools" /><summary type="html"><![CDATA[And where I'm at on the Hype Cycle]]></summary></entry><entry><title type="html">Inheritance</title><link href="/programming/2021/10/12/inheritance.html" rel="alternate" type="text/html" title="Inheritance" /><published>2021-10-12T00:00:00-05:00</published><updated>2021-10-12T00:00:00-05:00</updated><id>/programming/2021/10/12/inheritance</id><content type="html" xml:base="/programming/2021/10/12/inheritance.html"><![CDATA[<p>Inheritance is <em>subtyping</em> plus <em>subclassing</em>. It is
+wire.</p>]]></content><author><name></name></author><category term="diy" /><summary type="html"><![CDATA[Learn with me]]></summary></entry><entry><title type="html">Inheritance</title><link href="/programming/2021/10/12/inheritance.html" rel="alternate" type="text/html" title="Inheritance" /><published>2021-10-12T00:00:00-05:00</published><updated>2021-10-12T00:00:00-05:00</updated><id>/programming/2021/10/12/inheritance</id><content type="html" xml:base="/programming/2021/10/12/inheritance.html"><![CDATA[<p>Inheritance is <em>subtyping</em> plus <em>subclassing</em>. It is
 <strong>a domain-specific taxonomy with behavior and semantics</strong>. And “semantics”
 means dependencies, an interface, and a name. Inheritance is a kind of an “is a”
 relationship, as in “a baby <em>is</em> a person”.</p>
@@ -1309,7 +1415,85 @@ principles (especially Single Responsibility!) naturally leads to composition
 and unit-testability, or the best ways to create an escape hatch from
 inheritance without disturbing too much.</p>
 
-<p>But the point is: <strong>Why are you favoring inheritance over composition? Are you misusing inheritance?</strong></p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Musings about favoring either inheritance or composition]]></summary></entry><entry><title type="html">Async Method Builders Are Hard</title><link href="/programming/2021/09/30/async-method-builders-are-hard.html" rel="alternate" type="text/html" title="Async Method Builders Are Hard" /><published>2021-09-30T00:00:00-05:00</published><updated>2021-09-30T00:00:00-05:00</updated><id>/programming/2021/09/30/async-method-builders-are-hard</id><content type="html" xml:base="/programming/2021/09/30/async-method-builders-are-hard.html"><![CDATA[<p>C# lets you use asynchronous methods and awaitable expressions. For example, in
+<p>But the point is: <strong>Why are you favoring inheritance over composition? Are you misusing inheritance?</strong></p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Musings about favoring either inheritance or composition]]></summary></entry><entry><title type="html">Radial Arm Saw</title><link href="/tools/2021/10/12/ras.html" rel="alternate" type="text/html" title="Radial Arm Saw" /><published>2021-10-12T00:00:00-05:00</published><updated>2021-10-12T00:00:00-05:00</updated><id>/tools/2021/10/12/ras</id><content type="html" xml:base="/tools/2021/10/12/ras.html"><![CDATA[<p>I recently purchased a radial arm saw (RAS) from Craigslist.</p>
+
+<p>Here’s almost what it looks like:</p>
+
+<p><a href="https://commons.wikimedia.org/wiki/File:Radial_arm_saw_osha.jpg"><img src="/assets/img/ras/Radial_arm_saw_osha.jpg" alt="A radial arm saw" class="img-fluid" /></a></p>
+
+<p><em>Image from <a href="https://commons.wikimedia.org/wiki/File:Radial_arm_saw_osha.jpg">Wikimedia Commons</a></em></p>
+
+<p>I can’t post a picture of what it actually looks like because it’s made of a
+material that’s too difficult to photograph under the temperatures and pressures
+I can achieve in my garage.</p>
+
+<p>Just kidding. I can’t post a picture of it because it’s in pieces right now.</p>
+
+<p>But I’ll tell you how it works. The long thing at the top is called the “arm”.
+You can pull the spinning blade down that arm and through your fingers and also
+through the thing you want to cut. That kind of cut would usually be called a
+“crosscut”.</p>
+
+<p>Mine runs blades 10” in diameter—a 5” radius. The blade is attached directly
+to the motor which takes up some space. So in theory it can cut something up to
+~3” thick.</p>
+
+<p>What’s neat about a RAS is how many ways you can turn the blade. You can rotate
+it in all three axes. Obviously the blade spins around as it cuts, so that’s one
+axis. And you can rotate the motor in the other two axes. So basically you can
+put the blade at any angle you want. And the arm goes up and down and can be
+rotated, too. It can sort of do the job of two or three other dedicated tools. A
+RAS is supposed to be very flexible.</p>
+
+<p>This kind of saw was very popular a few decades ago. Probably because it’s so
+versatile and because it takes up so much less space than the two or three other
+tools it can sort of replace. That’s why I bought this used one. Since then
+they’ve fallen out of favor. They have the reputation of being too dangerous.
+But the people who love them and still have all their fingers say they’re not
+too dangerous if you keep it dialed in and use it correctly.</p>
+
+<p>My RAS is three decades old. I’m not sure how many decades the manufacturer of
+my RAS produced them. It’s not from DeWalt who started making them in the mid
+20s (as in the one-hundred-years-ago 20s), but still I guess thirty years old is
+pretty young for the design.</p>
+
+<p>But thirty years is plenty of time for there to have been <a href="https://www.cpsc.gov/Recalls/2001/CPSC-Emerson-Tool-Co-Announce-Recall-of-Craftsman-Radial-Arm-Saws-Sold-by-Sears-Roebuck-and-Co">a recall</a>
+for too many fingers cut off. Which brings me back to why my RAS is in pieces.</p>
+
+<p>One way I plan to help myself keep my fingers is by fine-tuning all its
+adjustments. I completely disassembled it, cleaned and degreased the parts that
+looked important, and as I put it back together I am adding new grease. I’m also
+tightening things that shouldn’t be loose, making sure I don’t over tighten
+things that only need to be snug, and sanding down spurs where there shouldn’t
+be any.</p>
+
+<p>Now I’m getting to the point where I can start aligning the blade to the table,
+to the <a href="https://en.wikipedia.org/wiki/Fence_(woodworking)">fence</a>, and to the
+arm. I’ll also align the table to the arm and the arm to the table. Then I’ll
+dial it all in with several strategic cuts.</p>
+
+<p>The idea is that a blade that cuts straight, true, smoothly, and precisely will
+not only be free of dramatic emergency room visits, but it’ll also make cuts
+that look really nice.</p>
+
+<p>Speaking of the strategy and technique for aligning a RAS, I cannot recommend
+a book on this subject more highly than Jon Eakes’s
+<a href="https://joneakes.com/learning-curve/75-radial-arm-saws">Fine Tuning Your Radial Arm Saw</a>.
+His book has been invaluable. It has tons of tips and tricks for getting it set
+up simply and effectively, and he walks you through a series of steps with
+enough detail to understand why without bogging you down in the minutiae. The
+pictures for my brand’s RAS are a little dated (the design must have changed)
+but you can still figure out how to apply the principle because he explains why
+it works.</p>
+
+<p>I also got some new blades. The blade that came with my purchase could very well
+be original to the saw. It wasn’t used heavily, but still it’s not super clean.
+Plus it has the wrong angles for crosscutting. Having a nice sharp clean blade
+with good angles is supposed to be another way to keep your fingers.</p>
+
+<p>Where am I on the <a href="https://www.gartner.com/en/research/methodologies/gartner-hype-cycle">Hype Cycle</a>?
+Things keep looking brighter, so I must not have crested the Peak of Inflated
+Expectations yet.</p>]]></content><author><name></name></author><category term="tools" /><summary type="html"><![CDATA[And where I'm at on the Hype Cycle]]></summary></entry><entry><title type="html">Async Method Builders Are Hard</title><link href="/programming/2021/09/30/async-method-builders-are-hard.html" rel="alternate" type="text/html" title="Async Method Builders Are Hard" /><published>2021-09-30T00:00:00-05:00</published><updated>2021-09-30T00:00:00-05:00</updated><id>/programming/2021/09/30/async-method-builders-are-hard</id><content type="html" xml:base="/programming/2021/09/30/async-method-builders-are-hard.html"><![CDATA[<p>C# lets you use asynchronous methods and awaitable expressions. For example, in
 C# you can do this:</p>
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
@@ -1783,812 +1967,4 @@ circuit!</p>
 
 <h2 id="the-point">The point</h2>
 
-<p>Don’t mix and match modular power supply cables from different manufacturers.</p>]]></content><author><name></name></author><category term="computers" /><summary type="html"><![CDATA[I'm happy to report that my power supply has it]]></summary></entry><entry><title type="html">Async and Await in C# vs Rust</title><link href="/programming/2021/09/16/async-await-csharp-rust.html" rel="alternate" type="text/html" title="Async and Await in C# vs Rust" /><published>2021-09-16T00:00:00-05:00</published><updated>2021-09-16T00:00:00-05:00</updated><id>/programming/2021/09/16/async-await-csharp-rust</id><content type="html" xml:base="/programming/2021/09/16/async-await-csharp-rust.html"><![CDATA[<p>Both <a href="https://www.rust-lang.org/">Rust</a> and
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/">C#</a> support
-asynchronous methods and awaitable expressions.</p>
-
-<p>However, in C# you have to allocate things on the heap and perform dynamic
-dispatch when you compose awaitable expressions. Using the heap puts pressure on
-the garbage collector which slows things down, and dynamic dispatch is opaque to
-the compiler and puts pressure on the JIT engine which slows things down.</p>
-
-<p>Rust doesn’t have these problems. Instead, async/await is a zero-cost
-abstraction. It’s even possible to use async/await in <code class="language-plaintext highlighter-rouge">[no_std]</code> (a heapless
-environment).</p>
-
-<p>I’m going to explain how async/await works in both languages, then show how the
-fact that Rust’s <code class="language-plaintext highlighter-rouge">Future</code> trait is polled means Rust doesn’t have to allocate
-on the heap or perform dynamic dispatch when you compose awaitable expressions
-in Rust. I also hope to clear up a common misunderstanding about the nature of
-polling the futures in Rust (no, polling doesn’t make them slow or inefficient).</p>
-
-<p>I think explaining why or how to use async/await is out of the scope of this
-article. In fact, if you aren’t totally comfortable using async/await then this
-article might not be for you. But if you love it and want to learn a little more
-about why Rust’s polled futures are great then keep reading.</p>
-
-<p>It’s surprising, but <em>polled</em> futures are better!</p>
-
-<h2 id="overview">Overview</h2>
-
-<p><em>Warning: Probably none of the code in this article compiles or works. It was
-written off the cuff and should only be taken for inspiration.</em></p>
-
-<p>First, let’s take a look at some example async code in both languages.</p>
-
-<p>In C# you can do this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
-<span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
-
-<span class="k">static</span> <span class="k">class</span> <span class="nc">Program</span>
-<span class="p">{</span>
-    <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">RunAsync</span><span class="p">();</span> <span class="c1">// Immediately prints "Just a second..."</span>
-        <span class="n">task</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">().</span><span class="nf">GetResult</span><span class="p">();</span> <span class="c1">// Blocks as it delays for one second then prints "Ok!"</span>
-    <span class="p">}</span>
-
-    <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">RunAsync</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Just a second..."</span><span class="p">);</span>
-        <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">1</span><span class="p">));</span>
-        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Ok!"</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>And in Rust you can write this:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">async_std</span><span class="p">::</span><span class="n">task</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">futures</span><span class="p">::</span><span class="nn">executor</span><span class="p">::</span><span class="n">block_on</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="n">Duration</span><span class="p">;</span>
-
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"Just a second..."</span><span class="p">);</span>
-    <span class="nn">task</span><span class="p">::</span><span class="nf">sleep</span><span class="p">(</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="k">.await</span><span class="p">;</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"Ok!"</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">future</span> <span class="o">=</span> <span class="nf">run</span><span class="p">();</span> <span class="c1">// Doesn't print anything</span>
-    <span class="nf">block_on</span><span class="p">(</span><span class="n">future</span><span class="p">);</span> <span class="c1">// Blocks as it prints "Just a second...", delays for one second, and then prints "Ok!"</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Both programs will output “Just a second…”, then nothing will happen for one
-second, then they’ll both output “Ok!”.</p>
-
-<p>The <strong>asynchronous methods</strong> in both languages are marked by the <code class="language-plaintext highlighter-rouge">async</code>
-keyword:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">RunAsync</span><span class="p">()</span>
-<span class="c1">//     ^^^^^</span>
-</code></pre></div></div>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="k">async</span> <span class="k">fn</span> <span class="nf">run</span><span class="p">()</span>
-<span class="c1">// ^^^^^</span>
-</code></pre></div></div>
-
-<p>And the <strong>awaitable expressions</strong> in both languages involve the <code class="language-plaintext highlighter-rouge">await</code> keyword:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">1</span><span class="p">));</span>
-<span class="c1">//       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expression</span>
-<span class="c1">// ^^^^^ keyword</span>
-</code></pre></div></div>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="nn">task</span><span class="p">::</span><span class="nf">sleep</span><span class="p">(</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="k">.await</span><span class="p">;</span>
-<span class="c1">//                                     ^^^^^^ keyword</span>
-<span class="c1">// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expression</span>
-</code></pre></div></div>
-
-<p>Functionally, C#’s tasks are pretty similar to Rust’s futures. They’re both
-pretty ergonomic, and they both bring all the benefits of async/await code.</p>
-
-<p>You’ll notice that one difference is that a C# task automatically starts as soon
-as you create it, and it runs itself, but a future in Rust is inert and has to
-be ushered along by something else.</p>
-
-<p>Rust’s futures have to be polled.</p>
-
-<p><em>What?!</em> Yes you heard right. <em>Polled</em>.</p>
-
-<p>But that’s a good thing. To understand why, we need to do a deep dive into C#.</p>
-
-<h2 id="deep-divec">Deep dive—C#</h2>
-
-<p>Let’s turn our attention to C#. I’ll explain how things work in C# and then show
-why heap allocations and dynamic dispatch are inevitable.</p>
-
-<h3 id="how-the-await-keyword-works">How the <code class="language-plaintext highlighter-rouge">await</code> keyword works</h3>
-
-<p>C#’s compiler automatically transforms <code class="language-plaintext highlighter-rouge">async</code> methods into a state machine. And
-within an <code class="language-plaintext highlighter-rouge">async</code> method you can <code class="language-plaintext highlighter-rouge">await</code>
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#awaitable-expressions">awaitable expressions</a>.</p>
-
-<p>For example, when you execute this <code class="language-plaintext highlighter-rouge">RunAsync()</code> method:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="n">Task</span> <span class="nf">RunAsync</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Running!"</span><span class="p">);</span>
-  <span class="kt">int</span> <span class="k">value</span> <span class="p">=</span> <span class="k">await</span> <span class="nf">GetValueAsync</span><span class="p">();</span>
-  <span class="k">if</span> <span class="p">(</span><span class="k">value</span> <span class="p">%</span> <span class="m">2</span> <span class="p">==</span> <span class="m">0</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="nf">DoEvenThingAsync</span><span class="p">();</span>
-  <span class="p">}</span>
-  <span class="k">else</span>
-  <span class="p">{</span>
-    <span class="kt">object</span> <span class="n">oddResult</span> <span class="p">=</span> <span class="k">await</span> <span class="nf">DoOddThingAsync</span><span class="p">();</span>
-    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">oddResult</span><span class="p">.</span><span class="nf">ToString</span><span class="p">());</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>…then you’re actually executing something like this monstrosity that the
-compiler automatically generated for you:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Task</span> <span class="nf">RunAsync</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="k">value</span><span class="p">;</span>
-  <span class="kt">object</span> <span class="n">oddResult</span><span class="p">;</span>
-  <span class="kt">var</span> <span class="n">stateMachine</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StateMachine</span><span class="p">(</span>
-    <span class="p">(</span><span class="kt">int</span> <span class="n">step</span><span class="p">)</span> <span class="p">=&gt;</span>
-    <span class="p">{</span>
-      <span class="k">switch</span> <span class="p">(</span><span class="n">step</span><span class="p">)</span>
-      <span class="p">{</span>
-        <span class="k">case</span> <span class="m">0</span><span class="p">:</span>
-        <span class="p">{</span>
-          <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Running!"</span><span class="p">);</span>
-          <span class="kt">var</span> <span class="n">awaitable</span> <span class="p">=</span> <span class="nf">GetValueAsync</span><span class="p">();</span>
-          <span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="n">awaitable</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">awaiter</span><span class="p">.</span><span class="n">IsCompleted</span><span class="p">)</span>
-          <span class="p">{</span>
-            <span class="k">value</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span>
-            <span class="n">stateMachine</span><span class="p">.</span><span class="nf">RunStep</span><span class="p">(</span><span class="m">1</span><span class="p">);</span>
-          <span class="p">}</span>
-          <span class="k">else</span>
-          <span class="p">{</span>
-            <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span>
-            <span class="p">{</span>
-              <span class="k">value</span> <span class="p">=</span> <span class="n">x</span><span class="p">;</span>
-              <span class="n">stateMachine</span><span class="p">.</span><span class="nf">RunStep</span><span class="p">(</span><span class="m">1</span><span class="p">);</span>
-            <span class="p">});</span>
-          <span class="p">}</span>
-        <span class="p">}</span>
-          <span class="k">break</span><span class="p">;</span>
-        <span class="k">case</span> <span class="m">1</span><span class="p">:</span>
-        <span class="p">{</span>
-          <span class="k">if</span> <span class="p">(</span><span class="k">value</span> <span class="p">%</span> <span class="m">2</span> <span class="p">==</span> <span class="m">0</span><span class="p">)</span>
-          <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">awaitable</span> <span class="p">=</span> <span class="nf">DoEvenThingsAsync</span><span class="p">();</span>
-            <span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="n">awaitable</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">awaiter</span><span class="p">.</span><span class="n">IsCompleted</span><span class="p">)</span>
-            <span class="p">{</span>
-              <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span>
-            <span class="p">}</span>
-            <span class="k">else</span>
-            <span class="p">{</span>
-              <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">stateMachine</span><span class="p">.</span><span class="nf">RunStep</span><span class="p">(</span><span class="m">2</span><span class="p">));</span>
-            <span class="p">}</span>
-          <span class="p">}</span>
-          <span class="k">else</span>
-          <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">awaitable</span> <span class="p">=</span> <span class="nf">DoOddThingsAsync</span><span class="p">();</span>
-            <span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="n">awaitable</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">awaiter</span><span class="p">.</span><span class="n">IsCompleted</span><span class="p">)</span>
-            <span class="p">{</span>
-              <span class="n">oddResult</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span>
-              <span class="n">stateMachine</span><span class="p">.</span><span class="nf">RunStep</span><span class="p">(</span><span class="m">3</span><span class="p">);</span>
-            <span class="p">}</span>
-            <span class="k">else</span>
-            <span class="p">{</span>
-              <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span>
-              <span class="p">{</span>
-                <span class="n">oddResult</span> <span class="p">=</span> <span class="n">x</span><span class="p">;</span>
-                <span class="n">stateMachine</span><span class="p">.</span><span class="nf">RunStep</span><span class="p">(</span><span class="m">3</span><span class="p">);</span>
-              <span class="p">});</span>
-            <span class="p">}</span>
-          <span class="p">}</span>
-        <span class="p">}</span>
-          <span class="k">break</span><span class="p">;</span>
-        <span class="k">case</span> <span class="m">2</span><span class="p">:</span>
-        <span class="p">{</span>
-          <span class="n">stateMachine</span><span class="p">.</span><span class="nf">Finish</span><span class="p">();</span>
-        <span class="p">}</span>
-          <span class="k">break</span><span class="p">;</span>
-        <span class="k">case</span> <span class="m">3</span><span class="p">:</span>
-        <span class="p">{</span>
-          <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">oddResult</span><span class="p">.</span><span class="nf">ToString</span><span class="p">());</span>
-          <span class="n">stateMachine</span><span class="p">.</span><span class="nf">Finish</span><span class="p">();</span>
-        <span class="p">}</span>
-          <span class="k">break</span><span class="p">;</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">);</span>
-  <span class="n">stateMachine</span><span class="p">.</span><span class="nf">RunStep</span><span class="p">(</span><span class="m">0</span><span class="p">);</span>
-  <span class="k">return</span> <span class="n">stateMachine</span><span class="p">.</span><span class="nf">ToTask</span><span class="p">();</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Of course the above is just inspirational pseudocode. But can you trace through
-it and see how it works?</p>
-
-<p>Please don’t get lost. What I want you to see is if you want to get a value out
-of a C#
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#awaitable-expressions">awaitable expression</a>,
-you have to do something like this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Action</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">handleTheResult</span> <span class="p">=</span> <span class="p">...;</span>
-
-<span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="p">(</span><span class="n">expression</span><span class="p">).</span><span class="nf">GetAwaiter</span><span class="p">();</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">awaiter</span><span class="p">.</span><span class="n">IsCompleted</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span> <span class="c1">// Will return immediately; might throw an exception</span>
-  <span class="nf">handleTheResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
-<span class="p">}</span>
-<span class="k">else</span>
-<span class="p">{</span>
-  <span class="c1">// .GetResult() won't immediately return because the task isn't yet complete</span>
-  <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(()</span> <span class="p">=&gt;</span>
-  <span class="p">{</span>
-    <span class="c1">// This code will be executed when the task is completed</span>
-    <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span> <span class="c1">// _Now_ it will immediately return (or throw an exception)</span>
-    <span class="nf">handleTheResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
-  <span class="p">});</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>…and the compiler automatically does that for you with a state machine when
-you use the <code class="language-plaintext highlighter-rouge">await</code> keyword in an <code class="language-plaintext highlighter-rouge">async</code> context.</p>
-
-<h4 id="weeds">Weeds</h4>
-
-<p>If you want to learn how to tell C# to build the async state machine in a
-specific way then take a look at C#’s
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types">task type documentation</a>.</p>
-
-<p>If you look at how the <code class="language-plaintext highlighter-rouge">Task&lt;T&gt;</code> class’s state machine
-<a href="https://referencesource.microsoft.com/#mscorlib/system/runtime/compilerservices/AsyncMethodBuilder.cs,5916df9e324fc0a1">is constructed</a>
-then you’ll see that it’s a bit different than my above pseudocode. Among other
-things, it captures the current <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> and <code class="language-plaintext highlighter-rouge">ExecutionContext</code>
-so that continuations can be executed on them.</p>
-
-<p>The fact that <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> and <code class="language-plaintext highlighter-rouge">ExecutionContext</code> are <em>static</em> state
-in C# was significant to the Rust language team when they decided how to design
-their <code class="language-plaintext highlighter-rouge">Future</code> trait. Rustaceans don’t like static state. Initial
-implementations of futures in Rust relied on thread local storage, but that was
-a dead end because thread local storage isn’t available in <code class="language-plaintext highlighter-rouge">[no_std]</code> Rust code.</p>
-
-<p>Okay let’s quit wandering around in these weeds and see if we can make some more
-progress.</p>
-
-<h3 id="how-to-create-your-own-awaitable-expressions">How to create your own awaitable expressions</h3>
-
-<p>You don’t have to rely only on <code class="language-plaintext highlighter-rouge">Task</code>, <code class="language-plaintext highlighter-rouge">ValueTask</code>, or any of the other
-framework-provided awaitable types. You can create your own
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#awaitable-expressions">awaitable type</a>.</p>
-
-<p>Basically it comes down to implementing this interface on a thing:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System.Runtime.CompilerServices</span><span class="p">;</span>
-
-<span class="k">public</span> <span class="k">interface</span> <span class="nc">IAwaiter</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">INotifyCompletion</span>
-<span class="p">{</span>
-    <span class="kt">bool</span> <span class="n">IsCompleted</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
-
-    <span class="n">T</span> <span class="nf">GetResult</span><span class="p">();</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>…then returning that thing from your awaitable type’s <code class="language-plaintext highlighter-rouge">GetAwaiter()</code> method.</p>
-
-<p>That interface doesn’t exist in the .Net framework. You can create it if you
-want, but any type that has that signature—implement <code class="language-plaintext highlighter-rouge">INotifyCompletion</code>,
-have a <code class="language-plaintext highlighter-rouge">bool IsCompleted</code> property, have a <code class="language-plaintext highlighter-rouge">T GetResult()</code> method—will
-work as an awaiter. And any type that returns an awaiter from a <code class="language-plaintext highlighter-rouge">GetAwaiter()</code>
-method can be awaited.</p>
-
-<p>Like this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="n">MyAwaiter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="nf">GetAwaiter</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="p">...;</span>
-<span class="p">}</span>
-
-<span class="k">class</span> <span class="nc">MyAwaiter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IAwaiter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="kt">bool</span> <span class="n">IsCompleted</span> <span class="p">=&gt;</span> <span class="p">...;</span>
-
-  <span class="k">public</span> <span class="n">T</span> <span class="nf">GetResult</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="p">...;</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">OnCompleted</span><span class="p">(</span><span class="n">Action</span> <span class="n">continuation</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">...;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="k">class</span> <span class="nc">Foo</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">RunAsync</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">Action</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">handleTheResult</span> <span class="p">=</span> <span class="p">...;</span>
-    <span class="n">Awaitable</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">awaitable</span> <span class="p">=</span> <span class="p">...;</span>
-    <span class="kt">int</span> <span class="n">result</span> <span class="p">=</span> <span class="k">await</span> <span class="n">awaitable</span><span class="p">;</span> <span class="c1">// You can await it!</span>
-    <span class="nf">handleTheResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Recall from the previous section how the compiler will create a state machine
-that essentially does this with your awaitable type:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Almost the same as the RunAsync method above:</span>
-<span class="n">Action</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">handleTheResult</span> <span class="p">=</span> <span class="p">...;</span>
-<span class="n">Awaitable</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">awaitable</span> <span class="p">=</span> <span class="p">...;</span>
-
-<span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="n">awaitable</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">awaiter</span><span class="p">.</span><span class="n">IsCompleted</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span> <span class="c1">// Will return immediately; might throw an exception</span>
-  <span class="nf">handleTheResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
-<span class="p">}</span>
-<span class="k">else</span>
-<span class="p">{</span>
-  <span class="c1">// .GetResult() won't immediately return because the task isn't yet complete</span>
-  <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(()</span> <span class="p">=&gt;</span>
-  <span class="p">{</span>
-    <span class="c1">// This code will be executed when the task is completed</span>
-    <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span> <span class="c1">// _Now_ it will immediately return (or throw an exception)</span>
-    <span class="nf">handleTheResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
-  <span class="p">});</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>You should now understand how you need to implement your awaitable type. The
-awaiter type returned from <code class="language-plaintext highlighter-rouge">GetAwaiter()</code> needs to do these things:</p>
-
-<ul>
-  <li>Return <code class="language-plaintext highlighter-rouge">true</code> from <code class="language-plaintext highlighter-rouge">IsCompleted</code> when the asynchronous work is completed</li>
-  <li>Accept a continuation/callback passed to the <code class="language-plaintext highlighter-rouge">OnCompleted</code> method. This
-callback should be executed when the asynchronous work is completed. Keep in
-mind a callback won’t be passed to <code class="language-plaintext highlighter-rouge">OnCompleted</code> if <code class="language-plaintext highlighter-rouge">IsCompleted</code> returned
-true when it was checked</li>
-  <li>Synchronously return the result or throw an exception from the <code class="language-plaintext highlighter-rouge">GetResult</code>
-method. Some implementations will choose to make <code class="language-plaintext highlighter-rouge">GetResult</code> synchronously
-block if the asynchronous work isn’t yet complete</li>
-</ul>
-
-<p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#awaitable-expressions">The documentation</a>
-explains how to create an awaitable type that returns nothing/void. Basically,
-<code class="language-plaintext highlighter-rouge">GetResult</code> should return <code class="language-plaintext highlighter-rouge">void</code> instead of <code class="language-plaintext highlighter-rouge">T</code>. If only C# would let us use
-<code class="language-plaintext highlighter-rouge">void</code> as a generic type parameter!</p>
-
-<h3 id="how-to-compose-awaitable-expressions">How to compose awaitable expressions</h3>
-
-<p>So how do you compose (as in combine) awaitable expressions? You now have
-everything you need to answer this question.</p>
-
-<p>As I showed in the “How the <code class="language-plaintext highlighter-rouge">await</code> keyword works” section above, the C#
-compiler transforms code like this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="nf">FooAsync</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="c1">// Synchronous block 1</span>
-  <span class="kt">var</span> <span class="n">a</span> <span class="p">=</span> <span class="nf">GetA</span><span class="p">();</span>
-  <span class="kt">var</span> <span class="n">b</span> <span class="p">=</span> <span class="nf">GetB</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
-
-  <span class="c1">// await keyword</span>
-  <span class="kt">var</span> <span class="n">c</span> <span class="p">=</span> <span class="k">await</span> <span class="nf">GetCAsync</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
-
-  <span class="c1">// Synchronous block 2</span>
-  <span class="kt">var</span> <span class="n">d</span> <span class="p">=</span> <span class="nf">GetD</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
-  <span class="kt">var</span> <span class="n">e</span> <span class="p">=</span> <span class="nf">GetE</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
-
-  <span class="c1">// await keyword</span>
-  <span class="kt">var</span> <span class="n">f</span> <span class="p">=</span> <span class="k">await</span> <span class="nf">GetFAsync</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
-
-  <span class="k">return</span> <span class="n">f</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>…into a state machine.</p>
-
-<p>The state machine has one step for each synchronous code block. The steps are
-wrapped up as continuations/callbacks which get passed to the various awaiters
-along the way. The awaiters decide when to execute the callbacks.</p>
-
-<p>You can do the same thing by hand if you wish.</p>
-
-<p>So the answer is: in C#, awaitable expressions are composed <em>with callbacks</em>.</p>
-
-<h3 id="why-heap-allocations-and-dynamic-dispatch-are-inevitable-when-you-compose-awaitable-expressions">Why heap allocations and dynamic dispatch are inevitable when you compose awaitable expressions</h3>
-
-<p>You should now see why heap allocations and dynamic dispatch are inevitable in
-C#’s async/await system: C# awaitable expressions are composed with callbacks.
-These callbacks have the type <code class="language-plaintext highlighter-rouge">Action</code>, which is a delegate.</p>
-
-<p>To package something (e.g. a step in a state machine) up into an <code class="language-plaintext highlighter-rouge">Action</code> you
-have to put something on the heap.</p>
-
-<p>And invoking an <code class="language-plaintext highlighter-rouge">Action</code> is dynamic dispatch.</p>
-
-<h4 id="but-what-about-valuetask">But what about <code class="language-plaintext highlighter-rouge">ValueTask</code>?</h4>
-
-<p>I can just hear it now. You’re wondering if this applies to <code class="language-plaintext highlighter-rouge">ValueTask</code>. After
-all, Microsoft created <code class="language-plaintext highlighter-rouge">ValueTask</code> expressly
-<a href="https://devblogs.microsoft.com/dotnet/understanding-the-whys-whats-and-whens-of-valuetask/#:~:text=nothing%20need%20be%20allocated%3A%20we%20can%20simply%20initialize%20this%20valuetask%3Ctresult%3E%20struct%20with%20the%20tresult%20and%20return%20that">so that</a>:</p>
-
-<blockquote>
-  <p>nothing need be allocated [in certain cases]: we can simply initialize this
-  <code class="language-plaintext highlighter-rouge">ValueTask&lt;TResult&gt;</code> struct with the <code class="language-plaintext highlighter-rouge">TResult</code> and return that.</p>
-</blockquote>
-
-<p>But keep reading. That only applies to the <em>synchronous</em> case, when the result
-of an asynchronous method is already known and can be returned synchronously.</p>
-
-<p>In other words, when the awaiter’s <code class="language-plaintext highlighter-rouge">IsCompleted</code> property returns true then its
-<code class="language-plaintext highlighter-rouge">GetResult</code> method is immediately/synchronously invoked and the result is
-immediately available. There’s no need to instantiate an <code class="language-plaintext highlighter-rouge">Action</code> to pass to its
-<code class="language-plaintext highlighter-rouge">OnCompleted</code> method.</p>
-
-<p>But when the result isn’t available synchronously: heap allocation and dynamic
-dispatch.</p>
-
-<p>Now, <code class="language-plaintext highlighter-rouge">ValueTask</code> has a trick up its sleeve. You can create a <code class="language-plaintext highlighter-rouge">ValueTask</code> from an
-<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.sources.ivaluetasksource?view=net-5.0"><code class="language-plaintext highlighter-rouge">IValueTaskSource</code></a>.
-That does help minimize heap allocations in certain cases, but it’s kind of
-complicated to implement that interface. And I think that implementations
-necessarily come with compromises.</p>
-
-<p>For example: when you create a <code class="language-plaintext highlighter-rouge">ValueTask</code> with an <code class="language-plaintext highlighter-rouge">IValueTaskSource</code> then you
-create it
-<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask.-ctor?view=net-5.0#System_Threading_Tasks_ValueTask__ctor_System_Threading_Tasks_Sources_IValueTaskSource_System_Int16_">with a token</a>.
-And that token is only a 16-bit integer. You can only have so many <code class="language-plaintext highlighter-rouge">ValueTask</code>s
-in play at once for a given <code class="language-plaintext highlighter-rouge">IValueTaskSource</code>. And how do you know when a
-<code class="language-plaintext highlighter-rouge">ValueTask</code> should be taken out of play and its token recycled? If I have a
-<code class="language-plaintext highlighter-rouge">ValueTask</code> then what’s to keep me from continuing to call
-<code class="language-plaintext highlighter-rouge">valueTask.GetAwaiter().GetResult()</code> on it over and over? There is nothing built
-into <code class="language-plaintext highlighter-rouge">ValueTask</code> or <code class="language-plaintext highlighter-rouge">IValueTaskSource</code> to let you know when the token can be
-recycled. You can only recycle the tokens if you have full control over the
-<code class="language-plaintext highlighter-rouge">ValueTask</code>s that are created with your <code class="language-plaintext highlighter-rouge">IValueTaskSource</code>. That limits the
-usefulness of this trick.</p>
-
-<p><strong>Edit September 29, 2021:</strong></p>
-<blockquote>
-  <p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1?view=net-5.0#remarks">The documentation for <code class="language-plaintext highlighter-rouge">ValueTask</code></a>
-  says:</p>
-
-  <blockquote>
-    <p>A <code class="language-plaintext highlighter-rouge">ValueTask&lt;TResult&gt;</code> instance may only be awaited once, and consumers may
-    not read <code class="language-plaintext highlighter-rouge">Result</code> until the instance has completed. If these limitations are
-    unacceptable, convert the <code class="language-plaintext highlighter-rouge">ValueTask&lt;TResult&gt;</code> to a <code class="language-plaintext highlighter-rouge">Task&lt;TResult&gt;</code> by
-    calling <code class="language-plaintext highlighter-rouge">AsTask</code>.</p>
-
-    <p>The following operations should never be performed on a <code class="language-plaintext highlighter-rouge">ValueTask&lt;TResult&gt;</code>
-    instance:</p>
-
-    <ul>
-      <li>Awaiting the instance multiple times.</li>
-      <li>Calling <code class="language-plaintext highlighter-rouge">AsTask</code> multiple times.</li>
-      <li>Using <code class="language-plaintext highlighter-rouge">.Result</code> or <code class="language-plaintext highlighter-rouge">.GetAwaiter().GetResult()</code> when the operation hasn’t
-    yet completed, or using them multiple times.</li>
-      <li>Using more than one of these techniques to consume the instance.</li>
-    </ul>
-
-    <p>If you do any of the above, the results are undefined.</p>
-  </blockquote>
-
-  <p>Now, I’m pretty sure these limitations do not apply if you create a
-  <code class="language-plaintext highlighter-rouge">ValueTask</code>
-  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1.-ctor?view=net-5.0#System_Threading_Tasks_ValueTask_1__ctor_System_Threading_Tasks_Task__0__">from a <code class="language-plaintext highlighter-rouge">Task</code></a>.
-  But do you see how even <code class="language-plaintext highlighter-rouge">ValueTask</code> has specific limitations?</p>
-
-  <p>These limitations necessarily exist because <code class="language-plaintext highlighter-rouge">ValueTask</code> is a <code class="language-plaintext highlighter-rouge">struct</code> (meaning
-  you use value semantics on it and instances probably live on the stack). It’s
-  very easy to create copies of C# <code class="language-plaintext highlighter-rouge">struct</code>s—just assign the <code class="language-plaintext highlighter-rouge">struct</code> to
-  another variable—but changing the state of one does not change the state
-  of the copies. In C# there <em>must</em> be an <code class="language-plaintext highlighter-rouge">Action</code> continuation object, and a
-  reference to it <em>must</em> to be kept somewhere. Perhaps the ideal design would
-  only let there be a single reference so that once the continuation is executed
-  then that single reference can be discarded (which would be the signal that
-  the asynchronous operation has completed). But it’s impossible to do that in
-  C# with <code class="language-plaintext highlighter-rouge">struct</code>s because of how easy it is to copy <code class="language-plaintext highlighter-rouge">struct</code>s and because of
-  how disconnected they are once you do; the developer must either have full
-  control of all instances of the struct, or else he must document a contract
-  (like Microsoft has done for <code class="language-plaintext highlighter-rouge">ValueTask</code> above) and hope that people stick to
-  it.</p>
-</blockquote>
-
-<p>And again, at the end of the day, even with <code class="language-plaintext highlighter-rouge">ValueTask</code> and all its tricks, if
-the awaiter returns <code class="language-plaintext highlighter-rouge">false</code> from <code class="language-plaintext highlighter-rouge">IsCompleted</code> then there is going to be at
-least one heap allocation and dynamic dispatch.</p>
-
-<p>This is why the Rust language devs
-<a href="http://aturon.github.io/tech/2016/09/07/futures-design/#:~:text=we%20were%20unable%20to%20make%20the%20%E2%80%9Cstandard%E2%80%9D%20future%20abstraction%20provide%20zero-cost%20composition%20of%20futures%2C%20and%20we%20know%20of%20no%20%E2%80%9Cstandard%E2%80%9D%20implementation%20that%20does%20so.">say</a>:</p>
-
-<blockquote>
-  <p>We were unable to make the “standard” future abstraction provide zero-cost
-  composition of futures, and we know of no “standard” implementation that does
-  so.</p>
-</blockquote>
-
-<h2 id="shallow-diverust">Shallow dive—Rust</h2>
-
-<p>Let’s turn our attention to Rust.</p>
-
-<p>I’m less familiar with Rust so I won’t be able to provide as much detail. But I
-think you’ll still see why Rust futures are better.</p>
-
-<h3 id="how-the-await-keyword-works-1">How the <code class="language-plaintext highlighter-rouge">await</code> keyword works</h3>
-
-<p>Actually I don’t entirely know how the <code class="language-plaintext highlighter-rouge">await</code> keyword works in Rust. I’m only
-able to find documentation on <em>what</em> it does.</p>
-
-<p>My best guess is the Rust compiler generates a state machine similar to how the
-C# compiler does it.</p>
-
-<p>But keep in mind that in Rust, closures are strongly typed, can be statically
-dispatched, and can live on the stack. So if async blocks are broken up into
-various steps in a state machine, that state machine and all its steps will be
-transparent to the compiler. And its steps can be statically dispatched without
-heap allocations.</p>
-
-<p>However it works, the Rust language devs are clear that async/await is a
-zero-cost abstraction. So dynamic dispatch and heap allocation are definitely
-<em>not</em> necessary.</p>
-
-<h3 id="how-to-create-your-own-awaitable-expressions-1">How to create your own awaitable expressions</h3>
-
-<p>In Rust it comes down to implementing
-<a href="https://doc.rust-lang.org/core/future/trait.Future.html">the <code class="language-plaintext highlighter-rouge">Future</code> trait</a>:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">Future</span> <span class="p">{</span>
-    <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
-    <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="nb">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="k">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>For example:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">OneShotTimer</span> <span class="p">{</span>
-  <span class="nb">bool</span> <span class="n">completed</span><span class="p">,</span>
-  <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Waker</span><span class="o">&gt;</span> <span class="n">waker</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="n">Future</span> <span class="k">for</span> <span class="n">OneShotTimer</span> <span class="p">{</span>
-  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="p">();</span>
-
-  <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="nb">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="k">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="k">match</span> <span class="k">self</span><span class="py">.completed</span> <span class="p">{</span>
-      <span class="k">true</span> <span class="k">=&gt;</span> <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">(()),</span>
-      <span class="k">false</span> <span class="k">=&gt;</span> <span class="p">{</span>
-        <span class="k">self</span><span class="py">.waker</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="n">cx</span><span class="nf">.waker</span><span class="p">()</span><span class="nf">.clone</span><span class="p">())</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="n">OneShotTimer</span> <span class="p">{</span>
-  <span class="k">pub</span> <span class="k">fn</span> <span class="nf">schedule</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
-    <span class="c1">// Do stuff like wire up the .waker to be notified when the timer goes off</span>
-    <span class="o">...</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>See?</p>
-
-<p>Of course there very well might be heap allocations in <em>scheduling</em> this
-particular implementation of a timer. But that’s up to you. It’s not forced upon
-you by the async/await system.</p>
-
-<p>And there are no heap allocations in polling this future. Even when it’s not yet
-ready nothing needs to be placed on the heap. Sure there is a <code class="language-plaintext highlighter-rouge">clone()</code> call in
-there, but that places something into memory that has already been reserved
-within the <code class="language-plaintext highlighter-rouge">OneShotTimer</code>. This <code class="language-plaintext highlighter-rouge">OneShotTimer</code> might happily live on the stack
-and you could call <code class="language-plaintext highlighter-rouge">poll()</code> in a <code class="language-plaintext highlighter-rouge">[no_std]</code> environment.</p>
-
-<h4 id="a-quick-note-about-what-polling-is-not">A quick note about what polling is not</h4>
-
-<p>You don’t have to always continually poll every single future. Rust’s futures
-tell you when they’re ready to be polled again. And you know which one told you
-because either you or your task executor gave it a specific <code class="language-plaintext highlighter-rouge">Waker</code>, and you
-did remember to create that <code class="language-plaintext highlighter-rouge">Waker</code> in a way that associates it with the
-currently executing task, right? So you don’t have to poll <em>all</em> the futures.</p>
-
-<p>Here is what
-<a href="https://doc.rust-lang.org/core/future/trait.Future.html#runtime-characteristics">the documentation</a>
-says:</p>
-
-<blockquote>
-  <p>The <code class="language-plaintext highlighter-rouge">poll</code> function is not called repeatedly in a tight loop – instead, it
-  should only be called when the future indicates that it is ready to make
-  progress (by calling <code class="language-plaintext highlighter-rouge">wake()</code>). If you’re familiar with the <code class="language-plaintext highlighter-rouge">poll(2)</code> or
-  <code class="language-plaintext highlighter-rouge">select(2)</code> syscalls on Unix it’s worth noting that futures typically do <em>not</em>
-  suffer the same problems of “all wakeups must poll all events”; they are more
-  like <code class="language-plaintext highlighter-rouge">epoll(4)</code>.</p>
-</blockquote>
-
-<h3 id="how-to-compose-awaitable-expressions-1">How to compose awaitable expressions</h3>
-
-<p>Here’s an example of joining two futures into a single future that returns the
-result of both of them only once they’ve completed:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">FutureOrResult</span><span class="o">&lt;</span><span class="n">T</span> <span class="p">:</span> <span class="n">Future</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="nf">Future</span><span class="p">(</span><span class="n">T</span><span class="p">),</span>
-  <span class="nf">Result</span><span class="p">(</span><span class="nn">T</span><span class="p">::</span><span class="n">Output</span><span class="p">),</span>
-  <span class="nb">None</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="n">Joined</span><span class="o">&lt;</span><span class="n">A</span> <span class="p">:</span> <span class="n">Future</span><span class="p">,</span> <span class="n">B</span> <span class="p">:</span> <span class="n">Future</span><span class="o">&gt;</span><span class="p">(</span><span class="n">FutureOrResult</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Waker</span><span class="o">&gt;</span><span class="p">);</span>
-
-<span class="k">impl</span><span class="o">&lt;</span><span class="n">A</span> <span class="p">:</span> <span class="n">Future</span><span class="p">,</span> <span class="n">B</span> <span class="p">:</span> <span class="n">Future</span><span class="o">&gt;</span> <span class="n">Future</span> <span class="k">for</span> <span class="n">Joined</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="p">(</span><span class="nn">A</span><span class="p">::</span><span class="n">Output</span><span class="p">,</span> <span class="nn">B</span><span class="p">::</span><span class="n">Output</span><span class="p">);</span>
-
-  <span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="nb">Pin</span><span class="o">&lt;&amp;</span><span class="k">mut</span> <span class="k">Self</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Context</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Poll</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="k">match</span> <span class="k">self</span><span class="na">.0</span> <span class="p">{</span>
-      <span class="nn">FutureOrResult</span><span class="p">::</span><span class="nf">Future</span><span class="p">(</span><span class="n">future_a</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="k">match</span> <span class="n">future_a</span><span class="nf">.poll</span><span class="p">(</span><span class="n">cx</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">(</span><span class="n">result_a</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="k">match</span> <span class="k">self</span><span class="na">.1</span><span class="nf">.poll</span><span class="p">(</span><span class="n">cx</span><span class="p">)</span> <span class="p">{</span>
-          <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">(</span><span class="n">result_b</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
-            <span class="k">self</span><span class="na">.0</span> <span class="o">=</span> <span class="nn">FutureOrResult</span><span class="p">::</span><span class="nb">None</span><span class="p">;</span>
-            <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">((</span><span class="n">result_a</span><span class="p">,</span> <span class="n">result_b</span><span class="p">))</span>
-          <span class="p">},</span>
-          <span class="nn">Poll</span><span class="p">::</span><span class="n">Pending</span> <span class="k">=&gt;</span> <span class="p">{</span>
-            <span class="k">self</span><span class="na">.0</span> <span class="o">=</span> <span class="nn">FutureOrResult</span><span class="p">::</span><span class="nf">Result</span><span class="p">(</span><span class="n">result_a</span><span class="p">);</span>
-            <span class="nn">Poll</span><span class="p">::</span><span class="n">Pending</span>
-          <span class="p">}</span>
-        <span class="p">},</span>
-        <span class="nn">Poll</span><span class="p">::</span><span class="n">Pending</span> <span class="k">=&gt;</span> <span class="nn">Poll</span><span class="p">::</span><span class="n">Pending</span>
-      <span class="p">},</span>
-      <span class="nn">FutureOrResult</span><span class="p">::</span><span class="nf">Result</span><span class="p">(</span><span class="n">result_a</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="k">match</span> <span class="k">self</span><span class="na">.1</span><span class="nf">.poll</span><span class="p">(</span><span class="n">cx</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">(</span><span class="n">result_b</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
-          <span class="k">self</span><span class="na">.0</span> <span class="o">=</span> <span class="nn">FutureOrResult</span><span class="p">::</span><span class="nb">None</span><span class="p">;</span>
-          <span class="nn">Poll</span><span class="p">::</span><span class="nf">Ready</span><span class="p">((</span><span class="n">result_a</span><span class="p">,</span> <span class="n">result_b</span><span class="p">))</span>
-        <span class="p">},</span>
-        <span class="nn">Poll</span><span class="p">::</span><span class="n">Pending</span> <span class="k">=&gt;</span> <span class="p">{</span>
-          <span class="nn">Poll</span><span class="p">::</span><span class="n">Pending</span>
-        <span class="p">}</span>
-      <span class="p">},</span>
-      <span class="nn">FutureOrResult</span><span class="p">::</span><span class="nb">None</span> <span class="k">=&gt;</span> <span class="nd">panic!</span><span class="p">(</span><span class="s">"You called poll too many times"</span><span class="p">)</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Maybe there’s a more idiomatic way, I dunno. But do you see any heap allocations
-anywhere in this composition of two futures?</p>
-
-<p>Do you see how instead of being composed with callbacks and dynamic dispatch,
-Rust futures are composed <em>with static dispatch</em>?</p>
-
-<h3 id="why-heap-allocations-and-dynamic-dispatch-are-avoidable-when-you-compose-futures">Why heap allocations and dynamic dispatch are avoidable when you compose futures</h3>
-
-<p>It’s redundant to say this again, but the <code class="language-plaintext highlighter-rouge">Future::poll()</code> method does not
-require heap allocation or dynamic dispatch. Instead it can be statically
-dispatched on things on the stack.</p>
-
-<h2 id="can-asyncawait-in-c-be-like-rust">Can async/await in C# be like Rust?</h2>
-
-<p>What’s to keep you from implementing your own <code class="language-plaintext highlighter-rouge">IFuture</code> interface in C# and
-making your own async/await framework?</p>
-
-<p>Almost nothing. Here’s an attempt in C# that I think would get most of the way
-there. But Rust’s ownership and lifetime system is really excellent, and I think
-this example suffers without it:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">readonly</span> <span class="k">struct</span> <span class="nc">Context</span>
-<span class="p">{</span>
-  <span class="c1">// Include a Waker here</span>
-<span class="p">}</span>
-
-<span class="k">public</span> <span class="k">readonly</span> <span class="k">struct</span> <span class="nc">Maybe</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-    <span class="k">public</span> <span class="k">static</span> <span class="k">readonly</span> <span class="n">Maybe</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">None</span> <span class="p">=</span> <span class="k">default</span><span class="p">;</span>
-
-    <span class="k">readonly</span> <span class="n">T</span> <span class="n">_value</span><span class="p">;</span>
-
-    <span class="k">public</span> <span class="nf">Maybe</span><span class="p">(</span><span class="n">T</span> <span class="k">value</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="n">HasValue</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
-        <span class="n">_value</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">public</span> <span class="kt">bool</span> <span class="n">HasValue</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
-
-    <span class="k">public</span> <span class="n">T</span> <span class="n">Value</span> <span class="p">=&gt;</span> <span class="n">HasValue</span>
-        <span class="p">?</span> <span class="n">_value</span>
-        <span class="p">:</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">();</span>
-<span class="p">}</span>
-
-<span class="k">public</span> <span class="k">interface</span> <span class="nc">IFuture</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-    <span class="n">Maybe</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="nf">Poll</span><span class="p">(</span><span class="k">in</span> <span class="n">Context</span> <span class="n">context</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">public</span> <span class="k">struct</span> <span class="nc">Joined</span><span class="p">&lt;</span><span class="n">TA</span><span class="p">,</span> <span class="n">TAFuture</span><span class="p">,</span> <span class="n">TB</span><span class="p">,</span> <span class="n">TBFuture</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IFuture</span><span class="p">&lt;(</span><span class="n">TA</span><span class="p">,</span> <span class="n">TB</span><span class="p">)&gt;</span>
-    <span class="k">where</span> <span class="n">TAFuture</span> <span class="p">:</span> <span class="n">IFuture</span><span class="p">&lt;</span><span class="n">TA</span><span class="p">&gt;</span>
-    <span class="k">where</span> <span class="n">TBFuture</span> <span class="p">:</span> <span class="n">IFuture</span><span class="p">&lt;</span><span class="n">TB</span><span class="p">&gt;</span>
-<span class="p">{</span>
-    <span class="kt">bool</span> <span class="n">_hasFutureA</span><span class="p">;</span>
-    <span class="n">TAFuture</span> <span class="n">_futureA</span><span class="p">;</span>
-    <span class="n">TA</span> <span class="n">_valueA</span><span class="p">;</span>
-    <span class="kt">bool</span> <span class="n">_hasFutureB</span><span class="p">;</span>
-    <span class="n">TBFuture</span> <span class="n">_futureB</span><span class="p">;</span>
-    <span class="n">TB</span> <span class="n">_valueB</span><span class="p">;</span>
-
-    <span class="k">public</span> <span class="nf">Joined</span><span class="p">(</span><span class="n">TAFuture</span> <span class="n">futureA</span><span class="p">,</span> <span class="n">TBFuture</span> <span class="n">futureB</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="n">_hasFutureA</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
-        <span class="n">_hasFutureB</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
-        <span class="n">_futureA</span> <span class="p">=</span> <span class="n">futureA</span><span class="p">;</span>
-        <span class="n">_futureB</span> <span class="p">=</span> <span class="n">futureB</span><span class="p">;</span>
-        <span class="n">_valueA</span> <span class="p">=</span> <span class="k">default</span><span class="p">!;</span>
-        <span class="n">_valueB</span> <span class="p">=</span> <span class="k">default</span><span class="p">!;</span>
-    <span class="p">}</span>
-
-    <span class="k">public</span> <span class="n">Maybe</span><span class="p">&lt;(</span><span class="n">TA</span><span class="p">,</span> <span class="n">TB</span><span class="p">)&gt;</span> <span class="nf">Poll</span><span class="p">(</span><span class="k">in</span> <span class="n">Context</span> <span class="n">context</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="n">TA</span> <span class="n">valueA</span> <span class="p">=</span> <span class="k">default</span><span class="p">!;</span>
-        <span class="n">TB</span> <span class="n">valueB</span> <span class="p">=</span> <span class="k">default</span><span class="p">!;</span>
-        <span class="kt">var</span> <span class="n">hasBoth</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="n">_hasFutureA</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">pollResult</span> <span class="p">=</span> <span class="n">_futureA</span><span class="p">.</span><span class="nf">Poll</span><span class="p">(</span><span class="k">in</span> <span class="n">context</span><span class="p">);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">pollResult</span><span class="p">.</span><span class="n">HasValue</span><span class="p">)</span>
-            <span class="p">{</span>
-                <span class="n">valueA</span> <span class="p">=</span> <span class="n">_valueA</span> <span class="p">=</span> <span class="n">pollResult</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
-                <span class="n">_hasFutureA</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-                <span class="n">_futureA</span> <span class="p">=</span> <span class="k">default</span><span class="p">!;</span>
-            <span class="p">}</span>
-            <span class="k">else</span>
-            <span class="p">{</span>
-                <span class="n">hasBoth</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="k">else</span>
-        <span class="p">{</span>
-            <span class="n">valueA</span> <span class="p">=</span> <span class="n">_valueA</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="n">_hasFutureB</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">pollResult</span> <span class="p">=</span> <span class="n">_futureB</span><span class="p">.</span><span class="nf">Poll</span><span class="p">(</span><span class="k">in</span> <span class="n">context</span><span class="p">);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">pollResult</span><span class="p">.</span><span class="n">HasValue</span><span class="p">)</span>
-            <span class="p">{</span>
-                <span class="n">valueB</span> <span class="p">=</span> <span class="n">_valueB</span> <span class="p">=</span> <span class="n">pollResult</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
-                <span class="n">_hasFutureB</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-                <span class="n">_futureB</span> <span class="p">=</span> <span class="k">default</span><span class="p">!;</span>
-            <span class="p">}</span>
-            <span class="k">else</span>
-            <span class="p">{</span>
-                <span class="n">hasBoth</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="k">else</span>
-        <span class="p">{</span>
-            <span class="n">valueB</span> <span class="p">=</span> <span class="n">_valueB</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="k">return</span> <span class="n">hasBoth</span>
-            <span class="p">?</span> <span class="k">new</span> <span class="n">Maybe</span><span class="p">&lt;(</span><span class="n">TA</span><span class="p">,</span> <span class="n">TB</span><span class="p">)&gt;((</span><span class="n">valueA</span><span class="p">,</span> <span class="n">valueB</span><span class="p">))</span>
-            <span class="p">:</span> <span class="n">Maybe</span><span class="p">&lt;(</span><span class="n">TA</span><span class="p">,</span> <span class="n">TB</span><span class="p">)&gt;.</span><span class="n">None</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>There are neither heap allocations nor dynamic dispatch anywhere in sight.</p>
-
-<p>You would have to be very careful with ownership and lifetimes of these structs,
-though. I’m sure havoc would ensue the moment you clone a <code class="language-plaintext highlighter-rouge">Joined</code> struct and
-<code class="language-plaintext highlighter-rouge">Poll()</code>‘ed both instances.</p>
-
-<p>But if you walked <em>very</em> carefully then I’m sure it could work.</p>
-
-<h2 id="the-point">The point</h2>
-
-<p>You can compose Rust futures without heap allocations or dynamic dispatch.
-That’s not true of C#’s tasks (or any other possible awaitable type).</p>
-
-<p>Rust’s heapless composition power comes from the fact that Rust’s futures are
-polled. Because they are polled they can be composed with static dispatch
-instead of callbacks.</p>
-
-<p>Polled futures are great!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Why Rust futures are better because they are polled]]></summary></entry></feed>
+<p>Don’t mix and match modular power supply cables from different manufacturers.</p>]]></content><author><name></name></author><category term="computers" /><summary type="html"><![CDATA[I'm happy to report that my power supply has it]]></summary></entry></feed>

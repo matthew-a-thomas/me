@@ -126,19 +126,13 @@ The following test passes:
 [Fact]
 public async Task EnterAsyncMethodShouldSwitchIntoAndOutOfGivenContext()
 {
-    // For some reason xUnit will waffle between `AsyncTestSyncContext` and
-    // `MaxConcurrencySyncContext` synchronization contexts. So we have to start
-    // on a known-good synchronization context
-    var originalContext = new SimpleWorkQueue();
-    await originalContext.RunBelow();
-    // var originalContext = SynchronizationContext.Current // Can't do this. See above
-
+    SynchronizationContext.SetSynchronizationContext(null); // Necessary because xUnit's SynchronizationContexts like to waffle back and forth
     var newContext = new SimpleWorkQueue();
     await using (await newContext.EnterAsync(default))
     {
         Assert.Same(newContext, SynchronizationContext.Current);
     }
-    Assert.Same(originalContext, SynchronizationContext.Current);
+    Assert.Null(SynchronizationContext.Current);
     var isActuallyOutOfTheContext = false;
     newContext.Post(_ => isActuallyOutOfTheContext = true, null);
     var spinWait = new SpinWait();

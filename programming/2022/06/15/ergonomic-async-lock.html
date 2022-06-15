@@ -95,9 +95,8 @@ reset to whatever it was before.</p>
         <span class="kt">var</span> <span class="n">contextFactory</span> <span class="p">=</span> <span class="nf">GetOrCreateTaskFactory</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
         <span class="kt">var</span> <span class="n">disposable</span> <span class="p">=</span> <span class="n">AsyncDisposable</span><span class="p">.</span><span class="nf">Create</span><span class="p">(()</span> <span class="p">=&gt;</span>
         <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span> <span class="p">!=</span> <span class="n">context</span><span class="p">)</span>
-                <span class="k">return</span> <span class="k">default</span><span class="p">;</span>
-            <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="n">previousContext</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span> <span class="p">==</span> <span class="n">context</span><span class="p">)</span>
+                <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="n">previousContext</span><span class="p">);</span>
             <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="n">DoNothing</span><span class="p">,</span> <span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
             <span class="k">return</span> <span class="k">new</span> <span class="nf">ValueTask</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
         <span class="p">});</span>

@@ -156,19 +156,13 @@ reset to whatever it was before.</p>
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="n">Fact</span><span class="p">]</span>
 <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">EnterAsyncMethodShouldSwitchIntoAndOutOfGivenContext</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="c1">// For some reason xUnit will waffle between `AsyncTestSyncContext` and</span>
-    <span class="c1">// `MaxConcurrencySyncContext` synchronization contexts. So we have to start</span>
-    <span class="c1">// on a known-good synchronization context</span>
-    <span class="kt">var</span> <span class="n">originalContext</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SimpleWorkQueue</span><span class="p">();</span>
-    <span class="k">await</span> <span class="n">originalContext</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
-    <span class="c1">// var originalContext = SynchronizationContext.Current // Can't do this. See above</span>
-
+    <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="k">null</span><span class="p">);</span> <span class="c1">// Necessary because xUnit's SynchronizationContexts like to waffle back and forth</span>
     <span class="kt">var</span> <span class="n">newContext</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SimpleWorkQueue</span><span class="p">();</span>
     <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">newContext</span><span class="p">.</span><span class="nf">EnterAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
     <span class="p">{</span>
         <span class="n">Assert</span><span class="p">.</span><span class="nf">Same</span><span class="p">(</span><span class="n">newContext</span><span class="p">,</span> <span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span><span class="p">);</span>
     <span class="p">}</span>
-    <span class="n">Assert</span><span class="p">.</span><span class="nf">Same</span><span class="p">(</span><span class="n">originalContext</span><span class="p">,</span> <span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span><span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="nf">Null</span><span class="p">(</span><span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span><span class="p">);</span>
     <span class="kt">var</span> <span class="n">isActuallyOutOfTheContext</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
     <span class="n">newContext</span><span class="p">.</span><span class="nf">Post</span><span class="p">(</span><span class="n">_</span> <span class="p">=&gt;</span> <span class="n">isActuallyOutOfTheContext</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
     <span class="kt">var</span> <span class="n">spinWait</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SpinWait</span><span class="p">();</span>

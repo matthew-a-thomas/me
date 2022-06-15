@@ -57,7 +57,7 @@ code like this:</p>
 
 <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoItAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">EnterAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">))</span>
+    <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">EnterAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">))</span>
     <span class="p">{</span>
         <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">_resource</span><span class="p">);</span>
     <span class="p">}</span>
@@ -68,74 +68,114 @@ code like this:</p>
 
 <p>This extension method sets <code class="language-plaintext highlighter-rouge">SynchronizationContext.Current</code> to the given
 <code class="language-plaintext highlighter-rouge">SynchronizationContext</code>, then asynchronously enters it. When the returned
-<code class="language-plaintext highlighter-rouge">IDisposable</code> is disposed of then <code class="language-plaintext highlighter-rouge">SynchronizationContext.Current</code> will be reset
-to whatever it was before.</p>
+<code class="language-plaintext highlighter-rouge">IAsyncDisposable</code> is disposed of then <code class="language-plaintext highlighter-rouge">SynchronizationContext.Current</code> will be
+reset to whatever it was before.</p>
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
 <span class="k">using</span> <span class="nn">System.Runtime.CompilerServices</span><span class="p">;</span>
 <span class="k">using</span> <span class="nn">System.Threading</span><span class="p">;</span>
 <span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
 
 <span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">SynchronizationContextExtensions</span>
 <span class="p">{</span>
-    <span class="k">static</span> <span class="k">readonly</span> <span class="n">Func</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">?,</span> <span class="n">IDisposable</span><span class="p">&gt;</span> <span class="n">CastToDisposable</span> <span class="p">=</span> <span class="n">state</span> <span class="p">=&gt;</span> <span class="p">(</span><span class="n">IDisposable</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">Func</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">?,</span> <span class="n">IAsyncDisposable</span><span class="p">&gt;</span> <span class="n">CastToAsyncDisposable</span> <span class="p">=</span> <span class="n">state</span> <span class="p">=&gt;</span> <span class="p">(</span><span class="n">IAsyncDisposable</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">Action</span> <span class="n">DoNothing</span> <span class="p">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{};</span>
 
     <span class="k">static</span> <span class="k">readonly</span> <span class="n">ConditionalWeakTable</span><span class="p">&lt;</span><span class="n">SynchronizationContext</span><span class="p">,</span> <span class="n">TaskFactory</span><span class="p">&gt;</span> <span class="n">SynchronizationContextToTaskFactoryMap</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
 
-    <span class="k">public</span> <span class="k">static</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">IDisposable</span><span class="p">&gt;</span> <span class="nf">EnterAsync</span><span class="p">(</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">IAsyncDisposable</span><span class="p">&gt;</span> <span class="nf">EnterAsync</span><span class="p">(</span>
         <span class="k">this</span> <span class="n">SynchronizationContext</span> <span class="n">context</span><span class="p">,</span>
         <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
     <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">cancellationToken</span><span class="p">.</span><span class="n">IsCancellationRequested</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">Task</span><span class="p">.</span><span class="n">FromCanceled</span><span class="p">&lt;</span><span class="n">IDisposable</span><span class="p">&gt;(</span><span class="n">cancellationToken</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">Task</span><span class="p">.</span><span class="n">FromCanceled</span><span class="p">&lt;</span><span class="n">IAsyncDisposable</span><span class="p">&gt;(</span><span class="n">cancellationToken</span><span class="p">);</span>
         <span class="kt">var</span> <span class="n">previousContext</span> <span class="p">=</span> <span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span><span class="p">;</span>
         <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
-        <span class="kt">var</span> <span class="n">disposable</span> <span class="p">=</span> <span class="n">Disposable</span><span class="p">.</span><span class="nf">Create</span><span class="p">(()</span> <span class="p">=&gt;</span>
+        <span class="kt">var</span> <span class="n">contextFactory</span> <span class="p">=</span> <span class="nf">GetOrCreateTaskFactory</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">disposable</span> <span class="p">=</span> <span class="n">AsyncDisposable</span><span class="p">.</span><span class="nf">Create</span><span class="p">(()</span> <span class="p">=&gt;</span>
         <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span> <span class="p">!=</span> <span class="n">context</span><span class="p">)</span>
-                <span class="k">return</span><span class="p">;</span>
+                <span class="k">return</span> <span class="k">default</span><span class="p">;</span>
             <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="n">previousContext</span><span class="p">);</span>
+            <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="n">DoNothing</span><span class="p">,</span> <span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nf">ValueTask</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
         <span class="p">});</span>
-        <span class="k">if</span> <span class="p">(!</span><span class="n">SynchronizationContextToTaskFactoryMap</span><span class="p">.</span><span class="nf">TryGetValue</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">factory</span><span class="p">))</span>
-        <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">scheduler</span> <span class="p">=</span> <span class="n">TaskScheduler</span><span class="p">.</span><span class="nf">FromCurrentSynchronizationContext</span><span class="p">();</span>
-            <span class="n">factory</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TaskFactory</span><span class="p">(</span><span class="n">scheduler</span><span class="p">);</span>
-            <span class="n">SynchronizationContextToTaskFactoryMap</span><span class="p">.</span><span class="nf">AddOrUpdate</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">factory</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="nf">EnterAsyncCore</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">disposable</span><span class="p">,</span> <span class="n">cancellationToken</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nf">EnterAsyncCore</span><span class="p">(</span><span class="n">contextFactory</span><span class="p">,</span> <span class="n">disposable</span><span class="p">,</span> <span class="n">cancellationToken</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">IDisposable</span><span class="p">&gt;</span> <span class="nf">EnterAsyncCore</span><span class="p">(</span>
+    <span class="k">static</span> <span class="n">TaskFactory</span> <span class="nf">GetOrCreateTaskFactory</span><span class="p">(</span><span class="n">SynchronizationContext</span> <span class="n">context</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Debug</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span> <span class="p">==</span> <span class="n">context</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">SynchronizationContextToTaskFactoryMap</span><span class="p">.</span><span class="nf">TryGetValue</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">factory</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">factory</span><span class="p">;</span>
+        <span class="kt">var</span> <span class="n">scheduler</span> <span class="p">=</span> <span class="n">TaskScheduler</span><span class="p">.</span><span class="nf">FromCurrentSynchronizationContext</span><span class="p">();</span>
+        <span class="n">factory</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TaskFactory</span><span class="p">(</span><span class="n">scheduler</span><span class="p">);</span>
+        <span class="n">SynchronizationContextToTaskFactoryMap</span><span class="p">.</span><span class="nf">AddOrUpdate</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">factory</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">IAsyncDisposable</span><span class="p">&gt;</span> <span class="nf">EnterAsyncCore</span><span class="p">(</span>
         <span class="n">TaskFactory</span> <span class="n">taskFactory</span><span class="p">,</span>
-        <span class="n">IDisposable</span> <span class="n">disposable</span><span class="p">,</span>
+        <span class="n">IAsyncDisposable</span> <span class="n">disposable</span><span class="p">,</span>
         <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
     <span class="p">{</span>
         <span class="k">try</span>
         <span class="p">{</span>
-            <span class="k">return</span> <span class="k">await</span> <span class="n">taskFactory</span><span class="p">.</span><span class="nf">StartNew</span><span class="p">(</span><span class="n">CastToDisposable</span><span class="p">,</span> <span class="n">disposable</span><span class="p">,</span> <span class="n">cancellationToken</span><span class="p">);</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">taskFactory</span><span class="p">.</span><span class="nf">StartNew</span><span class="p">(</span><span class="n">CastToAsyncDisposable</span><span class="p">,</span> <span class="n">disposable</span><span class="p">,</span> <span class="n">cancellationToken</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="k">catch</span>
         <span class="p">{</span>
-            <span class="n">disposable</span><span class="p">.</span><span class="nf">Dispose</span><span class="p">();</span>
+            <span class="kt">var</span> <span class="n">_</span> <span class="p">=</span> <span class="n">disposable</span><span class="p">.</span><span class="nf">DisposeAsync</span><span class="p">();</span>
             <span class="k">throw</span><span class="p">;</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">Disposable</span> <span class="p">:</span> <span class="n">IDisposable</span>
+<span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">AsyncDisposable</span> <span class="p">:</span> <span class="n">IAsyncDisposable</span>
 <span class="p">{</span>
-    <span class="k">public</span> <span class="k">static</span> <span class="k">readonly</span> <span class="n">Disposable</span> <span class="n">Empty</span> <span class="p">=</span> <span class="k">new</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="k">readonly</span> <span class="n">AsyncDisposable</span> <span class="n">Empty</span> <span class="p">=</span> <span class="k">new</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
 
-    <span class="n">Action</span><span class="p">?</span> <span class="n">_dispose</span><span class="p">;</span>
+    <span class="n">Func</span><span class="p">&lt;</span><span class="n">ValueTask</span><span class="p">&gt;?</span> <span class="n">_disposeAsync</span><span class="p">;</span>
 
-    <span class="nf">Disposable</span><span class="p">(</span><span class="n">Action</span><span class="p">?</span> <span class="n">dispose</span><span class="p">)</span>
+    <span class="nf">AsyncDisposable</span><span class="p">(</span><span class="n">Func</span><span class="p">&lt;</span><span class="n">ValueTask</span><span class="p">&gt;?</span> <span class="n">disposeAsync</span><span class="p">)</span>
     <span class="p">{</span>
-        <span class="n">_dispose</span> <span class="p">=</span> <span class="n">dispose</span><span class="p">;</span>
+        <span class="n">_disposeAsync</span> <span class="p">=</span> <span class="n">disposeAsync</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="k">public</span> <span class="n">Disposable</span> <span class="nf">Create</span><span class="p">(</span><span class="n">Action</span> <span class="n">dispose</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">(</span><span class="n">dispose</span><span class="p">);</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="n">AsyncDisposable</span> <span class="nf">Create</span><span class="p">(</span><span class="n">Func</span><span class="p">&lt;</span><span class="n">ValueTask</span><span class="p">&gt;</span> <span class="n">disposeAsync</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">(</span><span class="n">disposeAsync</span><span class="p">);</span>
 
-    <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">Interlocked</span><span class="p">.</span><span class="nf">Exchange</span><span class="p">(</span><span class="k">ref</span> <span class="n">_dispose</span><span class="p">,</span> <span class="k">null</span><span class="p">)?.</span><span class="nf">Invoke</span><span class="p">();</span>
+    <span class="k">public</span> <span class="n">ValueTask</span> <span class="nf">DisposeAsync</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">Interlocked</span><span class="p">.</span><span class="nf">Exchange</span><span class="p">(</span><span class="k">ref</span> <span class="n">_disposeAsync</span><span class="p">,</span> <span class="k">null</span><span class="p">)?.</span><span class="nf">Invoke</span><span class="p">()</span> <span class="p">??</span> <span class="k">default</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="a-passing-test-case">A passing test case</h2>
+
+<p>The following test passes:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="n">Fact</span><span class="p">]</span>
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">EnterAsyncMethodShouldSwitchIntoAndOutOfGivenContext</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// For some reason xUnit will waffle between `AsyncTestSyncContext` and</span>
+    <span class="c1">// `MaxConcurrencySyncContext` synchronization contexts. So we have to start</span>
+    <span class="c1">// on a known-good synchronization context</span>
+    <span class="kt">var</span> <span class="n">originalContext</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SimpleWorkQueue</span><span class="p">();</span>
+    <span class="k">await</span> <span class="n">originalContext</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+    <span class="c1">// var originalContext = SynchronizationContext.Current // Can't do this. See above</span>
+
+    <span class="kt">var</span> <span class="n">newContext</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SimpleWorkQueue</span><span class="p">();</span>
+    <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">newContext</span><span class="p">.</span><span class="nf">EnterAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="nf">Same</span><span class="p">(</span><span class="n">newContext</span><span class="p">,</span> <span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="nf">Same</span><span class="p">(</span><span class="n">originalContext</span><span class="p">,</span> <span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span><span class="p">);</span>
+    <span class="kt">var</span> <span class="n">isActuallyOutOfTheContext</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+    <span class="n">newContext</span><span class="p">.</span><span class="nf">Post</span><span class="p">(</span><span class="n">_</span> <span class="p">=&gt;</span> <span class="n">isActuallyOutOfTheContext</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+    <span class="kt">var</span> <span class="n">spinWait</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SpinWait</span><span class="p">();</span>
+    <span class="k">while</span> <span class="p">(!</span><span class="n">isActuallyOutOfTheContext</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">spinWait</span><span class="p">.</span><span class="nf">SpinOnce</span><span class="p">();</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
 

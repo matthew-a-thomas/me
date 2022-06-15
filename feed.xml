@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-14T16:47:55-05:00</updated><id>/feed.xml</id><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>Max Fedotov
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-15T07:56:54-05:00</updated><id>/feed.xml</id><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>Max Fedotov
 <a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a">wrote</a>:</p>
 <blockquote>
   <p>If you need a reentrant async lock — you are out of luck and would have to
@@ -113,24 +113,39 @@ one-at-a-time. Sort of like a <code class="language-plaintext highlighter-rouge"
 
 <h2 id="make-it-awaitable">Make it awaitable</h2>
 
-<p>I’ll leave it as an exercise for the reader to figure out how to implement
-<code class="language-plaintext highlighter-rouge">AwaitableSynchronizationContext</code>:</p>
+<p>This <code class="language-plaintext highlighter-rouge">RunBelow()</code> extension method will let you turn every
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> instance into an
+<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#11882-awaitable-expressions">awaitable expression</a>:</p>
 
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">SynchronizationContextExtensions</span>
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System.Runtime.CompilerServices</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">SynchronizationContextExtensions</span>
 <span class="p">{</span>
     <span class="k">public</span> <span class="k">static</span> <span class="n">AwaitableSynchronizationContext</span> <span class="nf">RunBelow</span><span class="p">(</span><span class="k">this</span> <span class="n">SynchronizationContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
 <span class="p">}</span>
+
+<span class="k">public</span> <span class="k">readonly</span> <span class="k">struct</span> <span class="nc">AwaitableSynchronizationContext</span>
+<span class="p">{</span>
+    <span class="k">readonly</span> <span class="n">SynchronizationContext</span> <span class="n">_synchronizationContext</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">AwaitableSynchronizationContext</span><span class="p">(</span><span class="n">SynchronizationContext</span> <span class="n">synchronizationContext</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_synchronizationContext</span> <span class="p">=</span> <span class="n">synchronizationContext</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="n">SynchronizationContextAwaiter</span> <span class="nf">GetAwaiter</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">(</span><span class="n">_synchronizationContext</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">readonly</span> <span class="k">struct</span> <span class="nc">SynchronizationContextAwaiter</span> <span class="p">:</span> <span class="n">INotifyCompletion</span>
+<span class="p">{</span>
+    <span class="k">readonly</span> <span class="n">SynchronizationContext</span> <span class="n">_synchronizationContext</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">SynchronizationContextAwaiter</span><span class="p">(</span><span class="n">SynchronizationContext</span> <span class="n">synchronizationContext</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_synchronizationContext</span> <span class="p">=</span> <span class="n">synchronizationContext</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">bool</span> <span class="n">IsCompleted</span> <span class="p">=&gt;</span> <span class="k">false</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">OnCompleted</span><span class="p">(</span><span class="n">Action</span> <span class="n">action</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_synchronizationContext</span><span class="p">.</span><span class="nf">Post</span><span class="p">(</span><span class="n">_</span> <span class="p">=&gt;</span> <span class="nf">action</span><span class="p">(),</span> <span class="k">null</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">GetResult</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></div>
-
-<p><a href="https://www.google.com/search?q=c%23+await+anything">Hint</a>.</p>
-
-<p>Okay, here are some big clues… the awaiter returned from
-<code class="language-plaintext highlighter-rouge">AwaitableSynchronizationContext.GetAwaiter()</code> needs to:</p>
-
-<ul>
-  <li>Return <code class="language-plaintext highlighter-rouge">false</code> from <code class="language-plaintext highlighter-rouge">IsCompleted</code></li>
-  <li>Pass the continuation from <code class="language-plaintext highlighter-rouge">OnCompleted</code> to <code class="language-plaintext highlighter-rouge">SynchronizationContext.Post</code></li>
-</ul>
 
 <h2 id="use-special-semantics">Use special semantics</h2>
 

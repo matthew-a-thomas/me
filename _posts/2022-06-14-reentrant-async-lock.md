@@ -253,7 +253,7 @@ public async Task SeeItIsPossible()
 You might think it's impossible to get all three of these at the same time:
 
 * Reentrance
-* Asynchronousity
+* Asynchronicity
 * Mutual exclusion
 
 But it becomes possible when you take control of the continuations in

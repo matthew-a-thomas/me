@@ -3,11 +3,12 @@
     "editor.rulers": [80, 120],
     "editor.tabSize": 2,
     "cSpell.words": [
-      "MVVM",
-      "Moto",
-      "Postgres",
+      "asynchronicity",
       "endhighlight",
       "heapless",
+      "Moto",
+      "MVVM",
+      "Postgres",
       "pseudocode",
       "smushed"
     ]

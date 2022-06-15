@@ -11,7 +11,7 @@ I previously [described]({% post_url 2022-06-14-reentrant-async-lock %}) how to
 make an async lock that supports all three of these at once:
 
 * Reentrance
-* Asynchronousity
+* Asynchronicity
 * Mutual exclusion
 
 Now I'm going to show how to make it more ergonomic. With

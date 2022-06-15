@@ -2,7 +2,10 @@
 title: Reentrant Async Lock
 category: programming
 description: A correct implementation
+async_series_ordinal: first
 ---
+
+{% include async_lock_series.md %}
 
 Max Fedotov
 [wrote](https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a):
@@ -17,6 +20,8 @@ Here's how we'll have our cake and eat it too:
 1. Make a custom `SynchronizationContext`
 2. Make that `SynchronizationContext` awaitable
 3. Use some special semantics
+4. **Update**: improved semantics are shown
+   [here]({% post_url 2022-06-15-ergonomic-async-lock %})
 
 ## Custom `SynchronizationContext`
 

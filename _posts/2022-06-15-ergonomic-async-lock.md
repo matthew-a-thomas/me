@@ -25,7 +25,7 @@ readonly object _resource = new();
 
 async Task DoItAsync(CancellationToken cancellationToken)
 {
-    using (await _asyncLock.EnterAsync(cancellationToken))
+    await using (await _asyncLock.EnterAsync(cancellationToken))
     {
         ExclusivelyUse(_resource);
     }
@@ -36,74 +36,115 @@ async Task DoItAsync(CancellationToken cancellationToken)
 
 This extension method sets `SynchronizationContext.Current` to the given
 `SynchronizationContext`, then asynchronously enters it. When the returned
-`IDisposable` is disposed of then `SynchronizationContext.Current` will be reset
-to whatever it was before.
+`IAsyncDisposable` is disposed of then `SynchronizationContext.Current` will be
+reset to whatever it was before.
 
 ```csharp
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 public static class SynchronizationContextExtensions
 {
-    static readonly Func<object?, IDisposable> CastToDisposable = state => (IDisposable)state!;
+    static readonly Func<object?, IAsyncDisposable> CastToAsyncDisposable = state => (IAsyncDisposable)state!;
+    static readonly Action DoNothing = () => {};
 
     static readonly ConditionalWeakTable<SynchronizationContext, TaskFactory> SynchronizationContextToTaskFactoryMap = new();
 
-    public static Task<IDisposable> EnterAsync(
+    public static Task<IAsyncDisposable> EnterAsync(
         this SynchronizationContext context,
         CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
-            return Task.FromCanceled<IDisposable>(cancellationToken);
+            return Task.FromCanceled<IAsyncDisposable>(cancellationToken);
         var previousContext = SynchronizationContext.Current;
         SynchronizationContext.SetSynchronizationContext(context);
-        var disposable = Disposable.Create(() =>
+        var contextFactory = GetOrCreateTaskFactory(context);
+        var disposable = AsyncDisposable.Create(() =>
         {
             if (SynchronizationContext.Current != context)
-                return;
+                return default;
             SynchronizationContext.SetSynchronizationContext(previousContext);
+            var task = Task.Run(DoNothing, CancellationToken.None);
+            return new ValueTask(task);
         });
-        if (!SynchronizationContextToTaskFactoryMap.TryGetValue(context, out var factory))
-        {
-            var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-            factory = new TaskFactory(scheduler);
-            SynchronizationContextToTaskFactoryMap.AddOrUpdate(context, factory);
-        }
-        return EnterAsyncCore(factory, disposable, cancellationToken);
+        return EnterAsyncCore(contextFactory, disposable, cancellationToken);
     }
 
-    static async Task<IDisposable> EnterAsyncCore(
+    static TaskFactory GetOrCreateTaskFactory(SynchronizationContext context)
+    {
+        Debug.Assert(SynchronizationContext.Current == context);
+        if (SynchronizationContextToTaskFactoryMap.TryGetValue(context, out var factory))
+            return factory;
+        var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+        factory = new TaskFactory(scheduler);
+        SynchronizationContextToTaskFactoryMap.AddOrUpdate(context, factory);
+        return factory;
+    }
+
+    static async Task<IAsyncDisposable> EnterAsyncCore(
         TaskFactory taskFactory,
-        IDisposable disposable,
+        IAsyncDisposable disposable,
         CancellationToken cancellationToken)
     {
         try
         {
-            return await taskFactory.StartNew(CastToDisposable, disposable, cancellationToken);
+            return await taskFactory.StartNew(CastToAsyncDisposable, disposable, cancellationToken);
         }
         catch
         {
-            disposable.Dispose();
+            var _ = disposable.DisposeAsync();
             throw;
         }
     }
 }
 
-public sealed class Disposable : IDisposable
+public sealed class AsyncDisposable : IAsyncDisposable
 {
-    public static readonly Disposable Empty = new(null);
+    public static readonly AsyncDisposable Empty = new(null);
 
-    Action? _dispose;
+    Func<ValueTask>? _disposeAsync;
 
-    Disposable(Action? dispose)
+    AsyncDisposable(Func<ValueTask>? disposeAsync)
     {
-        _dispose = dispose;
+        _disposeAsync = disposeAsync;
     }
 
-    public Disposable Create(Action dispose) => new(dispose);
+    public static AsyncDisposable Create(Func<ValueTask> disposeAsync) => new(disposeAsync);
 
-    public void Dispose() => Interlocked.Exchange(ref _dispose, null)?.Invoke();
+    public ValueTask DisposeAsync() => Interlocked.Exchange(ref _disposeAsync, null)?.Invoke() ?? default;
+}
+```
+
+## A passing test case
+
+The following test passes:
+
+```csharp
+[Fact]
+public async Task EnterAsyncMethodShouldSwitchIntoAndOutOfGivenContext()
+{
+    // For some reason xUnit will waffle between `AsyncTestSyncContext` and
+    // `MaxConcurrencySyncContext` synchronization contexts. So we have to start
+    // on a known-good synchronization context
+    var originalContext = new SimpleWorkQueue();
+    await originalContext.RunBelow();
+    // var originalContext = SynchronizationContext.Current // Can't do this. See above
+
+    var newContext = new SimpleWorkQueue();
+    await using (await newContext.EnterAsync(default))
+    {
+        Assert.Same(newContext, SynchronizationContext.Current);
+    }
+    Assert.Same(originalContext, SynchronizationContext.Current);
+    var isActuallyOutOfTheContext = false;
+    newContext.Post(_ => isActuallyOutOfTheContext = true, null);
+    var spinWait = new SpinWait();
+    while (!isActuallyOutOfTheContext)
+    {
+        spinWait.SpinOnce();
+    }
 }
 ```

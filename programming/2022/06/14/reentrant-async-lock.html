@@ -229,6 +229,19 @@ reentrant, asynchronous, and it provides mutual exclusion:</p>
 <span class="p">}</span>
 </code></pre></div></div>
 
+<h2 id="the-point">The point</h2>
+
+<p>You might think it’s impossible to get all three of these at the same time:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronousity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>But it becomes possible when you take control of the continuations in
+asynchronous contexts.</p>
+
         </div>
         <div class="list-group-item">
           <footer class="font-italic" style="font-size: 0.8em;">

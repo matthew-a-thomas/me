@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-15T07:56:54-05:00</updated><id>/feed.xml</id><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>Max Fedotov
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-15T07:59:11-05:00</updated><id>/feed.xml</id><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>Max Fedotov
 <a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a">wrote</a>:</p>
 <blockquote>
   <p>If you need a reentrant async lock — you are out of luck and would have to
@@ -197,7 +197,20 @@ reentrant, asynchronous, and it provides mutual exclusion:</p>
     <span class="p">);</span>
     <span class="n">Assert</span><span class="p">.</span><span class="nf">Empty</span><span class="p">(</span><span class="n">exceptions</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[A correct implementation]]></summary></entry><entry><title type="html">Loading Loose XAML</title><link href="/programming/2022/06/03/loading-loose-xaml.html" rel="alternate" type="text/html" title="Loading Loose XAML" /><published>2022-06-03T00:00:00-05:00</published><updated>2022-06-03T00:00:00-05:00</updated><id>/programming/2022/06/03/loading-loose-xaml</id><content type="html" xml:base="/programming/2022/06/03/loading-loose-xaml.html"><![CDATA[<p>Suppose you have a custom thingy like this:</p>
+</code></pre></div></div>
+
+<h2 id="the-point">The point</h2>
+
+<p>You might think it’s impossible to get all three of these at the same time:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronousity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>But it becomes possible when you take control of the continuations in
+asynchronous contexts.</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[A correct implementation]]></summary></entry><entry><title type="html">Loading Loose XAML</title><link href="/programming/2022/06/03/loading-loose-xaml.html" rel="alternate" type="text/html" title="Loading Loose XAML" /><published>2022-06-03T00:00:00-05:00</published><updated>2022-06-03T00:00:00-05:00</updated><id>/programming/2022/06/03/loading-loose-xaml</id><content type="html" xml:base="/programming/2022/06/03/loading-loose-xaml.html"><![CDATA[<p>Suppose you have a custom thingy like this:</p>
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">LooseXaml</span><span class="p">;</span>
 

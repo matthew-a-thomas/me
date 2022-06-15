@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-15T07:59:11-05:00</updated><id>/feed.xml</id><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>Max Fedotov
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-15T08:17:04-05:00</updated><id>/feed.xml</id><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>Max Fedotov
 <a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a">wrote</a>:</p>
 <blockquote>
   <p>If you need a reentrant async lock — you are out of luck and would have to
@@ -135,15 +135,22 @@ one-at-a-time. Sort of like a <code class="language-plaintext highlighter-rouge"
 
 <span class="k">public</span> <span class="k">readonly</span> <span class="k">struct</span> <span class="nc">SynchronizationContextAwaiter</span> <span class="p">:</span> <span class="n">INotifyCompletion</span>
 <span class="p">{</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">SendOrPostCallback</span> <span class="n">InvokeContinuationDelegate</span> <span class="p">=</span> <span class="n">InvokeContinuation</span><span class="p">;</span>
     <span class="k">readonly</span> <span class="n">SynchronizationContext</span> <span class="n">_synchronizationContext</span><span class="p">;</span>
 
     <span class="k">public</span> <span class="nf">SynchronizationContextAwaiter</span><span class="p">(</span><span class="n">SynchronizationContext</span> <span class="n">synchronizationContext</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_synchronizationContext</span> <span class="p">=</span> <span class="n">synchronizationContext</span><span class="p">;</span>
 
     <span class="k">public</span> <span class="kt">bool</span> <span class="n">IsCompleted</span> <span class="p">=&gt;</span> <span class="k">false</span><span class="p">;</span>
 
-    <span class="k">public</span> <span class="k">void</span> <span class="nf">OnCompleted</span><span class="p">(</span><span class="n">Action</span> <span class="n">action</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_synchronizationContext</span><span class="p">.</span><span class="nf">Post</span><span class="p">(</span><span class="n">_</span> <span class="p">=&gt;</span> <span class="nf">action</span><span class="p">(),</span> <span class="k">null</span><span class="p">);</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">OnCompleted</span><span class="p">(</span><span class="n">Action</span> <span class="n">action</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_synchronizationContext</span><span class="p">.</span><span class="nf">Post</span><span class="p">(</span><span class="n">InvokeContinuationDelegate</span><span class="p">,</span> <span class="n">action</span><span class="p">);</span>
 
     <span class="k">public</span> <span class="k">void</span> <span class="nf">GetResult</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">void</span> <span class="nf">InvokeContinuation</span><span class="p">(</span><span class="kt">object</span><span class="p">?</span> <span class="n">state</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">action</span> <span class="p">=</span> <span class="p">(</span><span class="n">Action</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+        <span class="nf">action</span><span class="p">();</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -188,7 +195,39 @@ reentrant, asynchronous, and it provides mutual exclusion:</p>
         <span class="nf">RecursivelyUseIt</span><span class="p">(</span><span class="m">0</span><span class="p">),</span>
         <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
         <span class="p">{</span>
-            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">100</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">10</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+                <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">10</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+                <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">10</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+                <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">10</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
+                <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">10</span><span class="p">;</span> <span class="p">++</span><span class="n">i</span><span class="p">)</span>
             <span class="p">{</span>
                 <span class="k">await</span> <span class="n">asyncGuard</span><span class="p">.</span><span class="nf">RunBelow</span><span class="p">();</span>
                 <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">nonThreadSafeResource</span><span class="p">);</span>

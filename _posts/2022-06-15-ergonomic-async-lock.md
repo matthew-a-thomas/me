@@ -64,9 +64,8 @@ public static class SynchronizationContextExtensions
         var contextFactory = GetOrCreateTaskFactory(context);
         var disposable = AsyncDisposable.Create(() =>
         {
-            if (SynchronizationContext.Current != context)
-                return default;
-            SynchronizationContext.SetSynchronizationContext(previousContext);
+            if (SynchronizationContext.Current == context)
+                SynchronizationContext.SetSynchronizationContext(previousContext);
             var task = Task.Run(DoNothing, CancellationToken.None);
             return new ValueTask(task);
         });

@@ -116,23 +116,47 @@ public sealed class WorkQueue : SynchronizationContext
 
 ## Make it awaitable
 
-I'll leave it as an exercise for the reader to figure out how to implement
-`AwaitableSynchronizationContext`:
+This `RunBelow()` extension method will let you turn every
+`SynchronizationContext` instance into an
+[awaitable expression](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#11882-awaitable-expressions):
 
 ```csharp
+using System.Runtime.CompilerServices;
+
 public static class SynchronizationContextExtensions
 {
     public static AwaitableSynchronizationContext RunBelow(this SynchronizationContext context) => new(context);
 }
+
+public readonly struct AwaitableSynchronizationContext
+{
+    readonly SynchronizationContext _synchronizationContext;
+
+    public AwaitableSynchronizationContext(SynchronizationContext synchronizationContext) => _synchronizationContext = synchronizationContext;
+
+    public SynchronizationContextAwaiter GetAwaiter() => new(_synchronizationContext);
+}
+
+public readonly struct SynchronizationContextAwaiter : INotifyCompletion
+{
+    static readonly SendOrPostCallback InvokeContinuationDelegate = InvokeContinuation;
+    readonly SynchronizationContext _synchronizationContext;
+
+    public SynchronizationContextAwaiter(SynchronizationContext synchronizationContext) => _synchronizationContext = synchronizationContext;
+
+    public bool IsCompleted => false;
+
+    public void OnCompleted(Action action) => _synchronizationContext.Post(InvokeContinuationDelegate, action);
+
+    public void GetResult() { }
+
+    static void InvokeContinuation(object? state)
+    {
+        var action = (Action)state!;
+        action();
+    }
+}
 ```
-
-[Hint](https://www.google.com/search?q=c%23+await+anything).
-
-Okay, here are some big clues... the awaiter returned from
-`AwaitableSynchronizationContext.GetAwaiter()` needs to:
-
-* Return `false` from `IsCompleted`
-* Pass the continuation from `OnCompleted` to `SynchronizationContext.Post`
 
 ## Use special semantics
 
@@ -176,7 +200,39 @@ public async Task SeeItIsPossible()
         RecursivelyUseIt(0),
         Task.Run(async () =>
         {
-            for (var i = 0; i < 100; ++i)
+            for (var i = 0; i < 10; ++i)
+            {
+                await asyncGuard.RunBelow();
+                ExclusivelyUse(nonThreadSafeResource);
+            }
+        }),
+        Task.Run(async () =>
+        {
+            for (var i = 0; i < 10; ++i)
+            {
+                await asyncGuard.RunBelow();
+                ExclusivelyUse(nonThreadSafeResource);
+            }
+        }),
+        Task.Run(async () =>
+        {
+            for (var i = 0; i < 10; ++i)
+            {
+                await asyncGuard.RunBelow();
+                ExclusivelyUse(nonThreadSafeResource);
+            }
+        }),
+        Task.Run(async () =>
+        {
+            for (var i = 0; i < 10; ++i)
+            {
+                await asyncGuard.RunBelow();
+                ExclusivelyUse(nonThreadSafeResource);
+            }
+        }),
+        Task.Run(async () =>
+        {
+            for (var i = 0; i < 10; ++i)
             {
                 await asyncGuard.RunBelow();
                 ExclusivelyUse(nonThreadSafeResource);
@@ -186,3 +242,14 @@ public async Task SeeItIsPossible()
     Assert.Empty(exceptions);
 }
 ```
+
+## The point
+
+You might think it's impossible to get all three of these at the same time:
+
+* Reentrance
+* Asynchronousity
+* Mutual exclusion
+
+But it becomes possible when you take control of the continuations in
+asynchronous contexts.

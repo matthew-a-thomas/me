@@ -28,7 +28,17 @@
           
           <p><i>June 14, 2022&mdash;A correct implementation</i></p>
           
-          <p>Max Fedotov
+          <p>This the first post in a short series about async
+locks:</p>
+
+<ol>
+  <li><strong>Reentrant Async Lock</strong> (<em>this post</em>)—A correct implementation</li>
+  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock</a></strong>—Making the work queue look more like an async lock</li>
+</ol>
+
+<hr />
+
+<p>Max Fedotov
 <a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a">wrote</a>:</p>
 <blockquote>
   <p>If you need a reentrant async lock — you are out of luck and would have to
@@ -44,6 +54,8 @@
   <li>Make a custom <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></li>
   <li>Make that <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> awaitable</li>
   <li>Use some special semantics</li>
+  <li><strong>Update</strong>: improved semantics are shown
+<a href="/programming/2022/06/15/ergonomic-async-lock.html">here</a></li>
 </ol>
 
 <h2 id="custom-synchronizationcontext">Custom <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></h2>

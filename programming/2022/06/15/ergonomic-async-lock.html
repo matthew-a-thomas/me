@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Making the work queue look more like an async lock">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>A More Ergonomic Async Lock - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>A More Ergonomic Async Lock</h1>
+          
+          
+          <p><i>June 15, 2022&mdash;Making the work queue look more like an async lock</i></p>
+          
+          <p>This the second post in a short series about async
+locks:</p>
+
+<ol>
+  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
+  <li><strong>A More Ergonomic Async Lock</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
+</ol>
+
+<hr />
+
+<p>I previously <a href="/programming/2022/06/14/reentrant-async-lock.html">described</a> how to
+make an async lock that supports all three of these at once:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronousity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>Now I’m going to show how to make it more ergonomic. With
+<a href="/programming/2022/06/14/reentrant-async-lock.html">the <code class="language-plaintext highlighter-rouge">WorkQueue</code> class from that post</a>
+and with the <code class="language-plaintext highlighter-rouge">EnterAsync</code> extension method shown below you’ll be able to write
+code like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">WorkQueue</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+<span class="k">readonly</span> <span class="kt">object</span> <span class="n">_resource</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">async</span> <span class="n">Task</span> <span class="nf">DoItAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">EnterAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="nf">ExclusivelyUse</span><span class="p">(</span><span class="n">_resource</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="the-enterasync-extension-method">The <code class="language-plaintext highlighter-rouge">EnterAsync</code> extension method</h2>
+
+<p>This extension method sets <code class="language-plaintext highlighter-rouge">SynchronizationContext.Current</code> to the given
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code>, then asynchronously enters it. When the returned
+<code class="language-plaintext highlighter-rouge">IDisposable</code> is disposed of then <code class="language-plaintext highlighter-rouge">SynchronizationContext.Current</code> will be reset
+to whatever it was before.</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Runtime.CompilerServices</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Threading</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">SynchronizationContextExtensions</span>
+<span class="p">{</span>
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">Func</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">?,</span> <span class="n">IDisposable</span><span class="p">&gt;</span> <span class="n">CastToDisposable</span> <span class="p">=</span> <span class="n">state</span> <span class="p">=&gt;</span> <span class="p">(</span><span class="n">IDisposable</span><span class="p">)</span><span class="n">state</span><span class="p">!;</span>
+
+    <span class="k">static</span> <span class="k">readonly</span> <span class="n">ConditionalWeakTable</span><span class="p">&lt;</span><span class="n">SynchronizationContext</span><span class="p">,</span> <span class="n">TaskFactory</span><span class="p">&gt;</span> <span class="n">SynchronizationContextToTaskFactoryMap</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">IDisposable</span><span class="p">&gt;</span> <span class="nf">EnterAsync</span><span class="p">(</span>
+        <span class="k">this</span> <span class="n">SynchronizationContext</span> <span class="n">context</span><span class="p">,</span>
+        <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cancellationToken</span><span class="p">.</span><span class="n">IsCancellationRequested</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Task</span><span class="p">.</span><span class="n">FromCanceled</span><span class="p">&lt;</span><span class="n">IDisposable</span><span class="p">&gt;(</span><span class="n">cancellationToken</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">previousContext</span> <span class="p">=</span> <span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span><span class="p">;</span>
+        <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">disposable</span> <span class="p">=</span> <span class="n">Disposable</span><span class="p">.</span><span class="nf">Create</span><span class="p">(()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">SynchronizationContext</span><span class="p">.</span><span class="n">Current</span> <span class="p">!=</span> <span class="n">context</span><span class="p">)</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="n">previousContext</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="k">if</span> <span class="p">(!</span><span class="n">SynchronizationContextToTaskFactoryMap</span><span class="p">.</span><span class="nf">TryGetValue</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">factory</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">scheduler</span> <span class="p">=</span> <span class="n">TaskScheduler</span><span class="p">.</span><span class="nf">FromCurrentSynchronizationContext</span><span class="p">();</span>
+            <span class="n">factory</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TaskFactory</span><span class="p">(</span><span class="n">scheduler</span><span class="p">);</span>
+            <span class="n">SynchronizationContextToTaskFactoryMap</span><span class="p">.</span><span class="nf">AddOrUpdate</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">factory</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nf">EnterAsyncCore</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">disposable</span><span class="p">,</span> <span class="n">cancellationToken</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">IDisposable</span><span class="p">&gt;</span> <span class="nf">EnterAsyncCore</span><span class="p">(</span>
+        <span class="n">TaskFactory</span> <span class="n">taskFactory</span><span class="p">,</span>
+        <span class="n">IDisposable</span> <span class="n">disposable</span><span class="p">,</span>
+        <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">try</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">taskFactory</span><span class="p">.</span><span class="nf">StartNew</span><span class="p">(</span><span class="n">CastToDisposable</span><span class="p">,</span> <span class="n">disposable</span><span class="p">,</span> <span class="n">cancellationToken</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">catch</span>
+        <span class="p">{</span>
+            <span class="n">disposable</span><span class="p">.</span><span class="nf">Dispose</span><span class="p">();</span>
+            <span class="k">throw</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">Disposable</span> <span class="p">:</span> <span class="n">IDisposable</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="k">readonly</span> <span class="n">Disposable</span> <span class="n">Empty</span> <span class="p">=</span> <span class="k">new</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+
+    <span class="n">Action</span><span class="p">?</span> <span class="n">_dispose</span><span class="p">;</span>
+
+    <span class="nf">Disposable</span><span class="p">(</span><span class="n">Action</span><span class="p">?</span> <span class="n">dispose</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_dispose</span> <span class="p">=</span> <span class="n">dispose</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">Disposable</span> <span class="nf">Create</span><span class="p">(</span><span class="n">Action</span> <span class="n">dispose</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">(</span><span class="n">dispose</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">Interlocked</span><span class="p">.</span><span class="nf">Exchange</span><span class="p">(</span><span class="k">ref</span> <span class="n">_dispose</span><span class="p">,</span> <span class="k">null</span><span class="p">)?.</span><span class="nf">Invoke</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

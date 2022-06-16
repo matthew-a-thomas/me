@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-15T15:28:27-05:00</updated><id>/feed.xml</id><entry><title type="html">A More Ergonomic Async Lock</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<p>This the second post in a short series about async
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-16T09:24:22-05:00</updated><id>/feed.xml</id><entry><title type="html">A More Ergonomic Async Lock</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<p>This the second post in a short series about async
 locks:</p>
 
 <ol>
   <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
   <li><strong>A More Ergonomic Async Lock</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
 </ol>
+
+<h3 id="it-turns-out-i-havent-gotten-this-right-yet-stay-tuned-for-the-third-post">It turns out I haven’t gotten this right yet! Stay tuned for the third post…</h3>
 
 <hr />
 
@@ -147,6 +149,8 @@ locks:</p>
   <li><strong>Reentrant Async Lock</strong> (<em>this post</em>)—A correct implementation</li>
   <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock</a></strong>—Making the work queue look more like an async lock</li>
 </ol>
+
+<h3 id="it-turns-out-i-havent-gotten-this-right-yet-stay-tuned-for-the-third-post">It turns out I haven’t gotten this right yet! Stay tuned for the third post…</h3>
 
 <hr />
 

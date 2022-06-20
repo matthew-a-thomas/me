@@ -1,11 +1,22 @@
 ---
-title: A More Ergonomic Async Lock
+title: A More Ergonomic Async Lock (obsolete)
 description: Making the work queue look more like an async lock
 category: programming
 async_series_ordinal: second
 ---
 
 {% include async_lock_series.md %}
+
+<div class="alert alert-warning">
+{% markdown %}
+## Warning
+
+The code described in this post has some issues. For example, the
+code below doesn't correctly handle cancellation. See
+[the next post]({% post_url 2022-06-20-introducing-reentrantasynclock %}) for a
+better implementation that is more thoroughly tested.
+{% endmarkdown %}
+</div>
 
 I previously [described]({% post_url 2022-06-14-reentrant-async-lock %}) how to
 make an async lock that supports all three of these at once:

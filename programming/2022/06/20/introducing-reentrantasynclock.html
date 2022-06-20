@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Introducing the ReentrantAsyncLock package">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>ReentrantAsyncLock NuGet Package - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>ReentrantAsyncLock NuGet Package</h1>
+          
+          
+          <p><i>June 20, 2022&mdash;Introducing the ReentrantAsyncLock package</i></p>
+          
+          <p>This is the third post in a short series about async
+locks:</p>
+
+<ol>
+  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
+  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
+  <li><strong>ReentrantAsyncLock NuGet Package</strong> (<em>this post</em>)—Introducing the ReentrantAsyncLock package</li>
+  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
+</ol>
+
+<hr />
+
+<p>In the previous two posts I outlined the concept for a reentrant asynchronous
+lock, and explained how it can provide all three of these things at once:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronicity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>In this third post I’ll introduce the ReentrantAsyncLock NuGet package which
+gives you semantics that will look a little more normal. I think this third post
+should take the place in your mind of the second one because the code here works
+out some kinks that I inadvertently have there. I consider this NuGet package
+the capstone of my efforts in this series.</p>
+
+<p>NuGet package:<br />
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">https://www.nuget.org/packages/ReentrantAsyncLock</a></p>
+
+<p>Source code:<br />
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock">https://github.com/matthew-a-thomas/cs-reentrant-async-lock</a></p>
+
+<h1 id="the-nuget-package-and-its-semantics">The NuGet package and its semantics</h1>
+
+<p>The
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
+lets you write code like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">asyncLock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ReentrantAsyncLock</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">raceCondition</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+<span class="c1">// You can acquire the lock asynchronously</span>
+<span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">WhenAll</span><span class="p">(</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="c1">// The lock is reentrant</span>
+            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="c1">// The lock provides mutual exclusion</span>
+                <span class="n">raceCondition</span><span class="p">++;</span>
+            <span class="p">}</span>
+        <span class="p">}),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="n">raceCondition</span><span class="p">++;</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">);</span>
+<span class="p">}</span>
+<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="n">raceCondition</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>In the code comments above I point out the three different aspects of the lock.</p>
+
+<p>You’ll also notice that the code has automated tests that assert the correctness
+of each of the three aspects.</p>
+
+<h1 id="how-does-it-work">How does it work?</h1>
+
+<p>It combines <code class="language-plaintext highlighter-rouge">ExecutionContext</code>/<code class="language-plaintext highlighter-rouge">AsyncLocal</code> with a special
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> and a special awaitable type.</p>
+
+<h2 id="executioncontext-and-asynclocal">ExecutionContext and AsyncLocal</h2>
+
+<p>If you’re familiar with
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.executioncontext?view=net-6.0">the ExecutionContext class</a>
+then you’ll know that it “flows” downward through async calls. And it carries
+some stuff with it. In particular, it carries the values of
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1?view=net-6.0">AsyncLocal</a>
+instances.</p>
+
+<p>One such instance holds a value that indicates an asynchronous scope. When you
+acquire the lock then your scope is squirreled away as though to say “the lock
+belongs to this scope”. And then that scope flows downward through async calls.
+That’s what makes the lock reentrant.</p>
+
+<p>If you’re looking at the source code then check out
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L84">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.LocalScope</code> property</a>.
+It is backed by an <code class="language-plaintext highlighter-rouge">AsyncLocal</code> instance and stores a value that indicates an
+asynchronous scope. When an object is assigned to this property then all nested
+async calls also get that value.</p>
+
+<p>Now notice
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L149">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.TryLockImmediately</code> method</a>.
+That method checks the <code class="language-plaintext highlighter-rouge">LocalScope</code> against
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L63">the <code class="language-plaintext highlighter-rouge">_owningScope</code> field</a>.
+When they match then the lock can be acquired because that’s a case of
+reentrance.</p>
+
+<h2 id="synchronizationcontext">SynchronizationContext</h2>
+
+<p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.synchronizationcontext?view=net-6.0">The <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> class</a>
+is Microsoft’s abstraction of a synchronization model. It is (usually) the thing
+in charge of deciding how asynchronous continuations should be executed.</p>
+
+<p>For example, in WPF when you are executing asynchronous code on the UI thread
+then you’ll want to still be on the UI thread after an <code class="language-plaintext highlighter-rouge">await</code> call:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">partial</span> <span class="k">class</span> <span class="nc">MyUserControl</span>
+<span class="p">{</span>
+  <span class="cm">/* Notice this is an "async" method: */</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">5</span><span class="p">));</span>
+    <span class="nf">DoSomethingSynchronousOnTheUIThread</span><span class="p">();</span> <span class="c1">// &lt;-- This needs to happen on the UI thread</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>WPF has
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.threading.dispatchersynchronizationcontext?view=windowsdesktop-6.0">a special subclass of <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></a>
+that enables this.</p>
+
+<p>I do something similar in the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> package. I subclassed
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> so that I could serialize continuations and execute
+them one-at-a-time.</p>
+
+<p>Check out
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/WorkQueue.cs">my <code class="language-plaintext highlighter-rouge">WorkQueue</code> class</a>.
+It’s the same thing that I described in
+<a href="/programming/2022/06/14/reentrant-async-lock.html">the first post</a>.</p>
+
+<p>It’s just a simple work queue. But that’s what gives the lock mutual exclusion.</p>
+
+<p>Recall how you acquire the lock:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>When you invoke <code class="language-plaintext highlighter-rouge">LockAsync</code> then you are immediately placed on that
+SynchronizationContext. The compiler packages up the code after the <code class="language-plaintext highlighter-rouge">await</code> into
+a continuation, and that continuation is given to the work queue. And since that
+work queue will only do one thing at a time you get mutual exclusion.</p>
+
+<h2 id="a-special-awaitable-type">A special awaitable type</h2>
+
+<p>This brings us to
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/AsyncLockResult.cs">the <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class</a>.
+This is a special awaitable type and is the thing that lets you asynchronously
+get the lock. Microsoft
+<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#11882-awaitable-expressions">describes</a>
+how to make an “awaitable” thing. <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> follows those rules and so
+you’re allowed to “await” the thing returned from the <code class="language-plaintext highlighter-rouge">LockAsync</code> method.</p>
+
+<p><code class="language-plaintext highlighter-rouge">AsyncLockResult</code> is really the glue that holds everything together. There are a
+couple of competing things going on and this class helps resolve them.</p>
+
+<p>For example, I need to execute asynchronous continuations on a special
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code>, but it’s futile to change the current
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> within asynchronous code because the previous context
+is restored as soon as execution leaves that context. So how do you change the
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> in the asynchronous code <em>outside of</em> the <code class="language-plaintext highlighter-rouge">LockAsync</code>
+method? The answer is to make the <code class="language-plaintext highlighter-rouge">LockAsync</code> method actually be <em>synchronous</em>
+but return something that can be awaited—that something is an instance of
+<code class="language-plaintext highlighter-rouge">AsyncLockResult</code>.</p>
+
+<p>As another example, the <code class="language-plaintext highlighter-rouge">LockAsync</code> method takes a <code class="language-plaintext highlighter-rouge">CancellationToken</code>, meaning
+“please stop trying to acquire the lock as soon as this token is canceled.” But
+what if the continuation (for the code following your call to <code class="language-plaintext highlighter-rouge">LockAsync</code>) has
+already been posted to the work queue and the work queue is busy? Then you’ll
+cancel the <code class="language-plaintext highlighter-rouge">CancellationToken</code> and nothing will happen until the work queue gets
+around to processing your continuation. So how do you safely post a continuation
+(which by design is only allowed to be executed once) to the work queue <em>and</em>
+call it when the <code class="language-plaintext highlighter-rouge">CancellationToken</code> is canceled? Again, the answer is “with the
+<code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class.” It wraps the continuation in such a way that it can be
+sent to both places at once but will only get executed a single time.</p>
+
+<h1 id="the-point">The point</h1>
+
+<p>The
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
+is an asynchronous lock that gives you all three of these things with nice
+semantics:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronicity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>Give it a try!</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

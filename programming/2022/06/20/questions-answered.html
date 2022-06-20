@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Answering some questions about ReentrantAsyncLock">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Questions Answered - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Questions Answered</h1>
+          
+          
+          <p><i>June 20, 2022&mdash;Answering some questions about ReentrantAsyncLock</i></p>
+          
+          <p>This is the fourth post in a short series about async
+locks:</p>
+
+<ol>
+  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
+  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  <li><strong>Questions Answered</strong> (<em>this post</em>)—Answering some questions about ReentrantAsyncLock</li>
+</ol>
+
+<hr />
+
+<p>This series started because I needed a reentrant asynchronous lock for my job.
+We were already using an asynchronous lock but I noticed it deadlocked when you
+tried to reenter it. I thought that was silly so I set out to find one that
+works. That’s when I found Max Fedotov’s article titled
+“Reentrant (Recursive) Async Lock is Impossible in C#”, along with
+<a href="https://www.reddit.com/r/dotnet/comments/rklmby/reentrant_recursive_async_lock_is_impossible_in_c/">his Reddit thread</a>
+about the same.</p>
+
+<p>I took that as a challenge and set out to prove him wrong. It’s not personal, I
+just like a good programming challenge. And it happens that the solution to this
+one will satisfy a real world need in my job.</p>
+
+<p>So after publishing
+“<a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a>” I
+linked to it
+<a href="https://www.reddit.com/r/dotnet/comments/rklmby/comment/icdr70a/?utm_source=reddit&amp;utm_medium=web2x&amp;context=3">in Max’s Reddit thread</a>.</p>
+
+<p>He gave it some thought and then replied with
+<a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a#:~:text=article%20still%20stands.-,2,-Another%20challenge%20to">an update to his article</a>
+and
+<a href="https://www.reddit.com/r/dotnet/comments/rklmby/comment/icthvsy/?utm_source=reddit&amp;utm_medium=web2x&amp;context=3">a reply on Reddit</a>.</p>
+
+<p>I really appreciate his thoughtful replies—something too often absent from
+other people on the internet—and I’d like to address the concerns he
+raised. I’ll frame them as questions and then I’ll answer them.</p>
+
+<p>In summary, I think that
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">the ReentrantAsyncLock NuGet package</a>
+correctly satisfies the need for a reentrant async lock. And while Max’s
+concerns do require consideration I don’t think they are showstoppers.</p>
+
+<h1 id="is-configureawaitfalse-a-problem">Is ConfigureAwait(false) a problem?</h1>
+
+<p>When you await a <code class="language-plaintext highlighter-rouge">Task</code> in C#, you can configure it to take the code after the
+await and run it on the thread pool synchronization context instead of returning
+to whatever context you were on to begin with.</p>
+
+<p>This can be very handy. And as Max pointed out this is sometimes even
+recommended. He points to
+<a href="https://devblogs.microsoft.com/dotnet/configureawait-faq/">an article written by Stephen Toub</a>
+and to
+<a href="https://blog.stephencleary.com/2012/02/async-and-await.html#avoiding-context">an article written by Stephen Cleary</a>.
+If you’ve been around C# long enough then you’ll recognize both of those names
+as heavy hitters. Both Stephens have made significant contributions to the .Net
+world and when they say something a lot of people listen. So let’s consider what
+they say.</p>
+
+<p>First let me give an example of when <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> is a good thing.</p>
+
+<p>Pretend that you have written the following library for the world to use. It’s
+really useful so a lot of people use your special function. A lot of CPU time
+the world over is being spent on your asynchronous function, but burning
+dinosaurs isn’t your hobby so you’d like to save some electricity and make it
+faster:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyLibrary</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSpecialStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="nf">DoFirstThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoSecondThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoLastThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>One way you can do that is by using <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyLibrary</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSpecialStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="nf">DoFirstThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoSecondThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoLastThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But <em>should</em> you do that?</p>
+
+<p>Well, it depends on what you’re doing. There is no hard-and-fast rule, but it’s
+merely a performance optimization that you can use <em>if it makes sense</em>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>What you’re doing</th>
+      <th>Use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Writing application code</td>
+      <td>No (Toub)</td>
+    </tr>
+    <tr>
+      <td>Writing framework code</td>
+      <td>Sometimes (Toub, Cleary)</td>
+    </tr>
+    <tr>
+      <td>Something that needs to preserve context</td>
+      <td>No (Toub, Cleary)</td>
+    </tr>
+    <tr>
+      <td>Eeking out every last CPU cycle</td>
+      <td>Maybe (Toub, Cleary)</td>
+    </tr>
+    <tr>
+      <td>Trying to avoid deadlocks</td>
+      <td>Maybe (Toub)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>As an aside, if you’re trying to avoid deadlocks by using
+<code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> then you’re probably doing it wrong. Why are you
+synchronously blocking on a <code class="language-plaintext highlighter-rouge">Task</code> at all?</p>
+
+<p>But here’s the thing: both Stephens agree if you need to preserve the context
+then you should not use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>. And in the case of
+<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> that context is the very thing that makes it tick—you
+must preserve it, so don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>.</p>
+
+<p>Here’s an example of how <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> can mess up a
+<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+    <span class="k">await</span> <span class="nf">DoAsyncIOOperationAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+    <span class="c1">//                                  ^^^^^^^^^^^^^^^^^^^^^^</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span> <span class="c1">// &lt;-- Uh oh!! Caused by this ^</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>That second call to <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> will <strong>not</strong> be guarded by the lock
+because you escaped the special synchronization context that the lock uses to
+guarantee mutual exclusion.</p>
+
+<p>So when you’re inside the guarded section of a <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> I think both
+Stephens would say “don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>.”</p>
+
+<p>Important!—it doesn’t matter if <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> is used by
+asynchronous methods that you call. Because when execution resumes after those
+methods it’ll resume back on the special synchronization context. For example:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="nf">DoAsyncIOOperationAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">));</span>
+    <span class="c1">//                                                             ^^^^^^^^^^^^^^^^^^^^^^</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span> <span class="c1">// &lt;-- This call is still guarded, even with this ^</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>So you really only have to worry about the asynchronous code immediately within
+the guarded section of the async lock. And if you’re using the async lock then
+that means you are also writing the code in that guarded section—nobody is
+talking about some third party function “out there” that you can’t control. So
+just don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> in the immediate guarded section and
+you’ll be fine.</p>
+
+<h1 id="can-you-synchronously-block-and-wait-for-other-tasks-in-the-same-synchronization-context">Can you synchronously block and wait for other tasks in the same synchronization context?</h1>
+
+<p>I think the question is if you can do this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">task</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">task</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The answer is no. That will deadlock.</p>
+
+<p>But this isn’t an issue with the async lock. The problem is you’ve written
+terrible code that deadlocks. The potential for deadlocks is the reason it’s a
+code smell to <code class="language-plaintext highlighter-rouge">.Wait()</code> a <code class="language-plaintext highlighter-rouge">Task</code>.</p>
+
+<p>Note: this deadlocks, too:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">task</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">task</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>To be fair, Max also doesn’t think this is really an issue.</p>
+
+<h1 id="cant-someone-just-replace-synchronizationcontextcurrent-somewhere-down-the-call-chain-inside-the-guarded-section-of-an-async-lock">Can’t someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?</h1>
+
+<p>I think the question here is if this has any effect on the performance of the
+lock:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">());</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">void</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The answer is: no. When execution returns from the awaited <code class="language-plaintext highlighter-rouge">Task</code> then the
+async state machine will have restored the synchronization context to what it
+was before awaiting that <code class="language-plaintext highlighter-rouge">Task</code>. So in this case <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> will
+still be guarded by the lock.</p>
+
+<p>But perhaps that’s not what Max was getting at. Perhaps he meant this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="nf">ChangeSynchronizationContext</span><span class="p">();</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Yield</span><span class="p">();</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">void</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The answer here is: yes, that’ll cause <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> to execute on
+the thread pool. You’ll have broken the lock.</p>
+
+<p>So don’t do that :)</p>
+
+<p>If you’re concerned about calling third party synchronous functions within the
+guarded section of the async lock then you can always package them up into a
+<code class="language-plaintext highlighter-rouge">Task.Run</code> and you will never have issues. Like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">ExecuteStrangeThirdPartyFunction</span><span class="p">());</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="what-about-the-synchronization-context-from-which-you-enter-the-async-lock">What about the synchronization context from which you enter the async lock?</h1>
+
+<p>Max said:</p>
+
+<blockquote>
+  <p>There could be another <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> already when you apply your
+  lock, so you have to consider if you want to wrap it and post things onto it
+  instead of posting them to the thread pool.</p>
+</blockquote>
+
+<p>This is a valid concern. Let me illustrate with a pretend WPF example:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="c1">// Event handler for the "Click" event on a button named "Button"</span>
+<span class="k">public</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"This works"</span><span class="p">;</span> <span class="c1">// This will work</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"Uh oh!"</span><span class="p">;</span> <span class="c1">// This will throw an exception</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The above code illustrates that when a button’s “Click” event handler executes
+it’ll do so on the UI thread. But then execution leaves that thread inside the
+async lock. This change in threads might be unexpected to developers. The second
+assignment to <code class="language-plaintext highlighter-rouge">Button.Tag</code> will throw an exception because in WPF that property
+can only be assigned from the thread that is running that button’s dispatcher.</p>
+
+<p>What’s the solution?</p>
+
+<p>In this case you would have to do the following:</p>
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"This still works"</span><span class="p">;</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Button</span><span class="p">.</span><span class="n">Dispatcher</span><span class="p">.</span><span class="nf">InvokeAsync</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"Now this works, too!"</span><span class="p">);</span> <span class="c1">// No more exception</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>While it is not a showstopper, it is something you have to be conscious of. And
+I think that’s Max’s point; entering the async lock changes some things that
+don’t usually change.</p>
+
+<h1 id="should-the-async-lock-have-a-synchronous-locking-api-too">Should the async lock have a synchronous locking API, too?</h1>
+
+<p>Max points out that many async lock implementations also have synchronous lock
+methods. Then the async lock can be used in both synchronous and asynchronous
+contexts.</p>
+
+<p>Personally I don’t think that’s a good choice. In fact I would go so far as to
+call it an anti-pattern. I personally think that a synchronous lock should be
+used for synchronous contexts, and an asynchronous lock should be used for
+asynchronous contexts, I suspect that if you want to use one for the other then
+there are probably some things going amuck in your code. I think that if you’re
+okay with
+<a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">colored functions</a>
+then you should also be okay with colored locks.</p>
+
+<p>But I’m writing this in a country where the First Amendment gives citizens the
+right to freely express the following extension method, and where copyright law
+won’t hamper them because this whole site
+<a href="https://github.com/matthew-a-thomas/me/blob/master/LICENSE">is MIT-licensed</a>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">ReentrantAsyncLockExtensions</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="n">IDisposable</span> <span class="nf">LockSynchronously</span><span class="p">(</span><span class="k">this</span> <span class="n">ReentrantAsyncLock</span> <span class="n">asyncLock</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">mre</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ManualResetEventSlim</span><span class="p">();</span>
+        <span class="kt">var</span> <span class="n">lockResult</span> <span class="p">=</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="n">lockResult</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
+        <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(</span><span class="n">mre</span><span class="p">.</span><span class="n">Set</span><span class="p">);</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Wait</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span> <span class="c1">// Token has already been given to LockAsync(...) above</span>
+        <span class="kt">var</span> <span class="n">asyncDisposable</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Disposable</span><span class="p">(()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">_</span> <span class="p">=</span> <span class="n">asyncDisposable</span><span class="p">.</span><span class="nf">DisposeAsync</span><span class="p">();</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">sealed</span> <span class="k">class</span> <span class="nc">Disposable</span> <span class="p">:</span> <span class="n">IDisposable</span>
+    <span class="p">{</span>
+        <span class="n">Action</span><span class="p">?</span> <span class="n">_dispose</span><span class="p">;</span>
+
+        <span class="k">public</span> <span class="nf">Disposable</span><span class="p">(</span><span class="n">Action</span><span class="p">?</span> <span class="n">dispose</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_dispose</span> <span class="p">=</span> <span class="n">dispose</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">Interlocked</span><span class="p">.</span><span class="nf">Exchange</span><span class="p">(</span><span class="k">ref</span> <span class="n">_dispose</span><span class="p">,</span> <span class="k">null</span><span class="p">)?.</span><span class="nf">Invoke</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>I <em>think</em> that’ll work. It takes into account some of the nuances of
+<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code>.</p>
+
+<p>But I don’t like it.</p>
+
+<h1 id="the-point">The point</h1>
+
+<p>I think that <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> provides all the important aspects of an
+asynchronous lock. It does sometimes require some careful thought when you use
+it, but all of the rough spots that I know of can be addressed and aren’t
+showstoppers.</p>
+
+<p>Feel free to <a href="https://www.nuget.org/packages/ReentrantAsyncLock/">try it out</a>
+and please
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/issues/new">report any bugs you find</a>!</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

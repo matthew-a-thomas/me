@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
     
-    <title>A More Ergonomic Async Lock - Matthew A. Thomas</title>
+    <title>A More Ergonomic Async Lock (obsolete) - Matthew A. Thomas</title>
   </head>
   <body class="text-justify">
     <div class="container">
@@ -23,22 +23,33 @@
         </div>
         <div class="list-group-item">
           
-          <h1>A More Ergonomic Async Lock</h1>
+          <h1>A More Ergonomic Async Lock (obsolete)</h1>
           
           
           <p><i>June 15, 2022&mdash;Making the work queue look more like an async lock</i></p>
           
-          <p>This the second post in a short series about async
+          <p>This is the second post in a short series about async
 locks:</p>
 
 <ol>
   <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
-  <li><strong>A More Ergonomic Async Lock</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
+  <li><strong>A More Ergonomic Async Lock (obsolete)</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
 </ol>
 
-<h3 id="it-turns-out-i-havent-gotten-this-right-yet-stay-tuned-for-the-third-post">It turns out I haven’t gotten this right yet! Stay tuned for the third post…</h3>
-
 <hr />
+
+<div class="alert alert-warning">
+
+<h2 id="warning">Warning</h2>
+
+<p>The code described in this post has some issues. For example, the
+code below doesn’t correctly handle cancellation. See
+<a href="/programming/2022/06/20/introducing-reentrantasynclock.html">the next post</a> for a
+better implementation that is more thoroughly tested.</p>
+
+</div>
 
 <p>I previously <a href="/programming/2022/06/14/reentrant-async-lock.html">described</a> how to
 make an async lock that supports all three of these at once:</p>

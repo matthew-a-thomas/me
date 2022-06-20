@@ -1,14 +1,641 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-16T09:24:22-05:00</updated><id>/feed.xml</id><entry><title type="html">A More Ergonomic Async Lock</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<p>This the second post in a short series about async
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-20T13:32:29-05:00</updated><id>/feed.xml</id><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
 locks:</p>
 
 <ol>
   <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
-  <li><strong>A More Ergonomic Async Lock</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
+  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  <li><strong>Questions Answered</strong> (<em>this post</em>)—Answering some questions about ReentrantAsyncLock</li>
 </ol>
 
-<h3 id="it-turns-out-i-havent-gotten-this-right-yet-stay-tuned-for-the-third-post">It turns out I haven’t gotten this right yet! Stay tuned for the third post…</h3>
+<hr />
+
+<p>This series started because I needed a reentrant asynchronous lock for my job.
+We were already using an asynchronous lock but I noticed it deadlocked when you
+tried to reenter it. I thought that was silly so I set out to find one that
+works. That’s when I found Max Fedotov’s article titled
+“Reentrant (Recursive) Async Lock is Impossible in C#”, along with
+<a href="https://www.reddit.com/r/dotnet/comments/rklmby/reentrant_recursive_async_lock_is_impossible_in_c/">his Reddit thread</a>
+about the same.</p>
+
+<p>I took that as a challenge and set out to prove him wrong. It’s not personal, I
+just like a good programming challenge. And it happens that the solution to this
+one will satisfy a real world need in my job.</p>
+
+<p>So after publishing
+“<a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a>” I
+linked to it
+<a href="https://www.reddit.com/r/dotnet/comments/rklmby/comment/icdr70a/?utm_source=reddit&amp;utm_medium=web2x&amp;context=3">in Max’s Reddit thread</a>.</p>
+
+<p>He gave it some thought and then replied with
+<a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a#:~:text=article%20still%20stands.-,2,-Another%20challenge%20to">an update to his article</a>
+and
+<a href="https://www.reddit.com/r/dotnet/comments/rklmby/comment/icthvsy/?utm_source=reddit&amp;utm_medium=web2x&amp;context=3">a reply on Reddit</a>.</p>
+
+<p>I really appreciate his thoughtful replies—something too often absent from
+other people on the internet—and I’d like to address the concerns he
+raised. I’ll frame them as questions and then I’ll answer them.</p>
+
+<p>In summary, I think that
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">the ReentrantAsyncLock NuGet package</a>
+correctly satisfies the need for a reentrant async lock. And while Max’s
+concerns do require consideration I don’t think they are showstoppers.</p>
+
+<h1 id="is-configureawaitfalse-a-problem">Is ConfigureAwait(false) a problem?</h1>
+
+<p>When you await a <code class="language-plaintext highlighter-rouge">Task</code> in C#, you can configure it to take the code after the
+await and run it on the thread pool synchronization context instead of returning
+to whatever context you were on to begin with.</p>
+
+<p>This can be very handy. And as Max pointed out this is sometimes even
+recommended. He points to
+<a href="https://devblogs.microsoft.com/dotnet/configureawait-faq/">an article written by Stephen Toub</a>
+and to
+<a href="https://blog.stephencleary.com/2012/02/async-and-await.html#avoiding-context">an article written by Stephen Cleary</a>.
+If you’ve been around C# long enough then you’ll recognize both of those names
+as heavy hitters. Both Stephens have made significant contributions to the .Net
+world and when they say something a lot of people listen. So let’s consider what
+they say.</p>
+
+<p>First let me give an example of when <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> is a good thing.</p>
+
+<p>Pretend that you have written the following library for the world to use. It’s
+really useful so a lot of people use your special function. A lot of CPU time
+the world over is being spent on your asynchronous function, but burning
+dinosaurs isn’t your hobby so you’d like to save some electricity and make it
+faster:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyLibrary</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSpecialStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="nf">DoFirstThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoSecondThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoLastThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>One way you can do that is by using <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyLibrary</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSpecialStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="nf">DoFirstThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoSecondThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+    <span class="k">await</span> <span class="nf">DoLastThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But <em>should</em> you do that?</p>
+
+<p>Well, it depends on what you’re doing. There is no hard-and-fast rule, but it’s
+merely a performance optimization that you can use <em>if it makes sense</em>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>What you’re doing</th>
+      <th>Use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Writing application code</td>
+      <td>No (Toub)</td>
+    </tr>
+    <tr>
+      <td>Writing framework code</td>
+      <td>Sometimes (Toub, Cleary)</td>
+    </tr>
+    <tr>
+      <td>Something that needs to preserve context</td>
+      <td>No (Toub, Cleary)</td>
+    </tr>
+    <tr>
+      <td>Eeking out every last CPU cycle</td>
+      <td>Maybe (Toub, Cleary)</td>
+    </tr>
+    <tr>
+      <td>Trying to avoid deadlocks</td>
+      <td>Maybe (Toub)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>As an aside, if you’re trying to avoid deadlocks by using
+<code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> then you’re probably doing it wrong. Why are you
+synchronously blocking on a <code class="language-plaintext highlighter-rouge">Task</code> at all?</p>
+
+<p>But here’s the thing: both Stephens agree if you need to preserve the context
+then you should not use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>. And in the case of
+<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> that context is the very thing that makes it tick—you
+must preserve it, so don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>.</p>
+
+<p>Here’s an example of how <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> can mess up a
+<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+    <span class="k">await</span> <span class="nf">DoAsyncIOOperationAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+    <span class="c1">//                                  ^^^^^^^^^^^^^^^^^^^^^^</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span> <span class="c1">// &lt;-- Uh oh!! Caused by this ^</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>That second call to <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> will <strong>not</strong> be guarded by the lock
+because you escaped the special synchronization context that the lock uses to
+guarantee mutual exclusion.</p>
+
+<p>So when you’re inside the guarded section of a <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> I think both
+Stephens would say “don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>.”</p>
+
+<p>Important!—it doesn’t matter if <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> is used by
+asynchronous methods that you call. Because when execution resumes after those
+methods it’ll resume back on the special synchronization context. For example:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="nf">DoAsyncIOOperationAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">));</span>
+    <span class="c1">//                                                             ^^^^^^^^^^^^^^^^^^^^^^</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span> <span class="c1">// &lt;-- This call is still guarded, even with this ^</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>So you really only have to worry about the asynchronous code immediately within
+the guarded section of the async lock. And if you’re using the async lock then
+that means you are also writing the code in that guarded section—nobody is
+talking about some third party function “out there” that you can’t control. So
+just don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> in the immediate guarded section and
+you’ll be fine.</p>
+
+<h1 id="can-you-synchronously-block-and-wait-for-other-tasks-in-the-same-synchronization-context">Can you synchronously block and wait for other tasks in the same synchronization context?</h1>
+
+<p>I think the question is if you can do this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">task</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">task</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The answer is no. That will deadlock.</p>
+
+<p>But this isn’t an issue with the async lock. The problem is you’ve written
+terrible code that deadlocks. The potential for deadlocks is the reason it’s a
+code smell to <code class="language-plaintext highlighter-rouge">.Wait()</code> a <code class="language-plaintext highlighter-rouge">Task</code>.</p>
+
+<p>Note: this deadlocks, too:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">task</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">task</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>To be fair, Max also doesn’t think this is really an issue.</p>
+
+<h1 id="cant-someone-just-replace-synchronizationcontextcurrent-somewhere-down-the-call-chain-inside-the-guarded-section-of-an-async-lock">Can’t someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?</h1>
+
+<p>I think the question here is if this has any effect on the performance of the
+lock:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">());</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">void</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The answer is: no. When execution returns from the awaited <code class="language-plaintext highlighter-rouge">Task</code> then the
+async state machine will have restored the synchronization context to what it
+was before awaiting that <code class="language-plaintext highlighter-rouge">Task</code>. So in this case <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> will
+still be guarded by the lock.</p>
+
+<p>But perhaps that’s not what Max was getting at. Perhaps he meant this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="nf">ChangeSynchronizationContext</span><span class="p">();</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Yield</span><span class="p">();</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">void</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The answer here is: yes, that’ll cause <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> to execute on
+the thread pool. You’ll have broken the lock.</p>
+
+<p>So don’t do that :)</p>
+
+<p>If you’re concerned about calling third party synchronous functions within the
+guarded section of the async lock then you can always package them up into a
+<code class="language-plaintext highlighter-rouge">Task.Run</code> and you will never have issues. Like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">ExecuteStrangeThirdPartyFunction</span><span class="p">());</span>
+    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="what-about-the-synchronization-context-from-which-you-enter-the-async-lock">What about the synchronization context from which you enter the async lock?</h1>
+
+<p>Max said:</p>
+
+<blockquote>
+  <p>There could be another <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> already when you apply your
+  lock, so you have to consider if you want to wrap it and post things onto it
+  instead of posting them to the thread pool.</p>
+</blockquote>
+
+<p>This is a valid concern. Let me illustrate with a pretend WPF example:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="c1">// Event handler for the "Click" event on a button named "Button"</span>
+<span class="k">public</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"This works"</span><span class="p">;</span> <span class="c1">// This will work</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"Uh oh!"</span><span class="p">;</span> <span class="c1">// This will throw an exception</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The above code illustrates that when a button’s “Click” event handler executes
+it’ll do so on the UI thread. But then execution leaves that thread inside the
+async lock. This change in threads might be unexpected to developers. The second
+assignment to <code class="language-plaintext highlighter-rouge">Button.Tag</code> will throw an exception because in WPF that property
+can only be assigned from the thread that is running that button’s dispatcher.</p>
+
+<p>What’s the solution?</p>
+
+<p>In this case you would have to do the following:</p>
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"This still works"</span><span class="p">;</span>
+  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Button</span><span class="p">.</span><span class="n">Dispatcher</span><span class="p">.</span><span class="nf">InvokeAsync</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"Now this works, too!"</span><span class="p">);</span> <span class="c1">// No more exception</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>While it is not a showstopper, it is something you have to be conscious of. And
+I think that’s Max’s point; entering the async lock changes some things that
+don’t usually change.</p>
+
+<h1 id="should-the-async-lock-have-a-synchronous-locking-api-too">Should the async lock have a synchronous locking API, too?</h1>
+
+<p>Max points out that many async lock implementations also have synchronous lock
+methods. Then the async lock can be used in both synchronous and asynchronous
+contexts.</p>
+
+<p>Personally I don’t think that’s a good choice. In fact I would go so far as to
+call it an anti-pattern. I personally think that a synchronous lock should be
+used for synchronous contexts, and an asynchronous lock should be used for
+asynchronous contexts, I suspect that if you want to use one for the other then
+there are probably some things going amuck in your code. I think that if you’re
+okay with
+<a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">colored functions</a>
+then you should also be okay with colored locks.</p>
+
+<p>But I’m writing this in a country where the First Amendment gives citizens the
+right to freely express the following extension method, and where copyright law
+won’t hamper them because this whole site
+<a href="https://github.com/matthew-a-thomas/me/blob/master/LICENSE">is MIT-licensed</a>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">ReentrantAsyncLockExtensions</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="n">IDisposable</span> <span class="nf">LockSynchronously</span><span class="p">(</span><span class="k">this</span> <span class="n">ReentrantAsyncLock</span> <span class="n">asyncLock</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">mre</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ManualResetEventSlim</span><span class="p">();</span>
+        <span class="kt">var</span> <span class="n">lockResult</span> <span class="p">=</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">);</span>
+        <span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="n">lockResult</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
+        <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(</span><span class="n">mre</span><span class="p">.</span><span class="n">Set</span><span class="p">);</span>
+        <span class="n">mre</span><span class="p">.</span><span class="nf">Wait</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span> <span class="c1">// Token has already been given to LockAsync(...) above</span>
+        <span class="kt">var</span> <span class="n">asyncDisposable</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Disposable</span><span class="p">(()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">_</span> <span class="p">=</span> <span class="n">asyncDisposable</span><span class="p">.</span><span class="nf">DisposeAsync</span><span class="p">();</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">sealed</span> <span class="k">class</span> <span class="nc">Disposable</span> <span class="p">:</span> <span class="n">IDisposable</span>
+    <span class="p">{</span>
+        <span class="n">Action</span><span class="p">?</span> <span class="n">_dispose</span><span class="p">;</span>
+
+        <span class="k">public</span> <span class="nf">Disposable</span><span class="p">(</span><span class="n">Action</span><span class="p">?</span> <span class="n">dispose</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_dispose</span> <span class="p">=</span> <span class="n">dispose</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">Interlocked</span><span class="p">.</span><span class="nf">Exchange</span><span class="p">(</span><span class="k">ref</span> <span class="n">_dispose</span><span class="p">,</span> <span class="k">null</span><span class="p">)?.</span><span class="nf">Invoke</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>I <em>think</em> that’ll work. It takes into account some of the nuances of
+<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code>.</p>
+
+<p>But I don’t like it.</p>
+
+<h1 id="the-point">The point</h1>
+
+<p>I think that <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> provides all the important aspects of an
+asynchronous lock. It does sometimes require some careful thought when you use
+it, but all of the rough spots that I know of can be addressed and aren’t
+showstoppers.</p>
+
+<p>Feel free to <a href="https://www.nuget.org/packages/ReentrantAsyncLock/">try it out</a>
+and please
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/issues/new">report any bugs you find</a>!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Answering some questions about ReentrantAsyncLock]]></summary></entry><entry><title type="html">ReentrantAsyncLock NuGet Package</title><link href="/programming/2022/06/20/introducing-reentrantasynclock.html" rel="alternate" type="text/html" title="ReentrantAsyncLock NuGet Package" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/introducing-reentrantasynclock</id><content type="html" xml:base="/programming/2022/06/20/introducing-reentrantasynclock.html"><![CDATA[<p>This is the third post in a short series about async
+locks:</p>
+
+<ol>
+  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
+  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
+  <li><strong>ReentrantAsyncLock NuGet Package</strong> (<em>this post</em>)—Introducing the ReentrantAsyncLock package</li>
+  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
+</ol>
 
 <hr />
+
+<p>In the previous two posts I outlined the concept for a reentrant asynchronous
+lock, and explained how it can provide all three of these things at once:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronicity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>In this third post I’ll introduce the ReentrantAsyncLock NuGet package which
+gives you semantics that will look a little more normal. I think this third post
+should take the place in your mind of the second one because the code here works
+out some kinks that I inadvertently have there. I consider this NuGet package
+the capstone of my efforts in this series.</p>
+
+<p>NuGet package:<br />
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">https://www.nuget.org/packages/ReentrantAsyncLock</a></p>
+
+<p>Source code:<br />
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock">https://github.com/matthew-a-thomas/cs-reentrant-async-lock</a></p>
+
+<h1 id="the-nuget-package-and-its-semantics">The NuGet package and its semantics</h1>
+
+<p>The
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
+lets you write code like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">asyncLock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ReentrantAsyncLock</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">raceCondition</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+<span class="c1">// You can acquire the lock asynchronously</span>
+<span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">WhenAll</span><span class="p">(</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="c1">// The lock is reentrant</span>
+            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="c1">// The lock provides mutual exclusion</span>
+                <span class="n">raceCondition</span><span class="p">++;</span>
+            <span class="p">}</span>
+        <span class="p">}),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="n">raceCondition</span><span class="p">++;</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">);</span>
+<span class="p">}</span>
+<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="n">raceCondition</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>In the code comments above I point out the three different aspects of the lock.</p>
+
+<p>You’ll also notice that the code has automated tests that assert the correctness
+of each of the three aspects.</p>
+
+<h1 id="how-does-it-work">How does it work?</h1>
+
+<p>It combines <code class="language-plaintext highlighter-rouge">ExecutionContext</code>/<code class="language-plaintext highlighter-rouge">AsyncLocal</code> with a special
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> and a special awaitable type.</p>
+
+<h2 id="executioncontext-and-asynclocal">ExecutionContext and AsyncLocal</h2>
+
+<p>If you’re familiar with
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.executioncontext?view=net-6.0">the ExecutionContext class</a>
+then you’ll know that it “flows” downward through async calls. And it carries
+some stuff with it. In particular, it carries the values of
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1?view=net-6.0">AsyncLocal</a>
+instances.</p>
+
+<p>One such instance holds a value that indicates an asynchronous scope. When you
+acquire the lock then your scope is squirreled away as though to say “the lock
+belongs to this scope”. And then that scope flows downward through async calls.
+That’s what makes the lock reentrant.</p>
+
+<p>If you’re looking at the source code then check out
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L84">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.LocalScope</code> property</a>.
+It is backed by an <code class="language-plaintext highlighter-rouge">AsyncLocal</code> instance and stores a value that indicates an
+asynchronous scope. When an object is assigned to this property then all nested
+async calls also get that value.</p>
+
+<p>Now notice
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L149">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.TryLockImmediately</code> method</a>.
+That method checks the <code class="language-plaintext highlighter-rouge">LocalScope</code> against
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L63">the <code class="language-plaintext highlighter-rouge">_owningScope</code> field</a>.
+When they match then the lock can be acquired because that’s a case of
+reentrance.</p>
+
+<h2 id="synchronizationcontext">SynchronizationContext</h2>
+
+<p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.synchronizationcontext?view=net-6.0">The <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> class</a>
+is Microsoft’s abstraction of a synchronization model. It is (usually) the thing
+in charge of deciding how asynchronous continuations should be executed.</p>
+
+<p>For example, in WPF when you are executing asynchronous code on the UI thread
+then you’ll want to still be on the UI thread after an <code class="language-plaintext highlighter-rouge">await</code> call:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">partial</span> <span class="k">class</span> <span class="nc">MyUserControl</span>
+<span class="p">{</span>
+  <span class="cm">/* Notice this is an "async" method: */</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">5</span><span class="p">));</span>
+    <span class="nf">DoSomethingSynchronousOnTheUIThread</span><span class="p">();</span> <span class="c1">// &lt;-- This needs to happen on the UI thread</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>WPF has
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.threading.dispatchersynchronizationcontext?view=windowsdesktop-6.0">a special subclass of <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></a>
+that enables this.</p>
+
+<p>I do something similar in the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> package. I subclassed
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> so that I could serialize continuations and execute
+them one-at-a-time.</p>
+
+<p>Check out
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/WorkQueue.cs">my <code class="language-plaintext highlighter-rouge">WorkQueue</code> class</a>.
+It’s the same thing that I described in
+<a href="/programming/2022/06/14/reentrant-async-lock.html">the first post</a>.</p>
+
+<p>It’s just a simple work queue. But that’s what gives the lock mutual exclusion.</p>
+
+<p>Recall how you acquire the lock:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>When you invoke <code class="language-plaintext highlighter-rouge">LockAsync</code> then you are immediately placed on that
+SynchronizationContext. The compiler packages up the code after the <code class="language-plaintext highlighter-rouge">await</code> into
+a continuation, and that continuation is given to the work queue. And since that
+work queue will only do one thing at a time you get mutual exclusion.</p>
+
+<h2 id="a-special-awaitable-type">A special awaitable type</h2>
+
+<p>This brings us to
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/AsyncLockResult.cs">the <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class</a>.
+This is a special awaitable type and is the thing that lets you asynchronously
+get the lock. Microsoft
+<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#11882-awaitable-expressions">describes</a>
+how to make an “awaitable” thing. <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> follows those rules and so
+you’re allowed to “await” the thing returned from the <code class="language-plaintext highlighter-rouge">LockAsync</code> method.</p>
+
+<p><code class="language-plaintext highlighter-rouge">AsyncLockResult</code> is really the glue that holds everything together. There are a
+couple of competing things going on and this class helps resolve them.</p>
+
+<p>For example, I need to execute asynchronous continuations on a special
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code>, but it’s futile to change the current
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> within asynchronous code because the previous context
+is restored as soon as execution leaves that context. So how do you change the
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> in the asynchronous code <em>outside of</em> the <code class="language-plaintext highlighter-rouge">LockAsync</code>
+method? The answer is to make the <code class="language-plaintext highlighter-rouge">LockAsync</code> method actually be <em>synchronous</em>
+but return something that can be awaited—that something is an instance of
+<code class="language-plaintext highlighter-rouge">AsyncLockResult</code>.</p>
+
+<p>As another example, the <code class="language-plaintext highlighter-rouge">LockAsync</code> method takes a <code class="language-plaintext highlighter-rouge">CancellationToken</code>, meaning
+“please stop trying to acquire the lock as soon as this token is canceled.” But
+what if the continuation (for the code following your call to <code class="language-plaintext highlighter-rouge">LockAsync</code>) has
+already been posted to the work queue and the work queue is busy? Then you’ll
+cancel the <code class="language-plaintext highlighter-rouge">CancellationToken</code> and nothing will happen until the work queue gets
+around to processing your continuation. So how do you safely post a continuation
+(which by design is only allowed to be executed once) to the work queue <em>and</em>
+call it when the <code class="language-plaintext highlighter-rouge">CancellationToken</code> is canceled? Again, the answer is “with the
+<code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class.” It wraps the continuation in such a way that it can be
+sent to both places at once but will only get executed a single time.</p>
+
+<h1 id="the-point">The point</h1>
+
+<p>The
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
+is an asynchronous lock that gives you all three of these things with nice
+semantics:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronicity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>Give it a try!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Introducing the ReentrantAsyncLock package]]></summary></entry><entry><title type="html">A More Ergonomic Async Lock (obsolete)</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock (obsolete)" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<p>This is the second post in a short series about async
+locks:</p>
+
+<ol>
+  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
+  <li><strong>A More Ergonomic Async Lock (obsolete)</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
+</ol>
+
+<hr />
+
+<div class="alert alert-warning">
+
+<h2 id="warning">Warning</h2>
+
+<p>The code described in this post has some issues. For example, the
+code below doesn’t correctly handle cancellation. See
+<a href="/programming/2022/06/20/introducing-reentrantasynclock.html">the next post</a> for a
+better implementation that is more thoroughly tested.</p>
+
+</div>
 
 <p>I previously <a href="/programming/2022/06/14/reentrant-async-lock.html">described</a> how to
 make an async lock that supports all three of these at once:</p>
@@ -142,15 +769,15 @@ reset to whatever it was before.</p>
         <span class="n">spinWait</span><span class="p">.</span><span class="nf">SpinOnce</span><span class="p">();</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Making the work queue look more like an async lock]]></summary></entry><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>This the first post in a short series about async
+</code></pre></div></div>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Making the work queue look more like an async lock]]></summary></entry><entry><title type="html">Reentrant Async Lock</title><link href="/programming/2022/06/14/reentrant-async-lock.html" rel="alternate" type="text/html" title="Reentrant Async Lock" /><published>2022-06-14T00:00:00-05:00</published><updated>2022-06-14T00:00:00-05:00</updated><id>/programming/2022/06/14/reentrant-async-lock</id><content type="html" xml:base="/programming/2022/06/14/reentrant-async-lock.html"><![CDATA[<p>This is the first post in a short series about async
 locks:</p>
 
 <ol>
   <li><strong>Reentrant Async Lock</strong> (<em>this post</em>)—A correct implementation</li>
-  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock</a></strong>—Making the work queue look more like an async lock</li>
+  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
 </ol>
-
-<h3 id="it-turns-out-i-havent-gotten-this-right-yet-stay-tuned-for-the-third-post">It turns out I haven’t gotten this right yet! Stay tuned for the third post…</h3>
 
 <hr />
 
@@ -1256,391 +1883,7 @@ line independent of the integrity of the outlet.</p>
 <p>A MWBC has to be wired properly to work. But it can be a useful way to get lots
 of power out of a single duplex outlet. Or a useful way to put a NEMA 6-20
 outlet in the same box as a duplex NEMA 5-20 outlet with only a single 12/3
-wire.</p>]]></content><author><name></name></author><category term="diy" /><summary type="html"><![CDATA[Learn with me]]></summary></entry><entry><title type="html">Inheritance</title><link href="/programming/2021/10/12/inheritance.html" rel="alternate" type="text/html" title="Inheritance" /><published>2021-10-12T00:00:00-05:00</published><updated>2021-10-12T00:00:00-05:00</updated><id>/programming/2021/10/12/inheritance</id><content type="html" xml:base="/programming/2021/10/12/inheritance.html"><![CDATA[<p>Inheritance is <em>subtyping</em> plus <em>subclassing</em>. It is
-<strong>a domain-specific taxonomy with behavior and semantics</strong>. And “semantics”
-means dependencies, an interface, and a name. Inheritance is a kind of an “is a”
-relationship, as in “a baby <em>is</em> a person”.</p>
-
-<p>Here is a UML diagram of inheritance:</p>
-
-<p><img src="/assets/img/inheritance/uml.png" alt="UML diagram of inheritance" class="img-fluid" /></p>
-
-<h2 id="the-good">The good</h2>
-
-<p>When you need a domain-specific taxonomy with behavior and semantics, then there
-really is nothing quite as suited to the task as inheritance.</p>
-
-<h2 id="the-bad">The bad</h2>
-
-<p>When you use inheritance you get <em>all</em> of that. Even if you’d rather not have it
-all.</p>
-
-<p>And can you think of a single time you have <em>needed</em> to glue both semantics and
-behavior onto a taxonomy? Was it <em>impossible</em> to accomplish that task without
-inheritance?</p>
-
-<p>The only times that come to mind for me are when inheritance was forced on me
-by a design that already used and required it. I used to think inheritance was
-the best solution to a lot of problems, but looking back I can tell that things
-would have been better if done differently.</p>
-
-<h3 id="behavior-vs-semantics">Behavior vs semantics</h3>
-
-<p>Behavior is what the thing does. Semantics is what it looks like (its public
-methods and properties).</p>
-
-<p>What if you only want the semantics of a thing but not its behavior?</p>
-
-<p>Here’s an example of using inheritance to get the semantics of a thing when you
-don’t care about its behavior:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// A thing that can drive on roads</span>
-<span class="k">abstract</span> <span class="k">class</span> <span class="nc">Car</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">abstract</span> <span class="kt">double</span> <span class="n">WheelSize</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span> <span class="c1">// In inches</span>
-
-  <span class="k">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're driving </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH, which means the wheels are turning at </span><span class="p">{</span><span class="n">speed</span> <span class="p">*</span> <span class="m">1056</span> <span class="p">/</span> <span class="n">WheelSize</span> <span class="p">/</span> <span class="n">Math</span><span class="p">.</span><span class="n">PI</span> <span class="p">/</span> <span class="m">2.0</span><span class="p">}</span><span class="s"> RPM!"</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="nf">Honk</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Honk!"</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// A thing that cars can drive on</span>
-<span class="k">class</span> <span class="nc">Road</span>
-<span class="p">{</span>
-  <span class="kt">double</span> <span class="n">_speedLimit</span><span class="p">;</span>
-
-  <span class="k">public</span> <span class="nf">Road</span><span class="p">(</span><span class="kt">double</span> <span class="n">speedLimit</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_speedLimit</span> <span class="p">=</span> <span class="n">speedLimit</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="n">Car</span> <span class="n">car</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">car</span><span class="p">.</span><span class="nf">Drive</span><span class="p">(</span><span class="n">_speedLimit</span><span class="p">);</span>
-    <span class="n">car</span><span class="p">.</span><span class="nf">Honk</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// You can go fast on highways</span>
-<span class="k">class</span> <span class="nc">Highway</span> <span class="p">:</span> <span class="n">Road</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="nf">Highway</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="m">70.0</span><span class="p">)</span>
-  <span class="p">{}</span>
-<span class="p">}</span>
-
-<span class="c1">// You have to go slow on driveways</span>
-<span class="k">class</span> <span class="nc">Driveway</span> <span class="p">:</span> <span class="n">Road</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="nf">Driveway</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="m">5.0</span><span class="p">)</span>
-  <span class="p">{}</span>
-<span class="p">}</span>
-
-<span class="c1">// A taxiway is a road, is it not?</span>
-<span class="k">class</span> <span class="nc">Taxiway</span> <span class="p">:</span> <span class="n">Road</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="nf">Taxiway</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="m">30.0</span><span class="p">)</span> <span class="c1">// Speed limit for planes</span>
-  <span class="p">{}</span>
-<span class="p">}</span>
-
-<span class="c1">// Planes need to operate on taxiways, so I guess it's a car</span>
-<span class="k">abstract</span> <span class="k">class</span> <span class="nc">Plane</span> <span class="p">:</span> <span class="n">Car</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// Planes do not drive like normal cars</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">speed</span> <span class="p">&lt;</span> <span class="m">50.0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're taxiing at </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH!"</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're flying at </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH!"</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Honk</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// Planes do not have horns</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Notice how <code class="language-plaintext highlighter-rouge">Plane</code> is implemented. It uses <em>none</em> of the behavior of the
-underlying <code class="language-plaintext highlighter-rouge">Car</code> class. The only reason it inherits from <code class="language-plaintext highlighter-rouge">Car</code> is so that it
-can operate on a <code class="language-plaintext highlighter-rouge">Taxiway</code> (which is a kind of road)—it needs the
-semantics of a <code class="language-plaintext highlighter-rouge">Car</code>. But it gets all the baggage of a <code class="language-plaintext highlighter-rouge">Car</code> as well.</p>
-
-<h3 id="constructor-parameters-and-other-dependencies">Constructor parameters and other dependencies</h3>
-
-<p>What about constructor parameters?</p>
-
-<p>They’re part of the semantics, too—the constructor is often a
-publicly-facing member.</p>
-
-<p>Have you ever added a constructor parameter? Perhaps to refactor and encapsulate
-some behavior after you realized it was repeated all over the place?</p>
-
-<p>Inheritance hierarchies tend to get deeper over time. And the deeper it gets,
-the harder it is to change constructor parameters.</p>
-
-<p>And sometimes the behavior that uses the constructor parameter is totally
-ignored in child classes—what a waste of effort!</p>
-
-<p>Or how about refactoring a base class. Think about the effort that is required
-to do that when there are hundreds of derived classes. You have to understand
-<em>exactly</em> what your change means in the context of every single one of those
-classes. I’ve had to do that multiple times. It’s no fun!</p>
-
-<h3 id="crossing-domain-boundaries">Crossing domain boundaries</h3>
-
-<p>Let’s continue the above example. Planes have to inherit from <code class="language-plaintext highlighter-rouge">Car</code> because they
-operate on taxiways (which is a kind of road).</p>
-
-<p>What about float planes?</p>
-
-<p><a href="https://commons.wikimedia.org/wiki/File:DeHavilland_Single_Otter_Harbour_Air.jpg"><img src="/assets/img/inheritance/DeHavilland_Single_Otter_Harbour_Air.jpg" alt="A float plane" class="img-fluid" /></a></p>
-
-<p><em>Image from <a href="https://commons.wikimedia.org/wiki/File:DeHavilland_Single_Otter_Harbour_Air.jpg">Wikimedia Commons</a></em></p>
-
-<p>That’s definitely a plane. And it’s operating on a waterway.</p>
-
-<p>They can sometimes operate on land, too. See?</p>
-
-<p><a href="https://www.vikingair.com/twin-otter-series-400/twin-otter-answers/can-floatplane-land-ground"><img src="/assets/img/inheritance/Viktoria Amphibs_landing_gear.jpg" alt="A float plane with wheels" class="img-fluid" /></a></p>
-
-<p><em>Image from <a href="https://www.vikingair.com/twin-otter-series-400/twin-otter-answers/can-floatplane-land-ground">Viking Air</a></em></p>
-
-<p>Okay, let’s implement waterways and float planes:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// A thing that can operate on waterways</span>
-<span class="k">class</span> <span class="nc">Watercraft</span>
-<span class="p">{</span>
-  <span class="p">...</span>
-<span class="p">}</span>
-
-<span class="c1">// It would be strange to call a waterway a "road", wouldn't it?</span>
-<span class="k">class</span> <span class="nc">Waterway</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="n">Watercraft</span> <span class="n">watercraft</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="p">...</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// A particular kind of watercraft. It's definitely not a car</span>
-<span class="k">class</span> <span class="nc">Speedboat</span> <span class="p">:</span> <span class="n">Watercraft</span>
-<span class="p">{</span>
-  <span class="p">...</span>
-<span class="p">}</span>
-
-<span class="c1">// A plane that can operate on the waterways</span>
-<span class="k">class</span> <span class="nc">FloatPlane</span> <span class="p">:</span> <span class="p">?????</span>
-<span class="p">{</span>
-  <span class="p">...</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>From what class should <code class="language-plaintext highlighter-rouge">FloatPlane</code> inherit?</p>
-
-<p>If it inherits from <code class="language-plaintext highlighter-rouge">Plane</code> then it cannot operate on waterways. And if it
-inherits from <code class="language-plaintext highlighter-rouge">Watercraft</code> then it cannot operate on taxiways. And C# won’t let
-you inherit from both.</p>
-
-<p>Have you ever found yourself <a href="https://stackoverflow.com/search?q=c%23+multiple+inheritance">wishing for multiple inheritance in C#</a>?
-I bet you were trying to use inheritance to cross domains.</p>
-
-<h2 id="the-fixes">The fixes</h2>
-
-<p>One fix that would enable you to cross between taxonomies would be to create
-adapter classes that inherit from one taxonomy while delegating to an instance
-of the other. But that’s just composition in ugly disguise.</p>
-
-<p>Which brings me to my favorite fix: <strong>composition</strong>.</p>
-
-<p>When something is “composed” of other things, that means it has those other
-things. Composition is a “has a” relationship. As in “a plane <em>has</em> an engine”.</p>
-
-<p>I favor composition over inheritance. Why relegate composition to only those
-times when you need to hack up an inheritance hierarchy?</p>
-
-<h3 id="behavior-vs-semantics-1">Behavior vs semantics</h3>
-
-<p>Do you want the semantics of being eligible to operate on a road?</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Something that can operate on a road</span>
-<span class="k">interface</span> <span class="nc">IRoadWorthy</span>
-<span class="p">{</span>
-  <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="c1">// A road</span>
-<span class="k">sealed</span> <span class="k">class</span> <span class="nc">Road</span>
-<span class="p">{</span>
-  <span class="k">readonly</span> <span class="kt">double</span> <span class="n">_speed</span><span class="p">;</span>
-
-  <span class="k">public</span> <span class="nf">Road</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_speed</span> <span class="p">=</span> <span class="n">speed</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="n">IRoadWorthy</span> <span class="n">thing</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">thing</span><span class="p">.</span><span class="nf">Operate</span><span class="p">(</span><span class="n">_speed</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// Creates highways</span>
-<span class="k">sealed</span> <span class="k">class</span> <span class="nc">HighwayFactory</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="n">Road</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">Road</span><span class="p">(</span><span class="m">70.0</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="c1">// Creates driveways</span>
-<span class="k">sealed</span> <span class="k">class</span> <span class="nc">DrivewayFactory</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="n">Road</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">Road</span><span class="p">(</span><span class="m">5.0</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="c1">// Creates taxiways</span>
-<span class="k">sealed</span> <span class="k">class</span> <span class="nc">TaxiwayFactory</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="n">Road</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="nf">Road</span><span class="p">(</span><span class="m">30.0</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Do you want the behavior of a car?</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">sealed</span> <span class="k">class</span> <span class="nc">Car</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Drive</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"We're driving at </span><span class="p">{</span><span class="n">speed</span><span class="p">}</span><span class="s"> MPH!"</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Honk</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Honk honk!"</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Do you want to be able to operate a car on a road in a particular way?</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">sealed</span> <span class="k">class</span> <span class="nc">DrivingHonkingCarToRoadWorthyAdapter</span> <span class="p">:</span> <span class="n">IRoadWorthy</span>
-<span class="p">{</span>
-  <span class="k">readonly</span> <span class="n">Car</span> <span class="n">_car</span><span class="p">;</span>
-
-  <span class="k">public</span> <span class="nf">DrivingHonkingCarToRoadWorthyAdapter</span><span class="p">(</span><span class="n">Car</span> <span class="n">car</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_car</span> <span class="p">=</span> <span class="n">car</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_car</span><span class="p">.</span><span class="nf">Drive</span><span class="p">(</span><span class="n">speed</span><span class="p">);</span>
-    <span class="n">_car</span><span class="p">.</span><span class="nf">Honk</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Do you want a float plane to operate on a road in a particular way?</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">sealed</span> <span class="k">class</span> <span class="nc">FloatPlane</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Crash</span><span class="p">(</span><span class="kt">string</span> <span class="n">reason</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Fly</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Float</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">RollOnWheels</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">SkimWater</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">sealed</span> <span class="k">class</span> <span class="nc">MustNotFlyFloatPlaneToRoadWorthyAdapter</span> <span class="p">:</span> <span class="n">IRoadWorthy</span>
-<span class="p">{</span>
-  <span class="k">readonly</span> <span class="n">FloatPlane</span> <span class="n">_floatPlane</span><span class="p">;</span>
-
-  <span class="k">public</span> <span class="nf">MustNotFlyFloatPlaneToRoadWorthyAdapter</span><span class="p">(</span><span class="n">FloatPlane</span> <span class="n">floatPlane</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_floatPlane</span> <span class="p">=</span> <span class="n">floatPlane</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">speed</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">speed</span> <span class="p">&lt;=</span> <span class="m">50.0</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">_floatPlane</span><span class="p">.</span><span class="nf">RollOnWheels</span><span class="p">(</span><span class="n">speed</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-      <span class="n">_floatPlane</span><span class="p">.</span><span class="nf">Crash</span><span class="p">(</span><span class="s">"Too fast to stay on the road"</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="but-there-are-too-many-classes">“But there are too many classes!”</h3>
-
-<p>Did you notice how many more classes there are now than there were before? There
-is basically one class for each behavior and also for each kind of usage of the
-behavior.</p>
-
-<p>Actually, you should count them. There aren’t as many more as you might think
-(make sure to remember that <code class="language-plaintext highlighter-rouge">Speedboat</code>, <code class="language-plaintext highlighter-rouge">Waterway</code>, and <code class="language-plaintext highlighter-rouge">Watercraft</code> don’t have
-equivalents in the above composition example).</p>
-
-<p>But even if there were dozens more classes, would that be a bad thing?</p>
-
-<p>The classes will tend to be smaller. They’ll tend to be easier to understand at
-a glance. Often, everything you need to know fits on a single screen.</p>
-
-<p>The classes will tend to do less. And just by doing less they will be less prone
-to bugs. And smaller <a href="https://martinfowler.com/bliki/HumbleObject.html">humbler</a>
-classes tend to be more <em>unit testable</em>.</p>
-
-<p>The classes will tend to change less. If you use composition then you’ll find
-that you are either creating or deleting classes more than you are modifying
-them. And the fewer the modifications, the fewer the regressions.</p>
-
-<p>The classes will tend to be less affected by change. They cannot be affected by
-changes upstream in the inheritance hierarchy, because there is no inheritance
-hierarchy. As you tailor classes to specific aspects (and then compose those
-aspects instead of using inheritance) then you’ll find that there are fewer
-dependencies between classes. And the fewer the dependencies, the lower the
-likelihood of a dependency introducing a breaking change.</p>
-
-<p>And with good design these things will remain true as your codebase grows
-to arbitrary complexity and thousands of source code files.</p>
-
-<p>Now, you can definitely go overboard with layer upon layer of interfaces and
-abstractions—I’m guilty of that!—but that doesn’t <em>necessarily</em>
-happen when you favor composition over inheritance. And neither is that
-<em>necessarily</em> prevented by using inheritance.</p>
-
-<p>In fact, I have found more than one misuse of inheritance that encouraged
-copy-and-paste instead of encapsulation-and-reuse, and that encouraged
-needlessly large and deep inheritance hierarchies (read: needlessly many
-classes). And I have personally misused inheritance to create needlessly many
-layers of abstraction.</p>
-
-<h2 id="the-point">The point</h2>
-
-<p>There is more that could be said, perhaps about how interfaces should be
-tailored to the interface’s consumer, or the value of unit testing, or how to
-make behavior unit-testable, or how following the <a href="https://en.wikipedia.org/wiki/SOLID">SOLID</a>
-principles (especially Single Responsibility!) naturally leads to composition
-and unit-testability, or the best ways to create an escape hatch from
-inheritance without disturbing too much.</p>
-
-<p>But the point is: <strong>Why are you favoring inheritance over composition? Are you misusing inheritance?</strong></p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Musings about favoring either inheritance or composition]]></summary></entry><entry><title type="html">Radial Arm Saw</title><link href="/tools/2021/10/12/ras.html" rel="alternate" type="text/html" title="Radial Arm Saw" /><published>2021-10-12T00:00:00-05:00</published><updated>2021-10-12T00:00:00-05:00</updated><id>/tools/2021/10/12/ras</id><content type="html" xml:base="/tools/2021/10/12/ras.html"><![CDATA[<p>I recently purchased a radial arm saw (RAS) from Craigslist.</p>
+wire.</p>]]></content><author><name></name></author><category term="diy" /><summary type="html"><![CDATA[Learn with me]]></summary></entry><entry><title type="html">Radial Arm Saw</title><link href="/tools/2021/10/12/ras.html" rel="alternate" type="text/html" title="Radial Arm Saw" /><published>2021-10-12T00:00:00-05:00</published><updated>2021-10-12T00:00:00-05:00</updated><id>/tools/2021/10/12/ras</id><content type="html" xml:base="/tools/2021/10/12/ras.html"><![CDATA[<p>I recently purchased a radial arm saw (RAS) from Craigslist.</p>
 
 <p>Here’s almost what it looks like:</p>
 
@@ -1718,283 +1961,4 @@ with good angles is supposed to be another way to keep your fingers.</p>
 
 <p>Where am I on the <a href="https://www.gartner.com/en/research/methodologies/gartner-hype-cycle">Hype Cycle</a>?
 Things keep looking brighter, so I must not have crested the Peak of Inflated
-Expectations yet.</p>]]></content><author><name></name></author><category term="tools" /><summary type="html"><![CDATA[And where I'm at on the Hype Cycle]]></summary></entry><entry><title type="html">Async Method Builders Are Hard</title><link href="/programming/2021/09/30/async-method-builders-are-hard.html" rel="alternate" type="text/html" title="Async Method Builders Are Hard" /><published>2021-09-30T00:00:00-05:00</published><updated>2021-09-30T00:00:00-05:00</updated><id>/programming/2021/09/30/async-method-builders-are-hard</id><content type="html" xml:base="/programming/2021/09/30/async-method-builders-are-hard.html"><![CDATA[<p>C# lets you use asynchronous methods and awaitable expressions. For example, in
-C# you can do this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
-<span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
-
-<span class="k">static</span> <span class="k">class</span> <span class="nc">Program</span>
-<span class="p">{</span>
-    <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">RunAsync</span><span class="p">();</span>
-        <span class="n">task</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">().</span><span class="nf">GetResult</span><span class="p">();</span>
-    <span class="p">}</span>
-
-    <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">RunAsync</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Just a second..."</span><span class="p">);</span>
-        <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">1</span><span class="p">));</span>
-        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Ok!"</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>…and your program will output “Just a second…”, then nothing will happen for
-one second, then it’ll output “Ok!”.</p>
-
-<p>Asynchronous methods are marked by the <code class="language-plaintext highlighter-rouge">async</code> keyword. Awaitable expressions
-involve the <code class="language-plaintext highlighter-rouge">await</code> keyword.</p>
-
-<p>But what types can an asynchronous method return?</p>
-
-<p>Any awaitable type that has an asynchronous method builder.</p>
-
-<h2 id="builder-type">Builder type</h2>
-
-<p>Microsoft’s documentation on asynchronous method builders pretty much is limited
-to this:</p>
-
-<p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types">https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types</a></p>
-
-<p>In summary, any type can be returned from an asynchronous method as long as it
-is:</p>
-
-<ul>
-  <li><a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#awaitable-expressions">An awaitable type</a></li>
-  <li>Decorated with the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.asyncmethodbuilderattribute?view=net-5.0"><code class="language-plaintext highlighter-rouge">AsyncMethodBuilder</code></a>
-attribute</li>
-  <li>And the attribute points to a <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#builder-type">builder type</a></li>
-</ul>
-
-<h2 id="documentation-woes"><del>Documentation woes</del></h2>
-
-<p><del>But Microsoft’s documentation isn’t even correct.</del></p>
-
-<p><del>Of the builder type <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.0/task-types#:~:text=awaitunsafeoncompleted()%20should%20call%20awaiter.oncompleted(action)">it says</a>:</del></p>
-
-<blockquote>
-  <p><del><code class="language-plaintext highlighter-rouge">AwaitUnsafeOnCompleted()</code> should call <code class="language-plaintext highlighter-rouge">awaiter.OnCompleted(action)</code></del></p>
-</blockquote>
-
-<p><del>That’s not correct. It should call <code class="language-plaintext highlighter-rouge">awaiter.UnsafeOnCompleted(action)</code>. That’s
-what Microsoft itself <a href="https://github.com/dotnet/runtime/blob/v5.0.10/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilderT.cs#L101">does</a>.</del></p>
-
-<p><del>Also, it says:</del></p>
-
-<blockquote>
-  <p><del>If the state machine is implemented as a <code class="language-plaintext highlighter-rouge">struct</code>, then
-  <code class="language-plaintext highlighter-rouge">builder.SetStateMachine(stateMachine)</code> is called with a boxed instance of the
-  state machine that the builder can cache if necessary.</del></p>
-</blockquote>
-
-<p><del>And that’s not correct, either. <a href="https://dotnetfiddle.net/bwBmFj">See?</a> (Make
-sure you run that code on your local PC; .NET Fiddle doesn’t run it correctly.)</del></p>
-
-<p><em>Edit: These mistakes will be fixed once <a href="https://github.com/dotnet/csharplang/pull/5253">PR 5253</a> goes live.</em></p>
-
-<h2 id="implementation-woes">Implementation woes</h2>
-
-<p>Can <em>you</em> tell me why the below code is a perfectly fine example of an async
-method builder in Debug mode or if <code class="language-plaintext highlighter-rouge">CustomAwaitableAsyncMethodBuilder</code> is
-changed to a <code class="language-plaintext highlighter-rouge">class</code>, but otherwise will hang and never complete?</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="n">nullable</span> <span class="n">enable</span>
-<span class="k">namespace</span> <span class="nn">BrokenAsyncMethodBuilder</span>
-<span class="p">{</span>
-    <span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
-    <span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
-    <span class="k">using</span> <span class="nn">System.Runtime.CompilerServices</span><span class="p">;</span>
-    <span class="k">using</span> <span class="nn">System.Threading</span><span class="p">;</span>
-    <span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
-
-    <span class="p">[</span><span class="nf">AsyncMethodBuilder</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">CustomAwaitableAsyncMethodBuilder</span><span class="p">&lt;&gt;))]</span>
-    <span class="k">public</span> <span class="k">readonly</span> <span class="k">struct</span> <span class="nc">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-    <span class="p">{</span>
-        <span class="k">readonly</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">_valueTask</span><span class="p">;</span>
-
-        <span class="k">public</span> <span class="nf">CustomAwaitable</span><span class="p">(</span><span class="n">ValueTask</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">valueTask</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="n">_valueTask</span> <span class="p">=</span> <span class="n">valueTask</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="k">public</span> <span class="n">ValueTaskAwaiter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="nf">GetAwaiter</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">_valueTask</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
-    <span class="p">}</span>
-
-    <span class="k">public</span> <span class="k">struct</span> <span class="nc">CustomAwaitableAsyncMethodBuilder</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-    <span class="c1">//     ^^^^^^ Only works if you change this to `class` or run in Debug mode</span>
-    <span class="p">{</span>
-        <span class="err">#</span><span class="n">region</span> <span class="n">fields</span>
-
-        <span class="n">Exception</span><span class="p">?</span> <span class="n">_exception</span><span class="p">;</span>
-        <span class="kt">bool</span> <span class="n">_hasResult</span><span class="p">;</span>
-        <span class="n">SpinLock</span> <span class="n">_lock</span><span class="p">;</span>
-        <span class="n">T</span><span class="p">?</span> <span class="n">_result</span><span class="p">;</span>
-        <span class="n">TaskCompletionSource</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;?</span> <span class="n">_source</span><span class="p">;</span>
-
-        <span class="err">#</span><span class="n">endregion</span>
-
-        <span class="err">#</span><span class="n">region</span> <span class="n">properties</span>
-
-        <span class="k">public</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Task</span>
-        <span class="p">{</span>
-            <span class="k">get</span>
-            <span class="p">{</span>
-                <span class="kt">var</span> <span class="n">lockTaken</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-                <span class="k">try</span>
-                <span class="p">{</span>
-                    <span class="n">_lock</span><span class="p">.</span><span class="nf">Enter</span><span class="p">(</span><span class="k">ref</span> <span class="n">lockTaken</span><span class="p">);</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">_exception</span> <span class="k">is</span> <span class="n">not</span> <span class="k">null</span><span class="p">)</span>
-                        <span class="k">return</span> <span class="k">new</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">ValueTask</span><span class="p">.</span><span class="n">FromException</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">_exception</span><span class="p">));</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">_hasResult</span><span class="p">)</span>
-                        <span class="k">return</span> <span class="k">new</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">ValueTask</span><span class="p">.</span><span class="nf">FromResult</span><span class="p">(</span><span class="n">_result</span><span class="p">!));</span>
-                    <span class="k">return</span> <span class="k">new</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span>
-                        <span class="k">new</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span>
-                            <span class="p">(</span><span class="n">_source</span> <span class="p">??=</span> <span class="k">new</span> <span class="n">TaskCompletionSource</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">TaskCreationOptions</span><span class="p">.</span><span class="n">RunContinuationsAsynchronously</span><span class="p">))</span>
-                            <span class="p">.</span><span class="n">Task</span>
-                        <span class="p">)</span>
-                    <span class="p">);</span>
-                <span class="p">}</span>
-                <span class="k">finally</span>
-                <span class="p">{</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">lockTaken</span><span class="p">)</span>
-                        <span class="n">_lock</span><span class="p">.</span><span class="nf">Exit</span><span class="p">();</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-
-        <span class="k">public</span> <span class="k">void</span> <span class="n">AwaitOnCompleted</span><span class="p">&lt;</span><span class="n">TAwaiter</span><span class="p">,</span> <span class="n">TStateMachine</span><span class="p">&gt;(</span>
-            <span class="k">ref</span> <span class="n">TAwaiter</span> <span class="n">awaiter</span><span class="p">,</span>
-            <span class="k">ref</span> <span class="n">TStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span>
-            <span class="k">where</span> <span class="n">TAwaiter</span> <span class="p">:</span> <span class="n">INotifyCompletion</span>
-            <span class="k">where</span> <span class="n">TStateMachine</span> <span class="p">:</span> <span class="n">IAsyncStateMachine</span> <span class="p">=&gt;</span>
-            <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(</span><span class="n">stateMachine</span><span class="p">.</span><span class="n">MoveNext</span><span class="p">);</span>
-
-        <span class="k">public</span> <span class="k">void</span> <span class="n">AwaitUnsafeOnCompleted</span><span class="p">&lt;</span><span class="n">TAwaiter</span><span class="p">,</span> <span class="n">TStateMachine</span><span class="p">&gt;(</span>
-            <span class="k">ref</span> <span class="n">TAwaiter</span> <span class="n">awaiter</span><span class="p">,</span>
-            <span class="k">ref</span> <span class="n">TStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span>
-            <span class="k">where</span> <span class="n">TAwaiter</span> <span class="p">:</span> <span class="n">ICriticalNotifyCompletion</span>
-            <span class="k">where</span> <span class="n">TStateMachine</span> <span class="p">:</span> <span class="n">IAsyncStateMachine</span> <span class="p">=&gt;</span>
-            <span class="n">awaiter</span><span class="p">.</span><span class="nf">UnsafeOnCompleted</span><span class="p">(</span><span class="n">stateMachine</span><span class="p">.</span><span class="n">MoveNext</span><span class="p">);</span>
-
-        <span class="err">#</span><span class="n">endregion</span>
-
-        <span class="err">#</span><span class="n">region</span> <span class="n">methods</span>
-
-        <span class="k">public</span> <span class="k">static</span> <span class="n">CustomAwaitableAsyncMethodBuilder</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="nf">Create</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="n">_lock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SpinLock</span><span class="p">(</span><span class="n">Debugger</span><span class="p">.</span><span class="n">IsAttached</span><span class="p">)</span>
-        <span class="p">};</span>
-
-        <span class="k">public</span> <span class="k">void</span> <span class="nf">SetException</span><span class="p">(</span><span class="n">Exception</span> <span class="n">exception</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">lockTaken</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-            <span class="k">try</span>
-            <span class="p">{</span>
-                <span class="n">_lock</span><span class="p">.</span><span class="nf">Enter</span><span class="p">(</span><span class="k">ref</span> <span class="n">lockTaken</span><span class="p">);</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">Volatile</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="k">ref</span> <span class="n">_source</span><span class="p">)</span> <span class="k">is</span> <span class="p">{}</span> <span class="n">source</span><span class="p">)</span>
-                <span class="p">{</span>
-                    <span class="n">source</span><span class="p">.</span><span class="nf">TrySetException</span><span class="p">(</span><span class="n">exception</span><span class="p">);</span>
-                <span class="p">}</span>
-                <span class="k">else</span>
-                <span class="p">{</span>
-                    <span class="n">_exception</span> <span class="p">=</span> <span class="n">exception</span><span class="p">;</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-            <span class="k">finally</span>
-            <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">lockTaken</span><span class="p">)</span>
-                    <span class="n">_lock</span><span class="p">.</span><span class="nf">Exit</span><span class="p">();</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-
-        <span class="k">public</span> <span class="k">void</span> <span class="nf">SetResult</span><span class="p">(</span><span class="n">T</span> <span class="n">result</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">lockTaken</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
-            <span class="k">try</span>
-            <span class="p">{</span>
-                <span class="n">_lock</span><span class="p">.</span><span class="nf">Enter</span><span class="p">(</span><span class="k">ref</span> <span class="n">lockTaken</span><span class="p">);</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">Volatile</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="k">ref</span> <span class="n">_source</span><span class="p">)</span> <span class="k">is</span> <span class="p">{}</span> <span class="n">source</span><span class="p">)</span>
-                <span class="p">{</span>
-                    <span class="n">source</span><span class="p">.</span><span class="nf">TrySetResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
-                <span class="p">}</span>
-                <span class="k">else</span>
-                <span class="p">{</span>
-                    <span class="n">_result</span> <span class="p">=</span> <span class="n">result</span><span class="p">;</span>
-                    <span class="n">_hasResult</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-            <span class="k">finally</span>
-            <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">lockTaken</span><span class="p">)</span>
-                    <span class="n">_lock</span><span class="p">.</span><span class="nf">Exit</span><span class="p">();</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-
-        <span class="k">public</span> <span class="k">void</span> <span class="nf">SetStateMachine</span><span class="p">(</span><span class="n">IAsyncStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span> <span class="p">{}</span>
-
-        <span class="k">public</span> <span class="k">void</span> <span class="n">Start</span><span class="p">&lt;</span><span class="n">TStateMachine</span><span class="p">&gt;(</span><span class="k">ref</span> <span class="n">TStateMachine</span> <span class="n">stateMachine</span><span class="p">)</span>
-            <span class="k">where</span> <span class="n">TStateMachine</span> <span class="p">:</span> <span class="n">IAsyncStateMachine</span> <span class="p">=&gt;</span> <span class="n">stateMachine</span><span class="p">.</span><span class="nf">MoveNext</span><span class="p">();</span>
-
-        <span class="err">#</span><span class="n">endregion</span>
-    <span class="p">}</span>
-
-    <span class="k">class</span> <span class="nc">Program</span>
-    <span class="p">{</span>
-        <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Main</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">expected</span> <span class="p">=</span> <span class="n">Guid</span><span class="p">.</span><span class="nf">NewGuid</span><span class="p">().</span><span class="nf">ToString</span><span class="p">();</span>
-            <span class="k">async</span> <span class="n">CustomAwaitable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="nf">GetValueAsync</span><span class="p">()</span>
-            <span class="p">{</span>
-                <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Yield</span><span class="p">();</span>
-                <span class="k">return</span> <span class="n">expected</span><span class="p">;</span>
-            <span class="p">}</span>
-
-            <span class="kt">var</span> <span class="n">actual</span> <span class="p">=</span> <span class="k">await</span> <span class="nf">GetValueAsync</span><span class="p">();</span>
-
-            <span class="k">if</span> <span class="p">(!</span><span class="nf">ReferenceEquals</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">actual</span><span class="p">))</span>
-                <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">();</span>
-
-            <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Done!"</span><span class="p">);</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p><a href="https://stackoverflow.com/a/69397857/3063273">Here’s the answer</a>. Guess how
-long it took me to figure that one out? I was pondering this <em>for a day or so</em>
-before I posted the question on StackOverflow. And then the only way I found out
-was by using <a href="https://github.com/icsharpcode/ILSpy">ILSpy</a> on the compiled .dll,
-and then only by configuring ILSpy in a specific way.</p>
-
-<p>How are people supposed to know this stuff?</p>
-
-<h3 id="inevitable-heap-allocations">Inevitable heap allocations</h3>
-
-<p>Not long ago I wrote “Async and Await in C# vs Rust”. In that article
-<a href="/programming/2021/09/16/async-await-csharp-rust.html#:~:text=async%2Fawait%20system%3A-,C%23%20awaitable%20expressions%20are,something%20on%20the%20heap.,-And%20invoking%20an">I pointed out</a>:</p>
-
-<blockquote>
-  <p>C# awaitable expressions are composed with callbacks. These callbacks have the
-  type <code class="language-plaintext highlighter-rouge">Action</code>, which is a delegate. To package something (e.g. a step in a
-  state machine) up into an <code class="language-plaintext highlighter-rouge">Action</code> you have to put something on the heap.</p>
-</blockquote>
-
-<p>Well, the exact same thing rears its head in async method builders. Async method
-builders themselves <em>must</em> create a boxed reference to the async state machine
-at some point. Otherwise you run into the above problem.</p>
-
-<p>The StackOverflow answer I linked to above has enough detail to figure out why.
-But basically it comes down to the fact that the async state machines are driven
-forward by <code class="language-plaintext highlighter-rouge">Action</code> delegates. It’s the other side of the same coin.</p>
-
-<p>Not only is it impossible to compose awaitable expressions without heap
-allocations, it’s not even possible to have an <code class="language-plaintext highlighter-rouge">async</code> method at all without
-heap allocations.</p>
-
-<h2 id="the-point">The point</h2>
-
-<p>Microsoft’s implementation of async/await has some flaws. You might not think
-they’re very serious, but I think you’ll at least agree that C#’s async method
-builders are hard to implement!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[A peek under the hood of C#, and a complaint about Microsoft's documentation]]></summary></entry></feed>
+Expectations yet.</p>]]></content><author><name></name></author><category term="tools" /><summary type="html"><![CDATA[And where I'm at on the Hype Cycle]]></summary></entry></feed>

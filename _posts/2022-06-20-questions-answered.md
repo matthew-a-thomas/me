@@ -349,7 +349,7 @@ contexts.
 Personally I don't think that's a good choice. In fact I would go so far as to
 call it an anti-pattern. I personally think that a synchronous lock should be
 used for synchronous contexts, and an asynchronous lock should be used for
-asynchronous contexts, I suspect that if you want to use one for the other then
+asynchronous contexts. I suspect that if you want to use one for the other then
 there are probably some things going amuck in your code. I think that if you're
 okay with
 [colored functions](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/)

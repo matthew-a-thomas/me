@@ -62,8 +62,8 @@ Assert.Equal(2, raceCondition);
 
 In the code comments above I point out the three different aspects of the lock.
 
-You'll also notice that the code has automated tests that assert the correctness
-of each of the three aspects.
+You'll also notice that the NuGet package source code has automated tests that
+assert the correctness of each of the three aspects (and more).
 
 # How does it work?
 

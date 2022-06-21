@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-20T14:05:16-05:00</updated><id>/feed.xml</id><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-21T07:37:30-05:00</updated><id>/feed.xml</id><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
 locks:</p>
 
 <ol>
@@ -489,8 +489,8 @@ lets you write code like this:</p>
 
 <p>In the code comments above I point out the three different aspects of the lock.</p>
 
-<p>You’ll also notice that the code has automated tests that assert the correctness
-of each of the three aspects.</p>
+<p>You’ll also notice that the NuGet package source code has automated tests that
+assert the correctness of each of the three aspects (and more).</p>
 
 <h1 id="how-does-it-work">How does it work?</h1>
 

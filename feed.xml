@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-21T07:37:30-05:00</updated><id>/feed.xml</id><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-06-22T12:46:24-05:00</updated><id>/feed.xml</id><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
 locks:</p>
 
 <ol>
@@ -239,6 +239,83 @@ code smell to <code class="language-plaintext highlighter-rouge">.Wait()</code> 
 
 <p>To be fair, Max also doesn’t think this is really an issue.</p>
 
+<p><strong>Update</strong>: Actually you’ll get stack overflows from those examples. But pretend
+for a moment that it deadlocks from the fact that one is waiting on the other
+which is waiting on the first. Pretend we’re talking about this instead:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DeadlockAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">tcs</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TaskCompletionSource</span><span class="p">();</span>
+  <span class="kt">var</span> <span class="n">task1</span> <span class="p">=</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="k">await</span> <span class="n">tcs</span><span class="p">.</span><span class="n">Task</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="kt">var</span> <span class="n">task2</span> <span class="p">=</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="n">tcs</span><span class="p">.</span><span class="nf">TrySetResult</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="k">await</span> <span class="n">task2</span><span class="p">;</span>
+  <span class="k">await</span> <span class="n">task1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In this example there is a race condition between <code class="language-plaintext highlighter-rouge">task1</code> and <code class="language-plaintext highlighter-rouge">task2</code>. If
+<code class="language-plaintext highlighter-rouge">task2</code> wins the race then everything is hunky dory. But if <code class="language-plaintext highlighter-rouge">task1</code> wins the
+race then there is a deadlock: <code class="language-plaintext highlighter-rouge">task1</code> will be waiting on the <code class="language-plaintext highlighter-rouge">tcs</code> which
+can only be set by <code class="language-plaintext highlighter-rouge">task2</code>, but <code class="language-plaintext highlighter-rouge">task2</code> is waiting to acquire the lock and can’t
+until <code class="language-plaintext highlighter-rouge">task1</code> releases it.</p>
+
+<p>Let me go into a little more detail about <em>why</em> that would deadlock, and why I
+think that’s exactly what should happen.</p>
+
+<p>The reason it deadlocks is because it’s not an example of re-entering the lock.
+Two <strong>different</strong> contexts are vying for the lock. Sometimes one of them gets it
+and sometimes the other one gets it, but not both at the same time.</p>
+
+<p>And they are two different contexts because they’ll have <em>sibling</em>
+<code class="language-plaintext highlighter-rouge">ExecutionContext</code> instead of one “inheriting” from the other.</p>
+
+<p>I think deadlocking is the right thing. Think about the synchronous analogy:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="kt">object</span> <span class="n">_gate</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+<span class="k">public</span> <span class="k">void</span> <span class="nf">Deadlock</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">mre</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ManualResetEventSlim</span><span class="p">();</span>
+  <span class="kt">var</span> <span class="n">thread1</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Thread</span><span class="p">(()</span> <span class="p">=&gt;</span>
+  <span class="p">{</span>
+    <span class="k">lock</span> <span class="p">(</span><span class="n">_gate</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">mre</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="n">thread1</span><span class="p">.</span><span class="nf">Start</span><span class="p">();</span>
+  <span class="kt">var</span> <span class="n">thread2</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Thread</span><span class="p">(()</span> <span class="p">=&gt;</span>
+  <span class="p">{</span>
+    <span class="k">lock</span> <span class="p">(</span><span class="n">_gate</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">mre</span><span class="p">.</span><span class="nf">Set</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="n">thread2</span><span class="p">.</span><span class="nf">Start</span><span class="p">();</span>
+
+  <span class="n">thread2</span><span class="p">.</span><span class="nf">Join</span><span class="p">();</span>
+  <span class="n">thread1</span><span class="p">.</span><span class="nf">Join</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>I don’t think anyone will complain about the deadlock in the synchronous
+analogy. Instead I think they’ll be content to learn that the problem is their
+code :)</p>
+
 <h1 id="cant-someone-just-replace-synchronizationcontextcurrent-somewhere-down-the-call-chain-inside-the-guarded-section-of-an-async-lock">Can’t someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?</h1>
 
 <p>I think the question here is if this has any effect on the performance of the
@@ -410,7 +487,9 @@ won’t hamper them because this whole site
 <p>I <em>think</em> that’ll work. It takes into account some of the nuances of
 <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code>.</p>
 
-<p>But I don’t like it.</p>
+<p>But no guarantees!</p>
+
+<p>And I don’t like it.</p>
 
 <h1 id="the-point">The point</h1>
 

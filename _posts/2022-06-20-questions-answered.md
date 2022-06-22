@@ -219,6 +219,85 @@ public async Task DoSomething2Async(CancellationToken token)
 
 To be fair, Max also doesn't think this is really an issue.
 
+**Update**: Actually you'll get stack overflows from those examples. But pretend
+for a moment that it deadlocks from the fact that one is waiting on the other
+which is waiting on the first. Pretend we're talking about this instead:
+
+```csharp
+readonly ReentrantAsyncLock _asyncLock = new();
+
+public async Task DeadlockAsync(CancellationToken token)
+{
+  var tcs = new TaskCompletionSource();
+  var task1 = Task.Run(async () =>
+  {
+    await using (await _asyncLock.LockAsync(token))
+    {
+      await tcs.Task;
+    }
+  });
+  var task2 = Task.Run(async () =>
+  {
+    await using (await _asyncLock.LockAsync(token))
+    {
+      tcs.TrySetResult();
+    }
+  });
+  await task2;
+  await task1;
+}
+```
+
+In this example there is a race condition between `task1` and `task2`. If
+`task2` wins the race then everything is hunky dory. But if `task1` wins the
+race then there is a deadlock: `task1` will be waiting on the `tcs` which
+can only be set by `task2`, but `task2` is waiting to acquire the lock and can't
+until `task1` releases it.
+
+Let me go into a little more detail about _why_ that would deadlock, and why I
+think that's exactly what should happen.
+
+The reason it deadlocks is because it's not an example of re-entering the lock.
+Two **different** contexts are vying for the lock. Sometimes one of them gets it
+and sometimes the other one gets it, but not both at the same time.
+
+And they are two different contexts because they'll have _sibling_
+`ExecutionContext` instead of one "inheriting" from the other.
+
+I think deadlocking is the right thing. Think about the synchronous analogy:
+
+```csharp
+readonly object _gate = new();
+
+public void Deadlock()
+{
+  var mre = new ManualResetEventSlim();
+  var thread1 = new Thread(() =>
+  {
+    lock (_gate)
+    {
+      mre.Wait();
+    }
+  });
+  thread1.Start();
+  var thread2 = new Thread(() =>
+  {
+    lock (_gate)
+    {
+      mre.Set();
+    }
+  });
+  thread2.Start();
+
+  thread2.Join();
+  thread1.Join();
+}
+```
+
+I don't think anyone will complain about the deadlock in the synchronous
+analogy. Instead I think they'll be content to learn that the problem is their
+code :)
+
 # Can't someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?
 
 I think the question here is if this has any effect on the performance of the
@@ -394,7 +473,9 @@ public static class ReentrantAsyncLockExtensions
 I _think_ that'll work. It takes into account some of the nuances of
 `ReentrantAsyncLock`.
 
-But I don't like it.
+But no guarantees!
+
+And I don't like it.
 
 # The point
 

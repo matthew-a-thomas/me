@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="At least, not necessarily">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Marker Interfaces Are Not Evil - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Marker Interfaces Are Not Evil</h1>
+          
+          
+          <p><i>September 08, 2022&mdash;At least, not necessarily</i></p>
+          
+          <p>When I Google “marker interfaces are bad” then the article
+“<a href="https://www.silasreinagel.com/blog/2018/04/24/marker-interfaces-are-evil/">Marker Interfaces Are Evil</a>”
+is close to the top.</p>
+
+<p>Well, are they?</p>
+
+<p>I don’t think so. Let me explain why.</p>
+
+<h2 id="marker-interfaces-reveal-intent">Marker interfaces reveal intent</h2>
+
+<p>Imagine you have a report rendering system:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">ReportRenderer</span>
+<span class="p">{</span>
+    <span class="k">readonly</span> <span class="n">IReadOnlyDictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">ISpecificReportRenderer</span><span class="p">&gt;</span> <span class="n">_renderers</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">ReportRenderer</span><span class="p">(</span><span class="n">IReadOnlyDictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">ISpecificReportRenderer</span><span class="p">&gt;</span> <span class="n">renderers</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_renderers</span> <span class="p">=</span> <span class="n">renderers</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">IReportModel</span> <span class="n">model</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">modelType</span> <span class="p">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">GetType</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">_renderers</span><span class="p">.</span><span class="nf">TryGetValue</span><span class="p">(</span><span class="n">modelType</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">specificRenderer</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">specificRenderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">$"No renderer available for models of type </span><span class="p">{</span><span class="n">modelType</span><span class="p">.</span><span class="n">Name</span><span class="p">}</span><span class="s">"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">interface</span> <span class="nc">ISpecificReportRenderer</span>
+<span class="p">{</span>
+    <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">IReportModel</span> <span class="n">model</span><span class="p">,</span> <span class="n">ReportRenderer</span> <span class="n">generalRenderer</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">abstract</span> <span class="k">class</span> <span class="nc">SpecificReportRenderer</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">ISpecificReportRenderer</span>
+<span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">IReportModel</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="k">abstract</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">T</span> <span class="n">model</span><span class="p">,</span> <span class="n">ReportRenderer</span> <span class="n">generalRenderer</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">IReportModel</span> <span class="n">model</span><span class="p">,</span> <span class="n">ReportRenderer</span> <span class="n">generalRenderer</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">model</span> <span class="k">is</span> <span class="n">not</span> <span class="n">T</span> <span class="n">asT</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Mismatched types"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nf">Render</span><span class="p">(</span><span class="n">asT</span><span class="p">,</span> <span class="n">generalRenderer</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">interface</span> <span class="nc">IReportModel</span>
+<span class="p">{</span>
+    <span class="c1">// Look, ma! No members!</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Report</span>
+<span class="p">{</span>
+    <span class="p">...</span> <span class="c1">// Pretend there's stuff in this Report class, like a tree of WPF controls or something</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Here’s how you might use it:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">renderers</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">ISpecificReportRenderer</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">StringReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StringReportModelRenderer</span><span class="p">(),</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">DoubleReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">DoubleReportModelRenderer</span><span class="p">(),</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">TableReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TableReportModelRenderer</span><span class="p">()</span>
+<span class="p">};</span>
+<span class="kt">var</span> <span class="n">renderer</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ReportRenderer</span><span class="p">(</span><span class="n">renderers</span><span class="p">);</span>
+<span class="kt">var</span> <span class="n">report</span> <span class="p">=</span> <span class="n">renderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="k">new</span> <span class="n">TableReportModel</span>
+<span class="p">{</span>
+    <span class="n">Title</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Billy Bob's finances"</span><span class="p">),</span>
+    <span class="n">Rows</span> <span class="p">=</span> <span class="k">new</span> <span class="n">IReportModel</span><span class="p">[][]</span>
+    <span class="p">{</span>
+        <span class="k">new</span> <span class="n">IReportModel</span><span class="p">[]</span>
+        <span class="p">{</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Date"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Location"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Amount"</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="k">new</span> <span class="n">IReportModel</span><span class="p">[]</span>
+        <span class="p">{</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"2022-09-08"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Somewhere in the world"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">DoubleReportModel</span><span class="p">(</span><span class="m">100.0</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+<span class="c1">// Now you have a rendered report!</span>
+</code></pre></div></div>
+
+<p>Of course you can always use it like this, too:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">report</span> <span class="p">=</span> <span class="n">renderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Hello, world!"</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>…or like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">report</span> <span class="p">=</span> <span class="n">renderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="k">new</span> <span class="nf">DoubleReportModel</span><span class="p">(</span><span class="m">42.0</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>And of course any IDE more sophisticated than Notepad will give you autocomplete
+like this:</p>
+
+<p><img src="/assets/img/marker-interface-not-evil/autocomplete.png" alt="The autocomplete menu in the Rider IDE" class="img-fluid" /></p>
+
+<p>Do you notice how the IDE front-loaded the various report models in that list?
+Want to guess how the IDE inferred your intent?</p>
+
+<p>And look what happens when I try to generate a report from a <code class="language-plaintext highlighter-rouge">Logger</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">renderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="k">new</span> <span class="nf">Logger</span><span class="p">());</span>
+<span class="c1">//                  ^^^^^^ [CS1503] Argument 1: cannot convert from 'Logger' to 'IReportModel'</span>
+</code></pre></div></div>
+
+<p>Want to guess how the compiler knew that it was improper to generate a report
+from a <code class="language-plaintext highlighter-rouge">Logger</code>?</p>
+
+<p>If you guessed that <strong>the marker interface revealed intent</strong> then you’re
+correct!</p>
+
+<h3 id="the-supposed-alternative">The (supposed) alternative</h3>
+
+<p>Imagine what would happen if <code class="language-plaintext highlighter-rouge">ReportRenderer.Render()</code> accepted <code class="language-plaintext highlighter-rouge">object</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">ReportRenderer</span>
+<span class="p">{</span>
+    <span class="k">readonly</span> <span class="n">IReadOnlyDictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">ISpecificReportRenderer</span><span class="p">&gt;</span> <span class="n">_renderers</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">ReportRenderer</span><span class="p">(</span><span class="n">IReadOnlyDictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">ISpecificReportRenderer</span><span class="p">&gt;</span> <span class="n">renderers</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_renderers</span> <span class="p">=</span> <span class="n">renderers</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="kt">object</span> <span class="n">model</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">modelType</span> <span class="p">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">GetType</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">_renderers</span><span class="p">.</span><span class="nf">TryGetValue</span><span class="p">(</span><span class="n">modelType</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">specificRenderer</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">specificRenderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">$"No renderer available for models of type </span><span class="p">{</span><span class="n">modelType</span><span class="p">.</span><span class="n">Name</span><span class="p">}</span><span class="s">"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">interface</span> <span class="nc">ISpecificReportRenderer</span>
+<span class="p">{</span>
+    <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="kt">object</span> <span class="n">model</span><span class="p">,</span> <span class="n">ReportRenderer</span> <span class="n">generalRenderer</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/marker-interface-not-evil/where-did-they-go.png" alt="Another autocomplete menu in the Rider IDE" class="img-fluid" /></p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">renderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="k">new</span> <span class="nf">Logger</span><span class="p">());</span>
+<span class="c1">// No compile errors</span>
+</code></pre></div></div>
+
+<p>I think marker interfaces improve this situation.</p>
+
+<h2 id="marker-interfaces-make-abstractions-possible-for-coding-evil">Marker interfaces make abstractions possible for coding evil</h2>
+
+<p>Sometimes in C# you just have to use reflection and opaque type casting because
+C#’s type system is so limited. And when you do, it’s nice to be able to have
+<em>some</em> kind of abstraction available. In those situations a marker interface can
+help.</p>
+
+<p>A good example is my report generator above. Compare it to this alternative that
+doesn’t require reflection or type casting:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">interface</span> <span class="nc">IReportModel</span>
+<span class="p">{</span>
+    <span class="n">Report</span> <span class="nf">Render</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">StringReportModel</span> <span class="p">:</span> <span class="n">IReportModel</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Value</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="kt">string</span> <span class="k">value</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Value</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="p">...</span> <span class="c1">// Use your imagination</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">TableReportModel</span> <span class="p">:</span> <span class="n">IReportModel</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="n">StringReportModel</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">IReportModel</span><span class="p">[][]</span> <span class="n">Rows</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">report</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Report</span><span class="p">();</span>
+        <span class="n">report</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">Title</span><span class="p">.</span><span class="nf">Render</span><span class="p">());</span>
+        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">row</span> <span class="k">in</span> <span class="n">Rows</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">rowReport</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Report</span><span class="p">();</span>
+            <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">cell</span> <span class="k">in</span> <span class="n">row</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">rowReport</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">cell</span><span class="p">.</span><span class="nf">Render</span><span class="p">());</span>
+            <span class="p">}</span>
+            <span class="n">report</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">rowReport</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">report</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>What did we have to do to attain this so-called paradise? We:</p>
+
+<ul>
+  <li>Threw out the <code class="language-plaintext highlighter-rouge">ReportRenderer</code></li>
+  <li>Made each model responsible for rendering itself</li>
+</ul>
+
+<p>It’s always a good day when I get to throw out a class because that means
+there’s less code to maintain.</p>
+
+<p>But is it a good day when classes gain an extra responsibility? What will we do
+when we want to render the models into CSV text instead of whatever <code class="language-plaintext highlighter-rouge">Report</code> is?
+As the code above stands you’d have to rewrite all the models. I don’t think it
+makes sense to change models to suit the presentation layer.</p>
+
+<p>That should clue us into the fact that the various report models now have too
+much responsibility. Here’s one way to refactor that:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">interface</span> <span class="nc">IReportModelRenderer</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">T</span> <span class="n">model</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">StringReportModel</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Value</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="kt">string</span> <span class="k">value</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Value</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">StringReportModelRenderer</span> <span class="p">:</span> <span class="n">IReportModelRenderer</span><span class="p">&lt;</span><span class="n">StringReportModel</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">StringReportModel</span> <span class="n">model</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="k">new</span> <span class="p">...</span> <span class="c1">// Use your imagination</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">TableReportModel</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="n">StringReportModel</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="p">???[][]</span> <span class="n">Rows</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">TableReportModelRenderer</span> <span class="p">:</span> <span class="n">IReportModelRenderer</span><span class="p">&lt;</span><span class="n">TableReportModel</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="k">readonly</span> <span class="n">IReportModelRenderer</span><span class="p">&lt;</span><span class="n">StringReportModel</span><span class="p">&gt;</span> <span class="n">_stringRenderer</span><span class="p">;</span>
+    <span class="k">readonly</span> <span class="n">IReportModelRenderer</span><span class="p">&lt;???&gt;</span> <span class="n">_cellRenderer</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">TableReportModel</span> <span class="n">model</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">report</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Report</span><span class="p">();</span>
+        <span class="n">report</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">_stringRenderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">Title</span><span class="p">));</span>
+        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">row</span> <span class="k">in</span> <span class="n">model</span><span class="p">.</span><span class="n">Rows</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">rowReport</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Report</span><span class="p">();</span>
+            <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">cell</span> <span class="k">in</span> <span class="n">row</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">rowReport</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">_cellRenderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="n">cell</span><span class="p">));</span>
+            <span class="p">}</span>
+            <span class="n">report</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">rowReport</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">report</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But what type should I specify for the <code class="language-plaintext highlighter-rouge">TableReportModel.Rows</code> array? And what
+type parameter do I give for <code class="language-plaintext highlighter-rouge">TableReportModelRenderer._cellRenderer</code>?</p>
+
+<p>I only see two choices: <code class="language-plaintext highlighter-rouge">object</code>, or a marker interface. And if I pick <code class="language-plaintext highlighter-rouge">object</code>
+then I lose IDE autocomplete and can also write nonsense code that tries to
+generate a <code class="language-plaintext highlighter-rouge">Report</code> from a <code class="language-plaintext highlighter-rouge">Logger</code>.</p>
+
+<p>So guess what the better answer is?</p>
+
+<h2 id="integrations-dont-have-to-be-hard-with-marker-interfaces">Integrations don’t have to be hard with marker interfaces</h2>
+
+<p>Let’s go back to my original report generator code toward the top:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">renderers</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">ISpecificReportRenderer</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">StringReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StringReportModelRenderer</span><span class="p">(),</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">DoubleReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">DoubleReportModelRenderer</span><span class="p">(),</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">TableReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TableReportModelRenderer</span><span class="p">()</span>
+<span class="p">};</span>
+<span class="kt">var</span> <span class="n">renderer</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ReportRenderer</span><span class="p">(</span><span class="n">renderers</span><span class="p">);</span>
+<span class="kt">var</span> <span class="n">report</span> <span class="p">=</span> <span class="n">renderer</span><span class="p">.</span><span class="nf">Render</span><span class="p">(</span><span class="k">new</span> <span class="n">TableReportModel</span>
+<span class="p">{</span>
+    <span class="n">Title</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Billy Bob's finances"</span><span class="p">),</span>
+    <span class="n">Rows</span> <span class="p">=</span> <span class="k">new</span> <span class="n">IReportModel</span><span class="p">[][]</span>
+    <span class="p">{</span>
+        <span class="k">new</span> <span class="n">IReportModel</span><span class="p">[]</span>
+        <span class="p">{</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Date"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Location"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Amount"</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="k">new</span> <span class="n">IReportModel</span><span class="p">[]</span>
+        <span class="p">{</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"2022-09-08"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">StringReportModel</span><span class="p">(</span><span class="s">"Somewhere in the world"</span><span class="p">),</span>
+            <span class="k">new</span> <span class="nf">DoubleReportModel</span><span class="p">(</span><span class="m">100.0</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+<span class="c1">// Now you have a rendered report!</span>
+</code></pre></div></div>
+
+<p>I don’t think it would be hard to add another report model type. All you have to
+do is follow the pattern already established in the first few lines:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">renderers</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">ISpecificReportRenderer</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">StringReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StringReportModelRenderer</span><span class="p">(),</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">DoubleReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">DoubleReportModelRenderer</span><span class="p">(),</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">TableReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TableReportModelRenderer</span><span class="p">(),</span>
+    <span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">NewfangledReportModel</span><span class="p">)]</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">NewfangledReportModelRenderer</span><span class="p">()</span> <span class="c1">// Look, ma! A newfangled thingamajig</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>There are other ways to encapsulate this pattern. You could decorate the
+renderers with attributes pointing out which model types they support, then
+dynamically reflect over your assembly and get the
+<code class="language-plaintext highlighter-rouge">IReadOnlyDictionary&lt;Type, ISpecificReportRenderer&gt;</code> from IoC.</p>
+
+<p>It’s easy, flexible, extensible, SOLID, etc.</p>
+
+<h2 id="marker-interfaces-arent-intended-for-type-system-safety">Marker interfaces aren’t intended for type-system safety</h2>
+
+<p>The author of the article rightly
+<a href="https://www.silasreinagel.com/blog/2018/04/24/marker-interfaces-are-evil/#:~:text=Since%20a%20marker%20interface%20is%20a%20contract%20who%20requires%20no%20behavior%2C%20he%20can%20never%20provide%20type%2Dsafety">points out</a>
+that</p>
+
+<blockquote>
+  <p>Since a marker interface is a contract [that] requires no behavior, [it] can
+  never provide type-safety.</p>
+</blockquote>
+
+<p>In response I say: then don’t use marker interfaces for type safety. Instead,
+use them to categorize types and reveal intent.</p>
+
+<h2 id="marker-interfaces-are-not-evil">Marker interfaces are not evil</h2>
+
+<ul>
+  <li>They enhance the understandability and maintainability of your code</li>
+  <li>They are useful when you have to hide the real behaviors of your system</li>
+  <li>They are useful when C#’s type system forces you into unpleasant things like reflection and casting</li>
+  <li>They can be easy to extend correctly</li>
+</ul>
+
+<p>Use them! Use libraries that use them!</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="As a student of Interface Segregation Principle, you'll find that C# forces you to make adapters">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    
+    <title>Friction: C# + ISP → Adapter Pattern - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <h1>Friction: C# + ISP → Adapter Pattern</h1>
+          
+          
+          <p><i>November 04, 2022&mdash;As a student of Interface Segregation Principle, you'll find that C# forces you to make adapters</i></p>
+          
+          <p>I’d like to explain why you, the diligent student of Interface Segregation Principle (ISP), will find yourself making
+many adapter classes in C#. I think C# adds unnecessary friction in this area.</p>
+
+<p><strong>ISP</strong> <a href="https://en.wikipedia.org/wiki/Interface_segregation_principle">states</a>:</p>
+
+<blockquote>
+  <p>No code should be forced to depend on methods it does not use.</p>
+</blockquote>
+
+<p>The intent of the <strong>Adapter Pattern</strong> <a href="https://archive.org/details/designpatternsel00gamm/page/139">is</a>:</p>
+
+<blockquote>
+  <p>Convert the interface of a class into another interface clients expect.</p>
+</blockquote>
+
+<h2 id="a-fillasync-method">A <code class="language-plaintext highlighter-rouge">FillAsync</code> method</h2>
+
+<p>Let’s start with a function that will asynchronously fill a buffer from a stream.</p>
+
+<p>As you know,
+<a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.stream.readasync?view=net-6.0#system-io-stream-readasync(system-memory((system-byte))-system-threading-cancellationtoken)"><code class="language-plaintext highlighter-rouge">Stream.ReadAsync</code></a>
+looks like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">ReadAsync</span> <span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>That method promises to copy some bytes from the stream into your <code class="language-plaintext highlighter-rouge">buffer</code>. But it only returns the number of bytes that
+it happened to copy, which “can be less than the number of bytes allocated in the buffer if that many bytes are not
+currently available”.</p>
+
+<p>We want to completely <em>fill</em> the buffer. So here’s our method:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">async</span> <span class="n">ValueTask</span> <span class="nf">FillAsync</span><span class="p">(</span>
+  <span class="n">Stream</span> <span class="n">stream</span><span class="p">,</span>
+  <span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span>
+  <span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">buffer</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">numBytes</span> <span class="p">=</span> <span class="k">await</span> <span class="n">stream</span><span class="p">.</span><span class="nf">ReadAsync</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">token</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">numBytes</span> <span class="p">&lt;=</span> <span class="m">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"The stream ended before the buffer could be filled"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">buffer</span> <span class="p">=</span> <span class="n">buffer</span><span class="p">[</span><span class="n">numBytes</span><span class="p">..];</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="interface-segregation-principle">Interface Segregation Principle</h2>
+
+<p>Remember:</p>
+
+<blockquote>
+  <p>No code should be forced to depend on methods it does not use.</p>
+</blockquote>
+
+<p>Our <code class="language-plaintext highlighter-rouge">FillAsync</code> method has a “stream” parameter of type <code class="language-plaintext highlighter-rouge">Stream</code>. Which methods in the <code class="language-plaintext highlighter-rouge">Stream</code> type does <code class="language-plaintext highlighter-rouge">FillAsync</code> use? Only
+<code class="language-plaintext highlighter-rouge">ReadAsync</code>:</p>
+
+<blockquote>
+  <p><code>await stream.<b><u>ReadAsync</u></b>(buffer, token)</code></p>
+</blockquote>
+
+<p>But what methods does it depend on? <strong>All of them from the Stream class</strong>. Your ISP alarm bell should be going off.</p>
+
+<p>What’s the solution? <strong>Introduce a smaller interface</strong>.</p>
+
+<h2 id="a-smaller-interface">A smaller interface</h2>
+
+<p>Here’s an interface that only does precisely as much as <code class="language-plaintext highlighter-rouge">FillAsync</code> needs:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IReadableStream</span>
+<span class="p">{</span>
+  <span class="n">ValueTask</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">ReadAsync</span><span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">token</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And here’s the corresponding change to our <code class="language-plaintext highlighter-rouge">FillAsync</code> method:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code> public static async ValueTask FillAsync(
+<span class="gd">-  Stream stream,
+</span><span class="gi">+  IReadableStream stream,
+</span>   Memory&lt;byte&gt; buffer,
+   CancellationToken token)
+ {
+   while (buffer.Length &gt; 0)
+   {
+     var numBytes = await stream.ReadAsync(buffer, token);
+     if (numBytes &lt;= 0)
+     {
+       throw new Exception("The stream ended before the buffer could be filled");
+     }
+     buffer = buffer[numBytes..];
+   }
+ }
+</code></pre></div></div>
+
+<p>But now <code class="language-plaintext highlighter-rouge">FillAsync</code> can no longer accept instances of <code class="language-plaintext highlighter-rouge">Stream</code>! What’s the <em>only</em> solution? <strong>Adapter pattern</strong>.</p>
+
+<h2 id="adapter-pattern">Adapter pattern</h2>
+
+<p>Because we followed ISP, we now have to introduce an adapter class like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">StreamToReadableStreamAdapter</span> <span class="p">:</span> <span class="n">IReadableStream</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">Stream</span> <span class="n">_stream</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">StreamToReadableStreamAdapter</span><span class="p">(</span><span class="n">Stream</span> <span class="n">stream</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_stream</span> <span class="p">=</span> <span class="n">stream</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">ReadAsync</span><span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_stream</span><span class="p">.</span><span class="nf">ReadAsync</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">token</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And now you can use <code class="language-plaintext highlighter-rouge">FillAsync</code> on instances of <code class="language-plaintext highlighter-rouge">Stream</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">stream</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">MemoryStream</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">adapter</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StreamToReadableStreamAdapter</span><span class="p">(</span><span class="n">stream</span><span class="p">);</span>
+<span class="kt">var</span> <span class="n">buffer</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="p">[</span><span class="m">42</span><span class="p">];</span>
+<span class="k">await</span> <span class="nf">FillAsync</span><span class="p">(</span><span class="n">adapter</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h2 id="the-point">The point</h2>
+
+<p>It’s too bad that we had to introduce a new type. This is such a common thing in well-designed software. I think in this
+area C# adds friction to writing high quality software.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2022&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

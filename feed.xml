@@ -1,4 +1,132 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-09-08T08:58:03-05:00</updated><id>/feed.xml</id><entry><title type="html">Marker Interfaces Are Not Evil</title><link href="/programming/2022/09/08/marker-interface-not-evil.html" rel="alternate" type="text/html" title="Marker Interfaces Are Not Evil" /><published>2022-09-08T00:00:00-05:00</published><updated>2022-09-08T00:00:00-05:00</updated><id>/programming/2022/09/08/marker-interface-not-evil</id><content type="html" xml:base="/programming/2022/09/08/marker-interface-not-evil.html"><![CDATA[<p>When I Google “marker interfaces are bad” then the article
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-11-04T14:59:37-05:00</updated><id>/feed.xml</id><entry><title type="html">Friction: C# + ISP → Adapter Pattern</title><link href="/programming/2022/11/04/friction-csharp-isp-adapters.html" rel="alternate" type="text/html" title="Friction: C# + ISP → Adapter Pattern" /><published>2022-11-04T00:00:00-05:00</published><updated>2022-11-04T00:00:00-05:00</updated><id>/programming/2022/11/04/friction-csharp-isp-adapters</id><content type="html" xml:base="/programming/2022/11/04/friction-csharp-isp-adapters.html"><![CDATA[<p>I’d like to explain why you, the diligent student of Interface Segregation Principle (ISP), will find yourself making
+many adapter classes in C#. I think C# adds unnecessary friction in this area.</p>
+
+<p><strong>ISP</strong> <a href="https://en.wikipedia.org/wiki/Interface_segregation_principle">states</a>:</p>
+
+<blockquote>
+  <p>No code should be forced to depend on methods it does not use.</p>
+</blockquote>
+
+<p>The intent of the <strong>Adapter Pattern</strong> <a href="https://archive.org/details/designpatternsel00gamm/page/139">is</a>:</p>
+
+<blockquote>
+  <p>Convert the interface of a class into another interface clients expect.</p>
+</blockquote>
+
+<h2 id="a-fillasync-method">A <code class="language-plaintext highlighter-rouge">FillAsync</code> method</h2>
+
+<p>Let’s start with a function that will asynchronously fill a buffer from a stream.</p>
+
+<p>As you know,
+<a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.stream.readasync?view=net-6.0#system-io-stream-readasync(system-memory((system-byte))-system-threading-cancellationtoken)"><code class="language-plaintext highlighter-rouge">Stream.ReadAsync</code></a>
+looks like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">ReadAsync</span> <span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>That method promises to copy some bytes from the stream into your <code class="language-plaintext highlighter-rouge">buffer</code>. But it only returns the number of bytes that
+it happened to copy, which “can be less than the number of bytes allocated in the buffer if that many bytes are not
+currently available”.</p>
+
+<p>We want to completely <em>fill</em> the buffer. So here’s our method:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">async</span> <span class="n">ValueTask</span> <span class="nf">FillAsync</span><span class="p">(</span>
+  <span class="n">Stream</span> <span class="n">stream</span><span class="p">,</span>
+  <span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span>
+  <span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">buffer</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">numBytes</span> <span class="p">=</span> <span class="k">await</span> <span class="n">stream</span><span class="p">.</span><span class="nf">ReadAsync</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">token</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">numBytes</span> <span class="p">&lt;=</span> <span class="m">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"The stream ended before the buffer could be filled"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">buffer</span> <span class="p">=</span> <span class="n">buffer</span><span class="p">[</span><span class="n">numBytes</span><span class="p">..];</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="interface-segregation-principle">Interface Segregation Principle</h2>
+
+<p>Remember:</p>
+
+<blockquote>
+  <p>No code should be forced to depend on methods it does not use.</p>
+</blockquote>
+
+<p>Our <code class="language-plaintext highlighter-rouge">FillAsync</code> method has a “stream” parameter of type <code class="language-plaintext highlighter-rouge">Stream</code>. Which methods in the <code class="language-plaintext highlighter-rouge">Stream</code> type does <code class="language-plaintext highlighter-rouge">FillAsync</code> use? Only
+<code class="language-plaintext highlighter-rouge">ReadAsync</code>:</p>
+
+<blockquote>
+  <p><code>await stream.<b><u>ReadAsync</u></b>(buffer, token)</code></p>
+</blockquote>
+
+<p>But what methods does it depend on? <strong>All of them from the Stream class</strong>. Your ISP alarm bell should be going off.</p>
+
+<p>What’s the solution? <strong>Introduce a smaller interface</strong>.</p>
+
+<h2 id="a-smaller-interface">A smaller interface</h2>
+
+<p>Here’s an interface that only does precisely as much as <code class="language-plaintext highlighter-rouge">FillAsync</code> needs:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IReadableStream</span>
+<span class="p">{</span>
+  <span class="n">ValueTask</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">ReadAsync</span><span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">token</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And here’s the corresponding change to our <code class="language-plaintext highlighter-rouge">FillAsync</code> method:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code> public static async ValueTask FillAsync(
+<span class="gd">-  Stream stream,
+</span><span class="gi">+  IReadableStream stream,
+</span>   Memory&lt;byte&gt; buffer,
+   CancellationToken token)
+ {
+   while (buffer.Length &gt; 0)
+   {
+     var numBytes = await stream.ReadAsync(buffer, token);
+     if (numBytes &lt;= 0)
+     {
+       throw new Exception("The stream ended before the buffer could be filled");
+     }
+     buffer = buffer[numBytes..];
+   }
+ }
+</code></pre></div></div>
+
+<p>But now <code class="language-plaintext highlighter-rouge">FillAsync</code> can no longer accept instances of <code class="language-plaintext highlighter-rouge">Stream</code>! What’s the <em>only</em> solution? <strong>Adapter pattern</strong>.</p>
+
+<h2 id="adapter-pattern">Adapter pattern</h2>
+
+<p>Because we followed ISP, we now have to introduce an adapter class like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">StreamToReadableStreamAdapter</span> <span class="p">:</span> <span class="n">IReadableStream</span>
+<span class="p">{</span>
+  <span class="k">readonly</span> <span class="n">Stream</span> <span class="n">_stream</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">StreamToReadableStreamAdapter</span><span class="p">(</span><span class="n">Stream</span> <span class="n">stream</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_stream</span> <span class="p">=</span> <span class="n">stream</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">ValueTask</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">ReadAsync</span><span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="kt">byte</span><span class="p">&gt;</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">_stream</span><span class="p">.</span><span class="nf">ReadAsync</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">token</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And now you can use <code class="language-plaintext highlighter-rouge">FillAsync</code> on instances of <code class="language-plaintext highlighter-rouge">Stream</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">stream</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">MemoryStream</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">adapter</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StreamToReadableStreamAdapter</span><span class="p">(</span><span class="n">stream</span><span class="p">);</span>
+<span class="kt">var</span> <span class="n">buffer</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="p">[</span><span class="m">42</span><span class="p">];</span>
+<span class="k">await</span> <span class="nf">FillAsync</span><span class="p">(</span><span class="n">adapter</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h2 id="the-point">The point</h2>
+
+<p>It’s too bad that we had to introduce a new type. This is such a common thing in well-designed software. I think in this
+area C# adds friction to writing high quality software.</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[As a student of Interface Segregation Principle, you'll find that C# forces you to make adapters]]></summary></entry><entry><title type="html">Marker Interfaces Are Not Evil</title><link href="/programming/2022/09/08/marker-interface-not-evil.html" rel="alternate" type="text/html" title="Marker Interfaces Are Not Evil" /><published>2022-09-08T00:00:00-05:00</published><updated>2022-09-08T00:00:00-05:00</updated><id>/programming/2022/09/08/marker-interface-not-evil</id><content type="html" xml:base="/programming/2022/09/08/marker-interface-not-evil.html"><![CDATA[<p>When I Google “marker interfaces are bad” then the article
 “<a href="https://www.silasreinagel.com/blog/2018/04/24/marker-interfaces-are-evil/">Marker Interfaces Are Evil</a>”
 is close to the top.</p>
 
@@ -549,14 +677,207 @@ is a savior who is able to bring you through unscathed.</p>
 <p>Not only <em>ought</em> you to go to work (because God said so in 2 Thessalonians
 3:6–12)—it’s possible for your work tomorrow to be eternally
 significant (because God will reward whatever service is rendered to
-him—Ephesians 6:7–8).</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[The future of things, and the point thereof]]></summary></entry><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
+him—Ephesians 6:7–8).</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[The future of things, and the point thereof]]></summary></entry><entry><title type="html">ReentrantAsyncLock NuGet Package</title><link href="/programming/2022/06/20/introducing-reentrantasynclock.html" rel="alternate" type="text/html" title="ReentrantAsyncLock NuGet Package" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/introducing-reentrantasynclock</id><content type="html" xml:base="/programming/2022/06/20/introducing-reentrantasynclock.html"><![CDATA[<p>This is the third post in a short series about async
 locks:</p>
 
 <ol>
   <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
   <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
-  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
+  <li><strong>ReentrantAsyncLock NuGet Package</strong> (<em>this post</em>)—Introducing the ReentrantAsyncLock package</li>
+</ol>
+
+<hr />
+
+<p>In the previous two posts I outlined the concept for a reentrant asynchronous
+lock, and explained how it can provide all three of these things at once:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronicity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>In this third post I’ll introduce the ReentrantAsyncLock NuGet package which
+gives you semantics that will look a little more normal. I think this third post
+should take the place in your mind of the second one because the code here works
+out some kinks that I inadvertently have there. I consider this NuGet package
+the capstone of my efforts in this series.</p>
+
+<p>NuGet package:<br />
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">https://www.nuget.org/packages/ReentrantAsyncLock</a></p>
+
+<p>Source code:<br />
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock">https://github.com/matthew-a-thomas/cs-reentrant-async-lock</a></p>
+
+<h1 id="the-nuget-package-and-its-semantics">The NuGet package and its semantics</h1>
+
+<p>The
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
+lets you write code like this:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">asyncLock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ReentrantAsyncLock</span><span class="p">();</span>
+<span class="kt">var</span> <span class="n">raceCondition</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+<span class="c1">// You can acquire the lock asynchronously</span>
+<span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">WhenAll</span><span class="p">(</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="c1">// The lock is reentrant</span>
+            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="c1">// The lock provides mutual exclusion</span>
+                <span class="n">raceCondition</span><span class="p">++;</span>
+            <span class="p">}</span>
+        <span class="p">}),</span>
+        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="n">raceCondition</span><span class="p">++;</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">);</span>
+<span class="p">}</span>
+<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="n">raceCondition</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>In the code comments above I point out the three different aspects of the lock.</p>
+
+<p>You’ll also notice that the NuGet package source code has automated tests that
+assert the correctness of each of the three aspects (and more).</p>
+
+<h1 id="how-does-it-work">How does it work?</h1>
+
+<p>It combines <code class="language-plaintext highlighter-rouge">ExecutionContext</code>/<code class="language-plaintext highlighter-rouge">AsyncLocal</code> with a special
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> and a special awaitable type.</p>
+
+<h2 id="executioncontext-and-asynclocal">ExecutionContext and AsyncLocal</h2>
+
+<p>If you’re familiar with
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.executioncontext?view=net-6.0">the ExecutionContext class</a>
+then you’ll know that it “flows” downward through async calls. And it carries
+some stuff with it. In particular, it carries the values of
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1?view=net-6.0">AsyncLocal</a>
+instances.</p>
+
+<p>One such instance holds a value that indicates an asynchronous scope. When you
+acquire the lock then your scope is squirreled away as though to say “the lock
+belongs to this scope”. And then that scope flows downward through async calls.
+That’s what makes the lock reentrant.</p>
+
+<p>If you’re looking at the source code then check out
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L84">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.LocalScope</code> property</a>.
+It is backed by an <code class="language-plaintext highlighter-rouge">AsyncLocal</code> instance and stores a value that indicates an
+asynchronous scope. When an object is assigned to this property then all nested
+async calls also get that value.</p>
+
+<p>Now notice
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L149">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.TryLockImmediately</code> method</a>.
+That method checks the <code class="language-plaintext highlighter-rouge">LocalScope</code> against
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L63">the <code class="language-plaintext highlighter-rouge">_owningScope</code> field</a>.
+When they match then the lock can be acquired because that’s a case of
+reentrance.</p>
+
+<h2 id="synchronizationcontext">SynchronizationContext</h2>
+
+<p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.synchronizationcontext?view=net-6.0">The <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> class</a>
+is Microsoft’s abstraction of a synchronization model. It is (usually) the thing
+in charge of deciding how asynchronous continuations should be executed.</p>
+
+<p>For example, in WPF when you are executing asynchronous code on the UI thread
+then you’ll want to still be on the UI thread after an <code class="language-plaintext highlighter-rouge">await</code> call:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">partial</span> <span class="k">class</span> <span class="nc">MyUserControl</span>
+<span class="p">{</span>
+  <span class="cm">/* Notice this is an "async" method: */</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">5</span><span class="p">));</span>
+    <span class="nf">DoSomethingSynchronousOnTheUIThread</span><span class="p">();</span> <span class="c1">// &lt;-- This needs to happen on the UI thread</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>WPF has
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.threading.dispatchersynchronizationcontext?view=windowsdesktop-6.0">a special subclass of <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></a>
+that enables this.</p>
+
+<p>I do something similar in the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> package. I subclassed
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> so that I could serialize continuations and execute
+them one-at-a-time.</p>
+
+<p>Check out
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/WorkQueue.cs">my <code class="language-plaintext highlighter-rouge">WorkQueue</code> class</a>.
+It’s the same thing that I described in
+<a href="/programming/2022/06/14/reentrant-async-lock.html">the first post</a>.</p>
+
+<p>It’s just a simple work queue. But that’s what gives the lock mutual exclusion.</p>
+
+<p>Recall how you acquire the lock:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>When you invoke <code class="language-plaintext highlighter-rouge">LockAsync</code> then you are immediately placed on that
+SynchronizationContext. The compiler packages up the code after the <code class="language-plaintext highlighter-rouge">await</code> into
+a continuation, and that continuation is given to the work queue. And since that
+work queue will only do one thing at a time you get mutual exclusion.</p>
+
+<h2 id="a-special-awaitable-type">A special awaitable type</h2>
+
+<p>This brings us to
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/AsyncLockResult.cs">the <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class</a>.
+This is a special awaitable type and is the thing that lets you asynchronously
+get the lock. Microsoft
+<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#11882-awaitable-expressions">describes</a>
+how to make an “awaitable” thing. <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> follows those rules and so
+you’re allowed to “await” the thing returned from the <code class="language-plaintext highlighter-rouge">LockAsync</code> method.</p>
+
+<p><code class="language-plaintext highlighter-rouge">AsyncLockResult</code> is really the glue that holds everything together. There are a
+couple of competing things going on and this class helps resolve them.</p>
+
+<p>For example, I need to execute asynchronous continuations on a special
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code>, but it’s futile to change the current
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> within asynchronous code because the previous context
+is restored as soon as execution leaves that context. So how do you change the
+<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> in the asynchronous code <em>outside of</em> the <code class="language-plaintext highlighter-rouge">LockAsync</code>
+method? The answer is to make the <code class="language-plaintext highlighter-rouge">LockAsync</code> method actually be <em>synchronous</em>
+but return something that can be awaited—that something is an instance of
+<code class="language-plaintext highlighter-rouge">AsyncLockResult</code>.</p>
+
+<p>As another example, the <code class="language-plaintext highlighter-rouge">LockAsync</code> method takes a <code class="language-plaintext highlighter-rouge">CancellationToken</code>, meaning
+“please stop trying to acquire the lock as soon as this token is canceled.” But
+what if the continuation (for the code following your call to <code class="language-plaintext highlighter-rouge">LockAsync</code>) has
+already been posted to the work queue and the work queue is busy? Then you’ll
+cancel the <code class="language-plaintext highlighter-rouge">CancellationToken</code> and nothing will happen until the work queue gets
+around to processing your continuation. So how do you safely post a continuation
+(which by design is only allowed to be executed once) to the work queue <em>and</em>
+call it when the <code class="language-plaintext highlighter-rouge">CancellationToken</code> is canceled? Again, the answer is “with the
+<code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class.” It wraps the continuation in such a way that it can be
+sent to both places at once but will only get executed a single time.</p>
+
+<h1 id="the-point">The point</h1>
+
+<p>The
+<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
+is an asynchronous lock that gives you all three of these things with nice
+semantics:</p>
+
+<ul>
+  <li>Reentrance</li>
+  <li>Asynchronicity</li>
+  <li>Mutual exclusion</li>
+</ul>
+
+<p>Give it a try!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Introducing the ReentrantAsyncLock package]]></summary></entry><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
+locks:</p>
+
+<ol>
+  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
+  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
   <li><strong>Questions Answered</strong> (<em>this post</em>)—Answering some questions about ReentrantAsyncLock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
 </ol>
 
 <hr />
@@ -1051,207 +1372,14 @@ showstoppers.</p>
 
 <p>Feel free to <a href="https://www.nuget.org/packages/ReentrantAsyncLock/">try it out</a>
 and please
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/issues/new">report any bugs you find</a>!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Answering some questions about ReentrantAsyncLock]]></summary></entry><entry><title type="html">ReentrantAsyncLock NuGet Package</title><link href="/programming/2022/06/20/introducing-reentrantasynclock.html" rel="alternate" type="text/html" title="ReentrantAsyncLock NuGet Package" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/introducing-reentrantasynclock</id><content type="html" xml:base="/programming/2022/06/20/introducing-reentrantasynclock.html"><![CDATA[<p>This is the third post in a short series about async
-locks:</p>
-
-<ol>
-  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
-  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
-  <li><strong>ReentrantAsyncLock NuGet Package</strong> (<em>this post</em>)—Introducing the ReentrantAsyncLock package</li>
-  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
-</ol>
-
-<hr />
-
-<p>In the previous two posts I outlined the concept for a reentrant asynchronous
-lock, and explained how it can provide all three of these things at once:</p>
-
-<ul>
-  <li>Reentrance</li>
-  <li>Asynchronicity</li>
-  <li>Mutual exclusion</li>
-</ul>
-
-<p>In this third post I’ll introduce the ReentrantAsyncLock NuGet package which
-gives you semantics that will look a little more normal. I think this third post
-should take the place in your mind of the second one because the code here works
-out some kinks that I inadvertently have there. I consider this NuGet package
-the capstone of my efforts in this series.</p>
-
-<p>NuGet package:<br />
-<a href="https://www.nuget.org/packages/ReentrantAsyncLock">https://www.nuget.org/packages/ReentrantAsyncLock</a></p>
-
-<p>Source code:<br />
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock">https://github.com/matthew-a-thomas/cs-reentrant-async-lock</a></p>
-
-<h1 id="the-nuget-package-and-its-semantics">The NuGet package and its semantics</h1>
-
-<p>The
-<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
-lets you write code like this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">asyncLock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ReentrantAsyncLock</span><span class="p">();</span>
-<span class="kt">var</span> <span class="n">raceCondition</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
-<span class="c1">// You can acquire the lock asynchronously</span>
-<span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
-<span class="p">{</span>
-    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">WhenAll</span><span class="p">(</span>
-        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
-        <span class="p">{</span>
-            <span class="c1">// The lock is reentrant</span>
-            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
-            <span class="p">{</span>
-                <span class="c1">// The lock provides mutual exclusion</span>
-                <span class="n">raceCondition</span><span class="p">++;</span>
-            <span class="p">}</span>
-        <span class="p">}),</span>
-        <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
-        <span class="p">{</span>
-            <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">))</span>
-            <span class="p">{</span>
-                <span class="n">raceCondition</span><span class="p">++;</span>
-            <span class="p">}</span>
-        <span class="p">})</span>
-    <span class="p">);</span>
-<span class="p">}</span>
-<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="n">raceCondition</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>In the code comments above I point out the three different aspects of the lock.</p>
-
-<p>You’ll also notice that the NuGet package source code has automated tests that
-assert the correctness of each of the three aspects (and more).</p>
-
-<h1 id="how-does-it-work">How does it work?</h1>
-
-<p>It combines <code class="language-plaintext highlighter-rouge">ExecutionContext</code>/<code class="language-plaintext highlighter-rouge">AsyncLocal</code> with a special
-<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> and a special awaitable type.</p>
-
-<h2 id="executioncontext-and-asynclocal">ExecutionContext and AsyncLocal</h2>
-
-<p>If you’re familiar with
-<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.executioncontext?view=net-6.0">the ExecutionContext class</a>
-then you’ll know that it “flows” downward through async calls. And it carries
-some stuff with it. In particular, it carries the values of
-<a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1?view=net-6.0">AsyncLocal</a>
-instances.</p>
-
-<p>One such instance holds a value that indicates an asynchronous scope. When you
-acquire the lock then your scope is squirreled away as though to say “the lock
-belongs to this scope”. And then that scope flows downward through async calls.
-That’s what makes the lock reentrant.</p>
-
-<p>If you’re looking at the source code then check out
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L84">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.LocalScope</code> property</a>.
-It is backed by an <code class="language-plaintext highlighter-rouge">AsyncLocal</code> instance and stores a value that indicates an
-asynchronous scope. When an object is assigned to this property then all nested
-async calls also get that value.</p>
-
-<p>Now notice
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L149">the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock.TryLockImmediately</code> method</a>.
-That method checks the <code class="language-plaintext highlighter-rouge">LocalScope</code> against
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/ReentrantAsyncLock.cs#L63">the <code class="language-plaintext highlighter-rouge">_owningScope</code> field</a>.
-When they match then the lock can be acquired because that’s a case of
-reentrance.</p>
-
-<h2 id="synchronizationcontext">SynchronizationContext</h2>
-
-<p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.synchronizationcontext?view=net-6.0">The <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> class</a>
-is Microsoft’s abstraction of a synchronization model. It is (usually) the thing
-in charge of deciding how asynchronous continuations should be executed.</p>
-
-<p>For example, in WPF when you are executing asynchronous code on the UI thread
-then you’ll want to still be on the UI thread after an <code class="language-plaintext highlighter-rouge">await</code> call:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">partial</span> <span class="k">class</span> <span class="nc">MyUserControl</span>
-<span class="p">{</span>
-  <span class="cm">/* Notice this is an "async" method: */</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">5</span><span class="p">));</span>
-    <span class="nf">DoSomethingSynchronousOnTheUIThread</span><span class="p">();</span> <span class="c1">// &lt;-- This needs to happen on the UI thread</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>WPF has
-<a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.threading.dispatchersynchronizationcontext?view=windowsdesktop-6.0">a special subclass of <code class="language-plaintext highlighter-rouge">SynchronizationContext</code></a>
-that enables this.</p>
-
-<p>I do something similar in the <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> package. I subclassed
-<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> so that I could serialize continuations and execute
-them one-at-a-time.</p>
-
-<p>Check out
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/WorkQueue.cs">my <code class="language-plaintext highlighter-rouge">WorkQueue</code> class</a>.
-It’s the same thing that I described in
-<a href="/programming/2022/06/14/reentrant-async-lock.html">the first post</a>.</p>
-
-<p>It’s just a simple work queue. But that’s what gives the lock mutual exclusion.</p>
-
-<p>Recall how you acquire the lock:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">await</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>When you invoke <code class="language-plaintext highlighter-rouge">LockAsync</code> then you are immediately placed on that
-SynchronizationContext. The compiler packages up the code after the <code class="language-plaintext highlighter-rouge">await</code> into
-a continuation, and that continuation is given to the work queue. And since that
-work queue will only do one thing at a time you get mutual exclusion.</p>
-
-<h2 id="a-special-awaitable-type">A special awaitable type</h2>
-
-<p>This brings us to
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/AsyncLockResult.cs">the <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class</a>.
-This is a special awaitable type and is the thing that lets you asynchronously
-get the lock. Microsoft
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#11882-awaitable-expressions">describes</a>
-how to make an “awaitable” thing. <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> follows those rules and so
-you’re allowed to “await” the thing returned from the <code class="language-plaintext highlighter-rouge">LockAsync</code> method.</p>
-
-<p><code class="language-plaintext highlighter-rouge">AsyncLockResult</code> is really the glue that holds everything together. There are a
-couple of competing things going on and this class helps resolve them.</p>
-
-<p>For example, I need to execute asynchronous continuations on a special
-<code class="language-plaintext highlighter-rouge">SynchronizationContext</code>, but it’s futile to change the current
-<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> within asynchronous code because the previous context
-is restored as soon as execution leaves that context. So how do you change the
-<code class="language-plaintext highlighter-rouge">SynchronizationContext</code> in the asynchronous code <em>outside of</em> the <code class="language-plaintext highlighter-rouge">LockAsync</code>
-method? The answer is to make the <code class="language-plaintext highlighter-rouge">LockAsync</code> method actually be <em>synchronous</em>
-but return something that can be awaited—that something is an instance of
-<code class="language-plaintext highlighter-rouge">AsyncLockResult</code>.</p>
-
-<p>As another example, the <code class="language-plaintext highlighter-rouge">LockAsync</code> method takes a <code class="language-plaintext highlighter-rouge">CancellationToken</code>, meaning
-“please stop trying to acquire the lock as soon as this token is canceled.” But
-what if the continuation (for the code following your call to <code class="language-plaintext highlighter-rouge">LockAsync</code>) has
-already been posted to the work queue and the work queue is busy? Then you’ll
-cancel the <code class="language-plaintext highlighter-rouge">CancellationToken</code> and nothing will happen until the work queue gets
-around to processing your continuation. So how do you safely post a continuation
-(which by design is only allowed to be executed once) to the work queue <em>and</em>
-call it when the <code class="language-plaintext highlighter-rouge">CancellationToken</code> is canceled? Again, the answer is “with the
-<code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class.” It wraps the continuation in such a way that it can be
-sent to both places at once but will only get executed a single time.</p>
-
-<h1 id="the-point">The point</h1>
-
-<p>The
-<a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
-is an asynchronous lock that gives you all three of these things with nice
-semantics:</p>
-
-<ul>
-  <li>Reentrance</li>
-  <li>Asynchronicity</li>
-  <li>Mutual exclusion</li>
-</ul>
-
-<p>Give it a try!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Introducing the ReentrantAsyncLock package]]></summary></entry><entry><title type="html">A More Ergonomic Async Lock (obsolete)</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock (obsolete)" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<p>This is the second post in a short series about async
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/issues/new">report any bugs you find</a>!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Answering some questions about ReentrantAsyncLock]]></summary></entry><entry><title type="html">A More Ergonomic Async Lock (obsolete)</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock (obsolete)" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<p>This is the second post in a short series about async
 locks:</p>
 
 <ol>
   <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
   <li><strong>A More Ergonomic Async Lock (obsolete)</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
-  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
   <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
 </ol>
 
 <hr />
@@ -1405,8 +1533,8 @@ locks:</p>
 <ol>
   <li><strong>Reentrant Async Lock</strong> (<em>this post</em>)—A correct implementation</li>
   <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
-  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
   <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
+  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
 </ol>
 
 <hr />
@@ -1949,451 +2077,4 @@ can:</p>
 <p>Output:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hello, world!
-</code></pre></div></div>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[How to dynamically generate a type at runtime in C#]]></summary></entry><entry><title type="html">Rust Traits</title><link href="/programming/2022/02/08/rust-traits-for-csharp-devs.html" rel="alternate" type="text/html" title="Rust Traits" /><published>2022-02-08T00:00:00-06:00</published><updated>2022-02-08T00:00:00-06:00</updated><id>/programming/2022/02/08/rust-traits-for-csharp-devs</id><content type="html" xml:base="/programming/2022/02/08/rust-traits-for-csharp-devs.html"><![CDATA[<p>The <a href="https://www.rust-lang.org/">Rust</a> programming language relies heavily on
-<em>traits</em>. But what are they? How do they compare to C#’s interfaces?</p>
-
-<p>In a nutshell, a trait is like a C# interface:</p>
-<ul>
-  <li>Multiple types can implement it</li>
-  <li>You can write code that abstracts over it</li>
-  <li>You can do dynamic dispatch with it</li>
-  <li>You can write default methods for it</li>
-</ul>
-
-<p>…but it is also <em>not</em> like a C# interface:</p>
-<ul>
-  <li>You can implement a trait for a foreign type</li>
-  <li>A trait can have associated types</li>
-</ul>
-
-<p>Let’s look at each of these in turn.</p>
-
-<h2 id="like-a-c-interface">Like a C# interface</h2>
-
-<p>The similarities are simple. So I’ll go quick.</p>
-
-<h3 id="multiple-types-can-implement-it">Multiple types can implement it</h3>
-
-<p>In C#, multiple types can implement an interface:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IFoo</span>
-<span class="p">{</span>
-  <span class="k">void</span> <span class="nf">Bar</span><span class="p">();</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="nc">ThingA</span> <span class="p">:</span> <span class="n">IFoo</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Bar</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Thing A"</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="nc">ThingB</span> <span class="p">:</span> <span class="n">IFoo</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Bar</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Thing B"</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>The same is true of traits in Rust:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Foo</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="n">ThingA</span> <span class="p">{}</span>
-
-<span class="k">impl</span> <span class="n">Foo</span> <span class="k">for</span> <span class="n">ThingA</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"Thing A"</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="n">ThingB</span> <span class="p">{}</span>
-
-<span class="k">impl</span> <span class="n">Foo</span> <span class="k">for</span> <span class="n">ThingB</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"Thing B"</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="you-can-write-code-that-abstracts-over-it">You can write code that abstracts over it</h3>
-
-<p>In C# you can abstract over an interface:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IBinaryOperator</span>
-<span class="p">{</span>
-  <span class="kt">double</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="nc">Add</span> <span class="p">:</span> <span class="n">IBinaryOperator</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="kt">double</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">a</span> <span class="p">+</span> <span class="n">b</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="nc">Multiply</span> <span class="p">:</span> <span class="n">IBinaryOperator</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="kt">double</span> <span class="nf">Operate</span><span class="p">(</span><span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">a</span> <span class="p">*</span> <span class="n">b</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
-<span class="p">{</span>
-  <span class="k">static</span> <span class="kt">double</span> <span class="n">Apply</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">T</span> <span class="n">op</span><span class="p">,</span> <span class="kt">double</span> <span class="n">a</span><span class="p">,</span> <span class="kt">double</span> <span class="n">b</span><span class="p">)</span>
-  <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">IBinaryOperator</span> <span class="p">=&gt;</span>
-  <span class="n">op</span><span class="p">.</span><span class="nf">Operate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>And the same is true of Rust’s traits:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">BinaryOperator</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">operate</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="nb">Add</span> <span class="p">{}</span>
-
-<span class="k">impl</span> <span class="n">BinaryOperator</span> <span class="k">for</span> <span class="nb">Add</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">operate</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span> <span class="p">{</span>
-    <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="n">Multiply</span> <span class="p">{}</span>
-
-<span class="k">impl</span> <span class="n">BinaryOperator</span> <span class="k">for</span> <span class="n">Multiply</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">operate</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span> <span class="p">{</span>
-    <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">fn</span> <span class="n">apply</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">&gt;</span><span class="p">(</span><span class="n">op</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">f64</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">f64</span> <span class="p">{</span>
-  <span class="n">op</span><span class="nf">.operate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="you-can-do-dynamic-dispatch-with-it">You can do dynamic dispatch with it</h3>
-
-<p>Dynamic dispatch happens so often in C# that we usually don’t notice it. But
-here’s an example of dynamic vs static dispatch in action:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IFoo</span>
-<span class="p">{</span>
-  <span class="k">void</span> <span class="nf">Bar</span><span class="p">();</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
-<span class="p">{</span>
-  <span class="k">static</span> <span class="k">void</span> <span class="nf">DynamicDispatch</span><span class="p">(</span><span class="n">IFoo</span> <span class="n">foo</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">foo</span><span class="p">.</span><span class="nf">bar</span><span class="p">();</span>
-  <span class="p">}</span>
-
-  <span class="k">static</span> <span class="k">void</span> <span class="n">StaticDispatch</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">T</span> <span class="n">foo</span><span class="p">)</span>
-  <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">IFoo</span>
-  <span class="p">{</span>
-    <span class="n">foo</span><span class="p">.</span><span class="nf">bar</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Here’s the same picture in Rust:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Foo</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">fn</span> <span class="nf">dynamic_dispatch</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">dyn</span> <span class="n">Foo</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">foo</span><span class="nf">.bar</span><span class="p">();</span>
-<span class="p">}</span>
-
-<span class="k">fn</span> <span class="n">static_dispatch</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">Foo</span><span class="o">&gt;</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">foo</span><span class="nf">.bar</span><span class="p">();</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="you-can-write-default-methods-for-it">You can write default methods for it</h3>
-
-<p>One of the recent versions of C# added default interface implementations. I’m
-writing this off the cuff, but I think it looks like this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IFoo</span>
-<span class="p">{</span>
-  <span class="k">void</span> <span class="nf">Bar</span><span class="p">();</span>
-
-  <span class="k">void</span> <span class="nf">Baz</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="k">this</span><span class="p">.</span><span class="nf">Bar</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">class</span> <span class="nc">Thing</span> <span class="p">:</span> <span class="n">IFoo</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">void</span> <span class="nf">Bar</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="c1">// This is the only method we're required to implement</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>It’s very similar in Rust:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Foo</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">);</span>
-
-  <span class="k">fn</span> <span class="nf">baz</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">self</span><span class="nf">.bar</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="n">Thing</span> <span class="p">{}</span>
-
-<span class="k">impl</span> <span class="n">Foo</span> <span class="k">for</span> <span class="n">Thing</span> <span class="p">{</span>
-  <span class="k">fn</span> <span class="nf">bar</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// This is the only method we're required to implement</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="not-like-a-c-interface">Not like a C# interface</h2>
-
-<p>In my opinion this is where Rust’s trait system really begins to shine.</p>
-
-<h3 id="you-can-implement-a-trait-for-a-foreign-type">You can implement a trait for a foreign type</h3>
-
-<p>In C#, when you use a type from some package you found on Nuget or in the
-framework (or anywhere for that matter), you’re stuck with whatever interfaces
-they decided to implement on that type.</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-  <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
-<span class="p">{</span>
-  <span class="k">static</span> <span class="k">void</span> <span class="n">DoImportantStuff</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">indexable</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// Very important things happen here. We don't want to repeat ourselves so</span>
-    <span class="c1">// we've encapsulated the behavior into this function and we're trying to</span>
-    <span class="c1">// make it work for multiple types by abstracting with generics.</span>
-  <span class="p">}</span>
-
-  <span class="k">static</span> <span class="k">void</span> <span class="nf">WontWork</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="kt">var</span> <span class="n">array</span> <span class="p">=</span> <span class="k">new</span><span class="p">[]</span> <span class="p">{</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">7</span><span class="p">,</span> <span class="m">11</span> <span class="p">};</span>
-    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="n">array</span><span class="p">);</span> <span class="c1">// Compile error: the array doesn't implement the interface!</span>
-    <span class="kt">var</span> <span class="n">span</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsSpan</span><span class="p">();</span>
-    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="n">span</span><span class="p">);</span> <span class="c1">// Compile error: Span doesn't implement the interface!</span>
-    <span class="kt">var</span> <span class="n">memory</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsMemory</span><span class="p">();</span>
-    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="n">memory</span><span class="p">);</span> <span class="c1">// Compile error: Memory doesn't implement the interface!</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>The adapter pattern will come to your rescue:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ArrayReadableIndexAdapter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-  <span class="k">readonly</span> <span class="n">T</span><span class="p">[]</span> <span class="n">_array</span><span class="p">;</span>
-
-  <span class="k">public</span> <span class="nf">ArrayReadableIndexAdapter</span><span class="p">(</span><span class="n">T</span><span class="p">[]</span> <span class="n">array</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_array</span> <span class="p">=</span> <span class="n">array</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">=&gt;</span> <span class="n">_array</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
-<span class="p">}</span>
-
-<span class="k">ref</span> <span class="k">struct</span> <span class="nc">SpanReadableIndexAdapter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-  <span class="k">readonly</span> <span class="n">Span</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">_span</span><span class="p">;</span>
-
-  <span class="k">public</span> <span class="nf">SpanReadableIndexAdapter</span><span class="p">(</span><span class="n">Span</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">span</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_span</span> <span class="p">=</span> <span class="n">span</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">=&gt;</span> <span class="n">_span</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="nc">MemoryReadableIndexAdapter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
-<span class="p">{</span>
-  <span class="k">readonly</span> <span class="n">Memory</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">_memory</span><span class="p">;</span>
-
-  <span class="k">public</span> <span class="nf">MemoryReadableIndexAdapter</span><span class="p">(</span><span class="n">Memory</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">memory</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="n">_memory</span> <span class="p">=</span> <span class="n">memory</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="k">public</span> <span class="n">T</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">=&gt;</span> <span class="n">_memory</span><span class="p">.</span><span class="n">Span</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="k">class</span> <span class="nc">Example</span>
-<span class="p">{</span>
-  <span class="k">static</span> <span class="k">void</span> <span class="n">DoImportantStuff</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">IReadableIndex</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">indexable</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="c1">// Same important stuff as before</span>
-  <span class="p">}</span>
-
-  <span class="k">static</span> <span class="k">void</span> <span class="nf">WillWork</span><span class="p">()</span>
-  <span class="p">{</span>
-    <span class="kt">var</span> <span class="n">array</span> <span class="p">=</span> <span class="k">new</span><span class="p">[]</span> <span class="p">{</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">7</span><span class="p">,</span> <span class="m">11</span> <span class="p">};</span>
-    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="k">new</span> <span class="nf">ArrayReadableIndexAdapter</span><span class="p">(</span><span class="n">array</span><span class="p">));</span>
-    <span class="kt">var</span> <span class="n">span</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsSpan</span><span class="p">();</span>
-    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="k">new</span> <span class="nf">SpanReadableIndexAdapter</span><span class="p">(</span><span class="n">span</span><span class="p">));</span>
-    <span class="kt">var</span> <span class="n">memory</span> <span class="p">=</span> <span class="n">array</span><span class="p">.</span><span class="nf">AsMemory</span><span class="p">();</span>
-    <span class="nf">DoImportantStuff</span><span class="p">(</span><span class="k">new</span> <span class="nf">MemoryReadableIndexAdapter</span><span class="p">(</span><span class="n">memory</span><span class="p">));</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>But the adapter pattern comes with a cost. Do you see all the boilerplate? We
-were trying to follow the <a href="https://en.wikipedia.org/wiki/Interface_segregation_principle">Interface Segregation Principle</a>
-which says:</p>
-<blockquote>
-  <p>ISP splits interfaces that are very large into smaller and more specific ones
-  so that <strong>clients will only have to know about the methods that are of
-  interest to them</strong>.</p>
-</blockquote>
-
-<p>Indeed we were following it, because the <code class="language-plaintext highlighter-rouge">IReadableIndex&lt;T&gt;</code> interface exposes
-the absolute minimum surface area needed for our “important stuff” method. But
-to do so we had to introduce a <em>lot</em> of boilerplate!</p>
-
-<p>Rust makes this much easier!</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="n">Idx</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
-    <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">Idx</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// Implement for arrays</span>
-<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="k">const</span> <span class="n">N</span><span class="p">:</span> <span class="nb">usize</span><span class="o">&gt;</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="k">for</span> <span class="p">[</span><span class="n">T</span><span class="p">;</span> <span class="n">N</span><span class="p">]</span> <span class="p">{</span>
-  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
-  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
-    <span class="o">&amp;</span><span class="k">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// Implement for lists</span>
-<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="k">for</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
-  <span class="k">fn</span> <span class="nf">index</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span> <span class="p">{</span>
-    <span class="o">&amp;</span><span class="k">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// etc</span>
-
-<span class="c1">// Now just use the trait!</span>
-<span class="k">fn</span> <span class="n">do_important_stuff</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="nb">Index</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">indexable</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// Important code here</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>(The astute reader will notice that Rust already has <a href="https://doc.rust-lang.org/core/ops/trait.Index.html">this trait</a>)</p>
-
-<p>Did you notice how it was possible to implement the trait for <em>foreign</em> types?
-It doesn’t matter that we don’t have access to the source code of <code class="language-plaintext highlighter-rouge">[T; N]</code> or
-<code class="language-plaintext highlighter-rouge">Vec&lt;T&gt;</code>. We could still make those types implement this trait, and we didn’t
-have to introduce any additional types!</p>
-
-<p>It is often much easier in Rust to <em>tailor interfaces to consumers</em>.</p>
-
-<p>To me it seems Microsoft has fallen in love with a form of programming by
-convention which they usually apply
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support">like this</a>:</p>
-<blockquote>
-  <p>The language will provide an instance indexer member with a single parameter
-  of type <code class="language-plaintext highlighter-rouge">Range</code> for types which meet the following criteria:</p>
-  <ul>
-    <li>The type is Countable.</li>
-    <li>The type has an accessible member named <code class="language-plaintext highlighter-rouge">Slice</code> which has two parameters of
-  type <code class="language-plaintext highlighter-rouge">int</code>.</li>
-    <li>The type does not have an instance indexer which takes a single <code class="language-plaintext highlighter-rouge">Range</code> as
-  the first parameter. The <code class="language-plaintext highlighter-rouge">Range</code> must be the only parameter or the remaining
-  parameters must be optional.</li>
-  </ul>
-
-  <p>For such types, the language will bind as if there is an indexer member of the
-  form <code class="language-plaintext highlighter-rouge">T this[Range range]</code> where <code class="language-plaintext highlighter-rouge">T</code> is the return type of the <code class="language-plaintext highlighter-rouge">Slice</code> method
-  including any <code class="language-plaintext highlighter-rouge">ref</code> style annotations. The new member will also have matching
-  accessibility with <code class="language-plaintext highlighter-rouge">Slice</code>.</p>
-</blockquote>
-
-<p>Ignore the minutiae. The thing I want you to notice is how they didn’t bother to
-give us an interface for this new functionality. Instead they said “if you put
-this here and name this other thing a certain way then the compiler will
-magically do this”. <em>They gave us no help with abstracting over this behavior in
-C#.</em> If you wanted to write code that would work for “range-aware” types then
-you’d have to create an interface and adapters for all the different types. (And
-once you’ve done that then who cares about <em>implicit</em> range support?)</p>
-
-<p>The benefit that Rust’s traits would bring to this situation is there would be
-far less boilerplate and <em>no additional types</em> needed to abstract over the very
-same feature! Actually, they have already
-<a href="https://doc.rust-lang.org/core/ops/trait.Index.html#impl-Index%3CI%3E-1">done</a>
-<a href="https://doc.rust-lang.org/core/ops/struct.Range.html#impl-SliceIndex%3C%5BT%5D%3E">this</a>.</p>
-
-<h3 id="a-trait-can-have-associated-types">A trait can have associated types</h3>
-
-<p>In C#, an interface may have:</p>
-<ul>
-  <li>Methods</li>
-  <li>Properties (which are just syntax sugar for methods)</li>
-</ul>
-
-<p>But in Rust, a trait may have:</p>
-<ul>
-  <li>Methods</li>
-  <li>Associated types</li>
-</ul>
-
-<p>For example, how would you represent this in C#?</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nb">Add</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="k">type</span> <span class="n">Output</span><span class="p">;</span>
-  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">:</span> <span class="n">Rhs</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="n">Foo</span> <span class="p">{}</span>
-
-<span class="k">struct</span> <span class="n">Bar</span> <span class="p">{}</span>
-
-<span class="k">struct</span> <span class="n">Baz</span> <span class="p">{}</span>
-
-<span class="k">impl</span> <span class="nb">Add</span><span class="o">&lt;</span><span class="n">Bar</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">Foo</span> <span class="p">{</span>
-  <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="n">Baz</span><span class="p">;</span>
-  <span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">:</span> <span class="n">Bar</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Baz</span> <span class="p">{</span>
-    <span class="c1">// Make a baz from this foo and the given bar</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="n">Foo</span> <span class="p">{};</span>
-<span class="k">let</span> <span class="n">bar</span> <span class="o">=</span> <span class="n">Bar</span> <span class="p">{};</span>
-<span class="k">let</span> <span class="n">baz</span><span class="p">:</span> <span class="n">Baz</span> <span class="o">=</span> <span class="n">foo</span> <span class="o">+</span> <span class="n">bar</span><span class="p">;</span>
-</code></pre></div></div>
-
-<p>I think in C# the interface would have to look like this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">interface</span> <span class="nc">IAdd</span><span class="p">&lt;</span><span class="n">TRight</span><span class="p">,</span> <span class="n">TOut</span><span class="p">&gt;</span>
-<span class="p">{</span>
-  <span class="n">TOut</span> <span class="nf">Add</span><span class="p">(</span><span class="n">TRight</span> <span class="n">right</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>But then you have a second generic type parameter that you have to carry
-everywhere.</p>
-
-<p>Rust’s associated types are great for hiding generic types in certain
-situations. You can even have associated <em>constants</em> (although support for that
-isn’t yet complete).</p>
-
-<hr />
-
-<p><em>Caution: the code in this article was written off the cuff and on the fly. It
-probably won’t compile.</em></p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Explained for C# developers]]></summary></entry></feed>
+</code></pre></div></div>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[How to dynamically generate a type at runtime in C#]]></summary></entry></feed>

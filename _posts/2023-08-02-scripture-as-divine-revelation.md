@@ -10,6 +10,28 @@ category: christian
 Matthew Barrett [wrote an essay on TGC](https://www.thegospelcoalition.org/essay/scripture-divine-revelation/) titled
 "Scripture as Divine Revelation".
 
+## Summary of the article
+
+Here is the definition and summary given by Barrett:
+
+### Definition
+
+> Scripture is the written form of God’s special revelation for his people, both the Old Testament and the New
+  Testament, which provides them with an enduring, permanent witness through which the Spirit brings them into union
+  with the resurrected and ascended Christ.
+
+### Summary
+
+> Divine revelation, which is a remarkable and gracious gift of God, comes in both general and special ways. General
+  revelation is given to everyone everywhere is broad (though far from empty) in what it says about God. This kind of
+  divine revelation is found in creation and in every person’s conscience. Special revelation, on the other hand, is
+  specific in its content and omnipotent in its effect. Through this revelation, God communicates the mysteries of the
+  faith and personal knowledge of Christ to his people. Scripture is the written form of special revelation, providing
+  God’s people with an enduring witness to the work of God in Christ. This Scripture has been “breathed out” by God
+  through his Spirit, carrying along the authors of Scripture as they wrote.
+
+## Study guide answers
+
 These are my answers to a study guide given by my pastor. Hopefully my answers correctly summarize the essay.
 
 1. Barrett gives a definition of Scripture that includes several elements. Identify these elements by answering the
@@ -69,3 +91,9 @@ These are my answers to a study guide given by my pastor. Hopefully my answers c
 1. What is the greatest testimony to the inspiration of Scripture?
    > The greatest testimony to the inspiration and divine origin of scripture is the very common refrain in the
      scriptures that Jesus fulfills the covenant promises of God in them.
+
+## Personal reflection
+
+This is a helpful reminder that the first cause of scripture was not God's people. And therefore the organization of
+God's people ("the Church") was not the first cause. Therefore we do not need to import or appeal to any other authority
+than that of God himself.

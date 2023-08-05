@@ -51,7 +51,8 @@ These are my answers to a study guide given by my pastor.
      distillation of truths arising from scripture. And it is also true that the Apostles' Creed is not immune to
      critical thinking by interpreters of scripture&mdash;for example, what does it mean that "Christ descended into
      hell [and arose three days later]" when he promised the repentant thief "today you will be with me in paradise"
-     Luke 23:43 (and arose three days later)?
+     Luke 23:43 (and arose three days later)? _Sola scriptura_ empowers you to answer that question from scripture with
+     a free conscience.
    >
    > I also find it helpful to think about the role of
      [General Revelation]({% link _posts/2023-08-02-scripture-as-divine-revelation.md %}) in relation to Special

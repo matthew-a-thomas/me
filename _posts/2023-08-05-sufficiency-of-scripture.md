@@ -103,10 +103,11 @@ These are my answers to a study guide given by my pastor.
    > <br/>
    > One could easily imagine that over time any teaching not committed to writing for preservation would tend to be
      corrupted and then lost, and any later doctrines built on such a foundation would be suspect. In Jesus' day the
-     Pharisees had so preserved and elevated their own tradition that it rose in practice to the position of supreme
-     authority, resulting in their own damnation (Matthew 23). And so Rome is correct to identify that it is dangerous
-     to depart from scripture. The Catholic Church seeks shelter by appealing to two things: the Holy Spirit who keeps
-     the Church from corruption; and to the inherited ability to tell people what the bible _really_ says.
+     Pharisees had so elevated their own tradition (which became corrupt over time) that it rose in practice to the
+     position of supreme authority because it was their lens for authoritatively interpreting scripture, resulting in
+     their own damnation (Matthew 23). And so Rome is correct to identify that it is dangerous to depart from scripture.
+     The Catholic Church seeks shelter by appealing to two things: the Holy Spirit who keeps the Church from corruption;
+     and to the inherited ability to tell people what the bible _really_ says.
    >
    > Logically, with these safeguards in place there would be no possibility for Sacred Tradition to contradict Sacred
      Scripture in the eyes of lay people. Lay people are not allowed to understand Sacred Scripture in any other way

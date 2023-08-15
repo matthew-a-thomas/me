@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-12T15:15:08-05:00</updated><id>/feed.xml</id><entry><title type="html">Fissiparousness and Perspicuity</title><link href="/christian/2023/08/12/fissiparousness-and-perspicuity.html" rel="alternate" type="text/html" title="Fissiparousness and Perspicuity" /><published>2023-08-12T00:00:00-05:00</published><updated>2023-08-12T00:00:00-05:00</updated><id>/christian/2023/08/12/fissiparousness-and-perspicuity</id><content type="html" xml:base="/christian/2023/08/12/fissiparousness-and-perspicuity.html"><![CDATA[<p>Casey Chalk wrote
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-15T11:23:58-05:00</updated><id>/feed.xml</id><entry><title type="html">Fissiparousness and Perspicuity</title><link href="/christian/2023/08/12/fissiparousness-and-perspicuity.html" rel="alternate" type="text/html" title="Fissiparousness and Perspicuity" /><published>2023-08-12T00:00:00-05:00</published><updated>2023-08-12T00:00:00-05:00</updated><id>/christian/2023/08/12/fissiparousness-and-perspicuity</id><content type="html" xml:base="/christian/2023/08/12/fissiparousness-and-perspicuity.html"><![CDATA[<p>Casey Chalk wrote
 <a href="https://www.catholic.com/magazine/online-edition/the-protestants-biggest-bible-problem">an article on Catholic.com</a>.</p>
 
 <p>I’d like to quote a large section of it. Then I’d like to quibble over words. Then I’d like to put the quibble’s feet on
@@ -1374,19 +1374,7 @@ is a savior who is able to bring you through unscathed.</p>
 <p>Not only <em>ought</em> you to go to work (because God said so in 2 Thessalonians
 3:6–12)—it’s possible for your work tomorrow to be eternally
 significant (because God will reward whatever service is rendered to
-him—Ephesians 6:7–8).</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[The future of things, and the point thereof]]></summary></entry><entry><title type="html">ReentrantAsyncLock NuGet Package</title><link href="/programming/2022/06/20/introducing-reentrantasynclock.html" rel="alternate" type="text/html" title="ReentrantAsyncLock NuGet Package" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/introducing-reentrantasynclock</id><content type="html" xml:base="/programming/2022/06/20/introducing-reentrantasynclock.html"><![CDATA[<p>This is the third post in a short series about async
-locks:</p>
-
-<ol>
-  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
-  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
-  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
-  <li><strong>ReentrantAsyncLock NuGet Package</strong> (<em>this post</em>)—Introducing the ReentrantAsyncLock package</li>
-</ol>
-
-<hr />
-
-<p>In the previous two posts I outlined the concept for a reentrant asynchronous
+him—Ephesians 6:7–8).</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[The future of things, and the point thereof]]></summary></entry><entry><title type="html">ReentrantAsyncLock NuGet Package</title><link href="/programming/2022/06/20/introducing-reentrantasynclock.html" rel="alternate" type="text/html" title="ReentrantAsyncLock NuGet Package" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/introducing-reentrantasynclock</id><content type="html" xml:base="/programming/2022/06/20/introducing-reentrantasynclock.html"><![CDATA[<p>In the previous two posts I outlined the concept for a reentrant asynchronous
 lock, and explained how it can provide all three of these things at once:</p>
 
 <ul>
@@ -1567,19 +1555,7 @@ semantics:</p>
   <li>Mutual exclusion</li>
 </ul>
 
-<p>Give it a try!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Introducing the ReentrantAsyncLock package]]></summary></entry><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This is the fourth post in a short series about async
-locks:</p>
-
-<ol>
-  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
-  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
-  <li><strong>Questions Answered</strong> (<em>this post</em>)—Answering some questions about ReentrantAsyncLock</li>
-  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
-</ol>
-
-<hr />
-
-<p>This series started because I needed a reentrant asynchronous lock for my job.
+<p>Give it a try!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Introducing the ReentrantAsyncLock package]]></summary></entry><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This series started because I needed a reentrant asynchronous lock for my job.
 We were already using an asynchronous lock but I noticed it deadlocked when you
 tried to reenter it. I thought that was silly so I set out to find one that
 works. That’s when I found Max Fedotov’s article titled
@@ -2069,19 +2045,7 @@ showstoppers.</p>
 
 <p>Feel free to <a href="https://www.nuget.org/packages/ReentrantAsyncLock/">try it out</a>
 and please
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/issues/new">report any bugs you find</a>!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Answering some questions about ReentrantAsyncLock]]></summary></entry><entry><title type="html">A More Ergonomic Async Lock (obsolete)</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock (obsolete)" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<p>This is the second post in a short series about async
-locks:</p>
-
-<ol>
-  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
-  <li><strong>A More Ergonomic Async Lock (obsolete)</strong> (<em>this post</em>)—Making the work queue look more like an async lock</li>
-  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
-  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
-</ol>
-
-<hr />
-
-<div class="alert alert-warning">
+<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/issues/new">report any bugs you find</a>!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Answering some questions about ReentrantAsyncLock]]></summary></entry><entry><title type="html">A More Ergonomic Async Lock (obsolete)</title><link href="/programming/2022/06/15/ergonomic-async-lock.html" rel="alternate" type="text/html" title="A More Ergonomic Async Lock (obsolete)" /><published>2022-06-15T00:00:00-05:00</published><updated>2022-06-15T00:00:00-05:00</updated><id>/programming/2022/06/15/ergonomic-async-lock</id><content type="html" xml:base="/programming/2022/06/15/ergonomic-async-lock.html"><![CDATA[<div class="alert alert-warning">
 
 <h2 id="warning">Warning</h2>
 

@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=auto">
     
     <title>Reentrant Async Lock - Matthew A. Thomas</title>
   </head>
@@ -28,19 +28,54 @@
           
           <p><i>June 14, 2022&mdash;A correct implementation</i></p>
           
-          <p>This is the first post in a short series about async
-locks:</p>
+          
 
+
+
+
+<p>
+  This is the
+  first
+    
+  post in a series about
+  async locks:
+</p>
 <ol>
-  <li><strong>Reentrant Async Lock</strong> (<em>this post</em>)—A correct implementation</li>
-  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
-  <li><strong><a href="/programming/2022/06/20/questions-answered.html">Questions Answered</a></strong>—Answering some questions about ReentrantAsyncLock</li>
-  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  
+  <li>
+    
+    
+    <b>Reentrant Async Lock</b> (<i>this post</i>)&mdash;A correct implementation
+    
+  </li>
+  
+  <li>
+    
+    
+    <a href="/programming/2022/06/15/ergonomic-async-lock.html"><b>A More Ergonomic Async Lock (obsolete)</b></a>&mdash;Making the work queue look more like an async lock
+    
+  </li>
+  
+  <li>
+    
+    
+    <a href="/programming/2022/06/20/introducing-reentrantasynclock.html"><b>ReentrantAsyncLock NuGet Package</b></a>&mdash;Introducing the ReentrantAsyncLock package
+    
+  </li>
+  
+  <li>
+    
+    
+    <a href="/programming/2022/06/20/questions-answered.html"><b>Questions Answered</b></a>&mdash;Answering some questions about ReentrantAsyncLock
+    
+  </li>
+  
 </ol>
 
-<hr />
+<hr/>
 
-<p>Max Fedotov
+
+          <p>Max Fedotov
 <a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a">wrote</a>:</p>
 <blockquote>
   <p>If you need a reentrant async lock — you are out of luck and would have to

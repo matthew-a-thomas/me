@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=auto">
     
     <title>Questions Answered - Matthew A. Thomas</title>
   </head>
@@ -28,19 +28,54 @@
           
           <p><i>June 20, 2022&mdash;Answering some questions about ReentrantAsyncLock</i></p>
           
-          <p>This is the fourth post in a short series about async
-locks:</p>
+          
 
+
+
+
+<p>
+  This is the
+  fourth
+    
+  post in a series about
+  async locks:
+</p>
 <ol>
-  <li><strong><a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a></strong>—A correct implementation</li>
-  <li><strong><a href="/programming/2022/06/15/ergonomic-async-lock.html">A More Ergonomic Async Lock (obsolete)</a></strong>—Making the work queue look more like an async lock</li>
-  <li><strong>Questions Answered</strong> (<em>this post</em>)—Answering some questions about ReentrantAsyncLock</li>
-  <li><strong><a href="/programming/2022/06/20/introducing-reentrantasynclock.html">ReentrantAsyncLock NuGet Package</a></strong>—Introducing the ReentrantAsyncLock package</li>
+  
+  <li>
+    
+    
+    <a href="/programming/2022/06/14/reentrant-async-lock.html"><b>Reentrant Async Lock</b></a>&mdash;A correct implementation
+    
+  </li>
+  
+  <li>
+    
+    
+    <a href="/programming/2022/06/15/ergonomic-async-lock.html"><b>A More Ergonomic Async Lock (obsolete)</b></a>&mdash;Making the work queue look more like an async lock
+    
+  </li>
+  
+  <li>
+    
+    
+    <a href="/programming/2022/06/20/introducing-reentrantasynclock.html"><b>ReentrantAsyncLock NuGet Package</b></a>&mdash;Introducing the ReentrantAsyncLock package
+    
+  </li>
+  
+  <li>
+    
+    
+    <b>Questions Answered</b> (<i>this post</i>)&mdash;Answering some questions about ReentrantAsyncLock
+    
+  </li>
+  
 </ol>
 
-<hr />
+<hr/>
 
-<p>This series started because I needed a reentrant asynchronous lock for my job.
+
+          <p>This series started because I needed a reentrant asynchronous lock for my job.
 We were already using an asynchronous lock but I noticed it deadlocked when you
 tried to reenter it. I thought that was silly so I set out to find one that
 works. That’s when I found Max Fedotov’s article titled

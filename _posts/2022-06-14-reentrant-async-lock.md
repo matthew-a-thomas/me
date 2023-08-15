@@ -2,10 +2,7 @@
 title: Reentrant Async Lock
 category: programming
 description: A correct implementation
-async_series_ordinal: first
 ---
-
-{% include async_lock_series.md %}
 
 Max Fedotov
 [wrote](https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a):

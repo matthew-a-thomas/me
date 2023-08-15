@@ -1,0 +1,49 @@
+{% for series in site.series %}
+  {% for path in series.paths %}
+    {% if page.path == path %}
+      {% assign match_index1 = forloop.index %}
+      {% assign match_series = series %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+{% if match_index1 %}
+
+{% assign series_count = match_series.paths | size %}
+<p>
+  This is the
+  {% case match_index1 %}
+    {% when 1 %}first
+    {% when 2 %}second
+    {% when 3 %}third
+    {% when 4 %}fourth
+    {% when 5 %}fifth
+    {% when 6 %}sixth
+    {% when 7 %}seventh
+    {% when 8 %}eighth
+    {% when 9 %}ninth
+    {% when 10 %}tenth
+    {% when 21 or 31 %}{{ match_index1 }}st
+    {% when 22 or 32 %}{{ match_index1 }}nd
+    {% when 23 or 33 %}{{ match_index1 }}rd
+    {% else %}{{ match_index1 }}th
+  {% endcase %}
+  post in a series about
+  {{ match_series.content }}:
+</p>
+<ol>
+  {% for path in match_series.paths %}
+  <li>
+    {% assign other_page = site.posts | where: "path", path | first %}
+    {% if other_page == page %}
+    <b>{{ page.title }}</b> (<i>this post</i>)&mdash;{{ page.description }}
+    {% else %}
+    <a href="{% link {{ other_page.path }} %}"><b>{{ other_page.title }}</b></a>&mdash;{{ other_page.description }}
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>
+
+<hr/>
+
+{% endif %}

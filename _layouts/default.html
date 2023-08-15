@@ -24,6 +24,7 @@
           {% if page.collection == "posts" %}
           <p><i>{{ page.date | date: '%B %d, %Y' }}&mdash;{{ page.description }}</i></p>
           {% endif %}
+          {% include series.html %}
           {{ content }}
         </div>
         <div class="list-group-item">

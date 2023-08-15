@@ -26,6 +26,8 @@ collections:
   pages:
     output: true
     permalink: :name
+  series:
+    output: false
 
 defaults:
   -

@@ -2,10 +2,7 @@
 title: ReentrantAsyncLock NuGet Package
 category: programming
 description: Introducing the ReentrantAsyncLock package
-async_series_ordinal: third
 ---
-
-{% include async_lock_series.md %}
 
 In the previous two posts I outlined the concept for a reentrant asynchronous
 lock, and explained how it can provide all three of these things at once:

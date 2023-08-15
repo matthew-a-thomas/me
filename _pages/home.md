@@ -8,8 +8,16 @@ Welcome to my personal website. Here are my posts:
 {% for post in site.posts %}
 <li>
   <p>
-    <a href="{{ post.url }}">{{ post.title }}</a><br/>
-    {{ post.description }}<br/>
+    <b><a href="{{ post.url }}">{{ post.title }}</a></b>
+    {% for series in site.series %}
+    {% for path in series.paths %}
+    {% if post.path == path %}
+    (<i>Series: <b>{{ series.content }}</b></i>)
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+    <br/>
+    &mdash;{{ post.description }}<br/>
     <i>{{ post.date | date: '%B %d, %Y' }}{% if post.category %} ({{ post.category }}){% endif %}</i>
   </p>
 </li>

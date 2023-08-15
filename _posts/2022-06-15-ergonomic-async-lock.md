@@ -2,10 +2,7 @@
 title: A More Ergonomic Async Lock (obsolete)
 description: Making the work queue look more like an async lock
 category: programming
-async_series_ordinal: second
 ---
-
-{% include async_lock_series.md %}
 
 <div class="alert alert-warning">
 {% markdown %}

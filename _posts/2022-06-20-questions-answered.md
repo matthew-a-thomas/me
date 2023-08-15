@@ -2,10 +2,7 @@
 title: Questions Answered
 category: programming
 description: Answering some questions about ReentrantAsyncLock
-async_series_ordinal: fourth
 ---
-
-{% include async_lock_series.md %}
 
 This series started because I needed a reentrant asynchronous lock for my job.
 We were already using an asynchronous lock but I noticed it deadlocked when you

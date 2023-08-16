@@ -1,4 +1,97 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-16T10:11:46-05:00</updated><id>/feed.xml</id><entry><title type="html">Things in C# Over Which You Cannot Abstract</title><link href="/programming/2023/08/16/impossible-csharp-abstractions.html" rel="alternate" type="text/html" title="Things in C# Over Which You Cannot Abstract" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/programming/2023/08/16/impossible-csharp-abstractions</id><content type="html" xml:base="/programming/2023/08/16/impossible-csharp-abstractions.html"><![CDATA[<p>I love abstractions. One of my favorite things about software is finding, making, and using good abstractions.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-16T12:41:00-05:00</updated><id>/feed.xml</id><entry><title type="html">Papal Infallibility</title><link href="/catholicism/2023/08/16/papal-infallibility.html" rel="alternate" type="text/html" title="Papal Infallibility" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/catholicism/2023/08/16/papal-infallibility</id><content type="html" xml:base="/catholicism/2023/08/16/papal-infallibility.html"><![CDATA[<p>Catholic Answers has published a tract titled <a href="https://www.catholic.com/tract/papal-infallibility"><em>Papal Infallibility</em></a>. It contains a certification by an official censor that it’s free of doctrinal or moral errors, so it seems pretty legit.</p>
+
+<p>I’d like to ask some questions as I think critically about it. Perhaps I’ll flesh this post out with additional research as I have time. But for now there will probably only be questions.</p>
+
+<blockquote>
+  <p>Vatican II explained the doctrine of infallibility as follows: “Although the individual bishops do not enjoy the prerogative of infallibility, they can nevertheless proclaim Christ’s doctrine infallibly. This is so, even when they are dispersed around the world, provided that while maintaining the bond of unity among themselves and with Peter’s successor, and while teaching authentically on a matter of faith or morals, they concur in a single viewpoint as the one which must be held conclusively. This authority is even more clearly verified when, gathered together in an ecumenical council, they are teachers and judges of faith and morals for the universal Church. Their definitions must then be adhered to with the submission of faith” (<em>Lumen Gentium</em> 25).</p>
+</blockquote>
+
+<p>I’m struggling to understand this. I <em>think</em> this is what is being said:</p>
+<ol>
+  <li>Individual bishops are fallible</li>
+  <li>Nevertheless, they are able to do one thing infallibly: proclaim doctrine
+    <ul>
+      <li><em>If</em> they remain joined to the pope</li>
+      <li><em>If</em> their teaching accords with the doctrine in question</li>
+    </ul>
+  </li>
+</ol>
+
+<p>It’s that last bullet point that I don’t understand. How can a person know if a bishop’s teaching accords with the doctrine in question? I think that judgment could only be made with certainty if the pope and a general council meet and agree? But then who can bring that infallible judgment down so that it is infallibly within reach of the lay person? Would it not have to be a bishop, which simply raises the question again? Because how can a person know if that bishop’s teaching on that infallible judgment, is itself in accord with that infallible judgment?</p>
+
+<p>Otherwise it seems that people have to just <em>assume</em> that a bishop’s teaching accords, and then <em>assume</em> that his teaching is infallible in that instance. So infallibility is reduced to a mere assumption?</p>
+
+<blockquote>
+  <p>Infallibility belongs in a special way to the pope as head of the bishops (Matt. 16:17–19; John 21:15–17). As Vatican II remarked, it is a charism the pope “enjoys in virtue of his office, when, as the supreme shepherd and teacher of all the faithful, who confirms his brethren in their faith (Luke 22:32), he proclaims by a definitive act some doctrine of faith or morals. Therefore his definitions, of themselves, and not from the consent of the Church, are justly held irreformable, for they are pronounced with the assistance of the Holy Spirit, an assistance promised to him in blessed Peter.”</p>
+</blockquote>
+
+<p>How solemnly, or in what form, must the pope make proclamation? And again, how can a person know infallibly that the pope has followed the proper procedure? Or what the pope has said?</p>
+
+<blockquote>
+  <p>An infallible pronouncement—whether made by the pope alone or by an ecumenical council—usually is made only when some doctrine has been called into question. Most doctrines have never been doubted by the large majority of Catholics.</p>
+</blockquote>
+
+<p>I think this is an appeal to purity (No True Scotsman). A Catholic is one who never calls anything significant into question, until he does. At which point he’s no longer Catholic? so it’s still true that nothing has been doubted by the large majority of Catholics. Otherwise a falsifying example would be the Reformation, when a <em>very</em> significant number of Catholics began doubting many <em>major</em> doctrines.</p>
+
+<blockquote>
+  <p>Some ask how popes can be infallible if some of them lived scandalously. This objection, of course, illustrates the common confusion between infallibility and impeccability. There is no guarantee that popes won’t sin or give bad example.</p>
+</blockquote>
+
+<p><a href="https://en.wikipedia.org/wiki/Pope_John_XII">Pope John XII</a> is a popular example of a pope living scandalously. He was excommunicated, declared to be apostate, and died shamefully. Indeed, if any kind of infallibility is present in the papacy, then this guy is proof that it comes with absolutely no guarantee of impeccability.</p>
+
+<p>But I have a question about this. Above, Catholic Answers said a bishop is infallible while “maintaining the bond of unity […] with Peter’s successor”. Surely Pope John XII was not maintaining that bond. So in his case he possessed the gift of infallibility by nature of his office (he was pope), while simultaneously he did not “enjoy the prerogative of infallibility” due to his sins? If so, then to me that feels like the fallacy of division (I think that’s the name for it?)—the doctrine arises out of a study of generalities, but then is used to overrule any contradicting specifics.</p>
+
+<blockquote>
+  <p>Other people wonder how infallibility could exist if some popes disagreed with others. This, too, shows an inaccurate understanding of infallibility, which applies only to solemn, official teachings on faith and morals, not to disciplinary decisions or even to unofficial comments on faith and morals. A pope’s private theological opinions are not infallible; only what he solemnly defines is considered to be infallible teaching.</p>
+</blockquote>
+
+<p>How solemnly? How “officially”?</p>
+
+<p>How can a person know <em>infallibly</em> that threshold has been reached? If you cannot know it infallibly, then you cannot know that the solemn official teaching is infallible, and so infallibility is an assumption or a courtesy.</p>
+
+<p>I believe it’s Catholic teaching that popes may err in matters of fact. Therefore isn’t it possible that a pope may err in saying “I solemnly and officially teach this”? Therefore you cannot know it is infallible without already knowing it’s infallible.</p>
+
+<p>Are there not examples of solemn, official teachings on faith and morals within the history of the Catholic Church which disagree with each other? I’ve heard allegations that there are.</p>
+
+<p>If they do not disagree, how do you know that infallibly? Wouldn’t certainty on the matter require the intervention of a bishop, and infallible knowledge of it would require the pope with a council. But then how would you know infallibly whether the pope and the council are in agreement, unless you already assume that they agree. In which case isn’t it meaningless to say they must agree, because it’s question begging to state they must agree and to mean the determination of their agreement is a presumption.</p>
+
+<blockquote>
+  <p>As a biblical example of papal fallibility, Fundamentalists like to point to Peter’s conduct at Antioch, where he refused to eat with Gentile Christians in order not to offend certain Jews from Palestine (Gal. 2:11–16). For this Paul rebuked him. Did this demonstrate papal infallibility was non-existent? Not at all. Peter’s actions had to do with matters of discipline, not with issues of faith or morals. Furthermore, the problem was Peter’s actions, not his teaching. Paul acknowledged that Peter very well knew the correct teaching (Gal. 2:12–13).</p>
+</blockquote>
+
+<p>So Peter’s actions had nothing to do with issues of faith or morals? That’s absurd. He was leading people astray (Gal 2:13), which is certainly an issue of both faith and morals.</p>
+
+<p>So Peter’s actions have no teaching role whatsoever? That’s also absurd.</p>
+
+<blockquote>
+  <p>Fundamentalists must also acknowledge that Peter did have some kind of infallibility—they cannot deny that he wrote two infallible epistles of the New Testament while under protection against writing error. So, if his behavior at Antioch was not incompatible with this kind of infallibility, neither is bad behavior contrary to papal infallibility in general.</p>
+</blockquote>
+
+<p>I agree that Peter had some kind of infallibility with respect to authoring his scriptures. So yes, Peter’s misconduct did not nullify the epistles he wrote. I even have to admit that Solomon’s misconduct did not nullify Proverbs or Song of Songs.</p>
+
+<p>But I think Pope John XII could rightly be called a slave of the devil without any offense to Catholics. So isn’t it an entirely different thing to say the popes are the rock and foundation of the church, helping to preserve her from the gates of hell, when at least one pope is himself a slave of hell? How can a hellish foundation save from hell? And then how can infallibility be derived from implications of <em>that</em>? That certainly requires additional explanation, to say the least.</p>
+
+<h2 id="in-summary">In summary</h2>
+
+<p>I think I’m left wondering these things:</p>
+
+<ol>
+  <li>What is the function of the Catholic doctrine of infallibility?</li>
+  <li>It seems people can never have complete certainty of things which are supposedly infallible
+    <ol>
+      <li>How then is infallibility any better than an assumption or courtesy?</li>
+      <li>How do Catholics resolve the facts of fallible knowledge of infallibility, and fallible usages of it?</li>
+      <li>Similarly, how certain must a Catholic be of the infallibility of something in order to perform the functions of it?</li>
+    </ol>
+  </li>
+  <li>I think I’ve detected a couple instances of question begging, and one or two other fallacies
+    <ul>
+      <li>How can this doctrine be established without logical fallacies?</li>
+    </ul>
+  </li>
+</ol>
+
+<p>I think some of these questions will be easy to answer with additional research.</p>]]></content><author><name></name></author><category term="catholicism" /><summary type="html"><![CDATA[Questions that arise from a Catholic Answers tract]]></summary></entry><entry><title type="html">Things in C# Over Which You Cannot Abstract</title><link href="/programming/2023/08/16/impossible-csharp-abstractions.html" rel="alternate" type="text/html" title="Things in C# Over Which You Cannot Abstract" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/programming/2023/08/16/impossible-csharp-abstractions</id><content type="html" xml:base="/programming/2023/08/16/impossible-csharp-abstractions.html"><![CDATA[<p>I love abstractions. One of my favorite things about software is finding, making, and using good abstractions.</p>
 
 <p>C# has many wonderful abstractions.</p>
 
@@ -1704,494 +1797,4 @@ is a savior who is able to bring you through unscathed.</p>
 <p>Not only <em>ought</em> you to go to work (because God said so in 2 Thessalonians
 3:6–12)—it’s possible for your work tomorrow to be eternally
 significant (because God will reward whatever service is rendered to
-him—Ephesians 6:7–8).</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[The future of things, and the point thereof]]></summary></entry><entry><title type="html">Questions Answered</title><link href="/programming/2022/06/20/questions-answered.html" rel="alternate" type="text/html" title="Questions Answered" /><published>2022-06-20T00:00:00-05:00</published><updated>2022-06-20T00:00:00-05:00</updated><id>/programming/2022/06/20/questions-answered</id><content type="html" xml:base="/programming/2022/06/20/questions-answered.html"><![CDATA[<p>This series started because I needed a reentrant asynchronous lock for my job.
-We were already using an asynchronous lock but I noticed it deadlocked when you
-tried to reenter it. I thought that was silly so I set out to find one that
-works. That’s when I found Max Fedotov’s article titled
-“Reentrant (Recursive) Async Lock is Impossible in C#”, along with
-<a href="https://www.reddit.com/r/dotnet/comments/rklmby/reentrant_recursive_async_lock_is_impossible_in_c/">his Reddit thread</a>
-about the same.</p>
-
-<p>I took that as a challenge and set out to prove him wrong. It’s not personal, I
-just like a good programming challenge. And it happens that the solution to this
-one will satisfy a real world need in my job.</p>
-
-<p>So after publishing
-“<a href="/programming/2022/06/14/reentrant-async-lock.html">Reentrant Async Lock</a>” I
-linked to it
-<a href="https://www.reddit.com/r/dotnet/comments/rklmby/comment/icdr70a/?utm_source=reddit&amp;utm_medium=web2x&amp;context=3">in Max’s Reddit thread</a>.</p>
-
-<p>He gave it some thought and then replied with
-<a href="https://itnext.io/reentrant-recursive-async-lock-is-impossible-in-c-e9593f4aa38a#:~:text=article%20still%20stands.-,2,-Another%20challenge%20to">an update to his article</a>
-and
-<a href="https://www.reddit.com/r/dotnet/comments/rklmby/comment/icthvsy/?utm_source=reddit&amp;utm_medium=web2x&amp;context=3">a reply on Reddit</a>.</p>
-
-<p>I really appreciate his thoughtful replies—something too often absent from
-other people on the internet—and I’d like to address the concerns he
-raised. I’ll frame them as questions and then I’ll answer them.</p>
-
-<p>In summary, I think that
-<a href="https://www.nuget.org/packages/ReentrantAsyncLock">the ReentrantAsyncLock NuGet package</a>
-correctly satisfies the need for a reentrant async lock. And while Max’s
-concerns do require consideration I don’t think they are showstoppers.</p>
-
-<h2 id="is-configureawaitfalse-a-problem">Is ConfigureAwait(false) a problem?</h2>
-
-<p>When you await a <code class="language-plaintext highlighter-rouge">Task</code> in C#, you can configure it to take the code after the
-await and run it on the thread pool synchronization context instead of returning
-to whatever context you were on to begin with.</p>
-
-<p>This can be very handy. And as Max pointed out this is sometimes even
-recommended. He points to
-<a href="https://devblogs.microsoft.com/dotnet/configureawait-faq/">an article written by Stephen Toub</a>
-and to
-<a href="https://blog.stephencleary.com/2012/02/async-and-await.html#avoiding-context">an article written by Stephen Cleary</a>.
-If you’ve been around C# long enough then you’ll recognize both of those names
-as heavy hitters. Both Stephens have made significant contributions to the .Net
-world and when they say something a lot of people listen. So let’s consider what
-they say.</p>
-
-<p>First let me give an example of when <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> is a good thing.</p>
-
-<p>Pretend that you have written the following library for the world to use. It’s
-really useful so a lot of people use your special function. A lot of CPU time
-the world over is being spent on your asynchronous function, but burning
-dinosaurs isn’t your hobby so you’d like to save some electricity and make it
-faster:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyLibrary</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSpecialStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="nf">DoFirstThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-    <span class="k">await</span> <span class="nf">DoSecondThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-    <span class="k">await</span> <span class="nf">DoLastThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>One way you can do that is by using <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyLibrary</span>
-<span class="p">{</span>
-  <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSpecialStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="nf">DoFirstThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
-    <span class="k">await</span> <span class="nf">DoSecondThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
-    <span class="k">await</span> <span class="nf">DoLastThingAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>But <em>should</em> you do that?</p>
-
-<p>Well, it depends on what you’re doing. There is no hard-and-fast rule, but it’s
-merely a performance optimization that you can use <em>if it makes sense</em>:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>What you’re doing</th>
-      <th>Use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>?</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Writing application code</td>
-      <td>No (Toub)</td>
-    </tr>
-    <tr>
-      <td>Writing framework code</td>
-      <td>Sometimes (Toub, Cleary)</td>
-    </tr>
-    <tr>
-      <td>Something that needs to preserve context</td>
-      <td>No (Toub, Cleary)</td>
-    </tr>
-    <tr>
-      <td>Eeking out every last CPU cycle</td>
-      <td>Maybe (Toub, Cleary)</td>
-    </tr>
-    <tr>
-      <td>Trying to avoid deadlocks</td>
-      <td>Maybe (Toub)</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>As an aside, if you’re trying to avoid deadlocks by using
-<code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> then you’re probably doing it wrong. Why are you
-synchronously blocking on a <code class="language-plaintext highlighter-rouge">Task</code> at all?</p>
-
-<p>But here’s the thing: both Stephens agree if you need to preserve the context
-then you should not use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>. And in the case of
-<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> that context is the very thing that makes it tick—you
-must preserve it, so don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>.</p>
-
-<p>Here’s an example of how <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> can mess up a
-<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code>:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
-    <span class="k">await</span> <span class="nf">DoAsyncIOOperationAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
-    <span class="c1">//                                  ^^^^^^^^^^^^^^^^^^^^^^</span>
-    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span> <span class="c1">// &lt;-- Uh oh!! Caused by this ^</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>That second call to <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> will <strong>not</strong> be guarded by the lock
-because you escaped the special synchronization context that the lock uses to
-guarantee mutual exclusion.</p>
-
-<p>So when you’re inside the guarded section of a <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> I think both
-Stephens would say “don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code>.”</p>
-
-<p>Important!—it doesn’t matter if <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> is used by
-asynchronous methods that you call. Because when execution resumes after those
-methods it’ll resume back on the special synchronization context. For example:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoStuffAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
-    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="k">await</span> <span class="nf">DoAsyncIOOperationAsync</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="nf">ConfigureAwait</span><span class="p">(</span><span class="k">false</span><span class="p">));</span>
-    <span class="c1">//                                                             ^^^^^^^^^^^^^^^^^^^^^^</span>
-    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span> <span class="c1">// &lt;-- This call is still guarded, even with this ^</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>So you really only have to worry about the asynchronous code immediately within
-the guarded section of the async lock. And if you’re using the async lock then
-that means you are also writing the code in that guarded section—nobody is
-talking about some third party function “out there” that you can’t control. So
-just don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> in the immediate guarded section and
-you’ll be fine.</p>
-
-<h2 id="can-you-synchronously-block-and-wait-for-other-tasks-in-the-same-synchronization-context">Can you synchronously block and wait for other tasks in the same synchronization context?</h2>
-
-<p>I think the question is if you can do this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="n">task</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="n">task</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>The answer is no. That will deadlock.</p>
-
-<p>But this isn’t an issue with the async lock. The problem is you’ve written
-terrible code that deadlocks. The potential for deadlocks is the reason it’s a
-code smell to <code class="language-plaintext highlighter-rouge">.Wait()</code> a <code class="language-plaintext highlighter-rouge">Task</code>.</p>
-
-<p>Note: this deadlocks, too:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="n">task</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomething2Async</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">task</span> <span class="p">=</span> <span class="nf">DoSomething1Async</span><span class="p">(</span><span class="n">token</span><span class="p">);</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="n">task</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>To be fair, Max also doesn’t think this is really an issue.</p>
-
-<p><strong>Update</strong>: Actually you’ll get stack overflows from those examples. But pretend
-for a moment that it deadlocks from the fact that one is waiting on the other
-which is waiting on the first. Pretend we’re talking about this instead:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DeadlockAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">tcs</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">TaskCompletionSource</span><span class="p">();</span>
-  <span class="kt">var</span> <span class="n">task1</span> <span class="p">=</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-    <span class="p">{</span>
-      <span class="k">await</span> <span class="n">tcs</span><span class="p">.</span><span class="n">Task</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-  <span class="kt">var</span> <span class="n">task2</span> <span class="p">=</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="p">=&gt;</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-    <span class="p">{</span>
-      <span class="n">tcs</span><span class="p">.</span><span class="nf">TrySetResult</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-  <span class="k">await</span> <span class="n">task2</span><span class="p">;</span>
-  <span class="k">await</span> <span class="n">task1</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>In this example there is a race condition between <code class="language-plaintext highlighter-rouge">task1</code> and <code class="language-plaintext highlighter-rouge">task2</code>. If
-<code class="language-plaintext highlighter-rouge">task2</code> wins the race then everything is hunky dory. But if <code class="language-plaintext highlighter-rouge">task1</code> wins the
-race then there is a deadlock: <code class="language-plaintext highlighter-rouge">task1</code> will be waiting on the <code class="language-plaintext highlighter-rouge">tcs</code> which
-can only be set by <code class="language-plaintext highlighter-rouge">task2</code>, but <code class="language-plaintext highlighter-rouge">task2</code> is waiting to acquire the lock and can’t
-until <code class="language-plaintext highlighter-rouge">task1</code> releases it.</p>
-
-<p>Let me go into a little more detail about <em>why</em> that would deadlock, and why I
-think that’s exactly what should happen.</p>
-
-<p>The reason it deadlocks is because it’s not an example of re-entering the lock.
-Two <strong>different</strong> contexts are vying for the lock. Sometimes one of them gets it
-and sometimes the other one gets it, but not both at the same time.</p>
-
-<p>And they are two different contexts because they’ll have <em>sibling</em>
-<code class="language-plaintext highlighter-rouge">ExecutionContext</code> instead of one “inheriting” from the other.</p>
-
-<p>I think deadlocking is the right thing. Think about the synchronous analogy:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="kt">object</span> <span class="n">_gate</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">void</span> <span class="nf">Deadlock</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="kt">var</span> <span class="n">mre</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ManualResetEventSlim</span><span class="p">();</span>
-  <span class="kt">var</span> <span class="n">thread1</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Thread</span><span class="p">(()</span> <span class="p">=&gt;</span>
-  <span class="p">{</span>
-    <span class="k">lock</span> <span class="p">(</span><span class="n">_gate</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">mre</span><span class="p">.</span><span class="nf">Wait</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-  <span class="n">thread1</span><span class="p">.</span><span class="nf">Start</span><span class="p">();</span>
-  <span class="kt">var</span> <span class="n">thread2</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Thread</span><span class="p">(()</span> <span class="p">=&gt;</span>
-  <span class="p">{</span>
-    <span class="k">lock</span> <span class="p">(</span><span class="n">_gate</span><span class="p">)</span>
-    <span class="p">{</span>
-      <span class="n">mre</span><span class="p">.</span><span class="nf">Set</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-  <span class="n">thread2</span><span class="p">.</span><span class="nf">Start</span><span class="p">();</span>
-
-  <span class="n">thread2</span><span class="p">.</span><span class="nf">Join</span><span class="p">();</span>
-  <span class="n">thread1</span><span class="p">.</span><span class="nf">Join</span><span class="p">();</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>I don’t think anyone will complain about the deadlock in the synchronous
-analogy. Instead I think they’ll be content to learn that the problem is their
-code :)</p>
-
-<h2 id="cant-someone-just-replace-synchronizationcontextcurrent-somewhere-down-the-call-chain-inside-the-guarded-section-of-an-async-lock">Can’t someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?</h2>
-
-<p>I think the question here is if this has any effect on the performance of the
-lock:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">());</span>
-    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">void</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>The answer is: no. When execution returns from the awaited <code class="language-plaintext highlighter-rouge">Task</code> then the
-async state machine will have restored the synchronization context to what it
-was before awaiting that <code class="language-plaintext highlighter-rouge">Task</code>. So in this case <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> will
-still be guarded by the lock.</p>
-
-<p>But perhaps that’s not what Max was getting at. Perhaps he meant this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="nf">ChangeSynchronizationContext</span><span class="p">();</span>
-    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Yield</span><span class="p">();</span>
-    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">void</span> <span class="nf">ChangeSynchronizationContext</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="n">SynchronizationContext</span><span class="p">.</span><span class="nf">SetSynchronizationContext</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>The answer here is: yes, that’ll cause <code class="language-plaintext highlighter-rouge">DoNonThreadSafeStuff()</code> to execute on
-the thread pool. You’ll have broken the lock.</p>
-
-<p>So don’t do that :)</p>
-
-<p>If you’re concerned about calling third party synchronous functions within the
-guarded section of the async lock then you can always package them up into a
-<code class="language-plaintext highlighter-rouge">Task.Run</code> and you will never have issues. Like this:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">DoSomethingAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">token</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="n">Task</span><span class="p">.</span><span class="nf">Run</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="nf">ExecuteStrangeThirdPartyFunction</span><span class="p">());</span>
-    <span class="nf">DoNonThreadSafeStuff</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h2 id="what-about-the-synchronization-context-from-which-you-enter-the-async-lock">What about the synchronization context from which you enter the async lock?</h2>
-
-<p>Max said:</p>
-
-<blockquote>
-  <p>There could be another <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> already when you apply your
-  lock, so you have to consider if you want to wrap it and post things onto it
-  instead of posting them to the thread pool.</p>
-</blockquote>
-
-<p>This is a valid concern. Let me illustrate with a pretend WPF example:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="c1">// Event handler for the "Click" event on a button named "Button"</span>
-<span class="k">public</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"This works"</span><span class="p">;</span> <span class="c1">// This will work</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"Uh oh!"</span><span class="p">;</span> <span class="c1">// This will throw an exception</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>The above code illustrates that when a button’s “Click” event handler executes
-it’ll do so on the UI thread. But then execution leaves that thread inside the
-async lock. This change in threads might be unexpected to developers. The second
-assignment to <code class="language-plaintext highlighter-rouge">Button.Tag</code> will throw an exception because in WPF that property
-can only be assigned from the thread that is running that button’s dispatcher.</p>
-
-<p>What’s the solution?</p>
-
-<p>In this case you would have to do the following:</p>
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="n">ReentrantAsyncLock</span> <span class="n">_asyncLock</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
-
-<span class="k">public</span> <span class="k">async</span> <span class="k">void</span> <span class="nf">OnButtonClick</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"This still works"</span><span class="p">;</span>
-  <span class="k">await</span> <span class="k">using</span> <span class="p">(</span><span class="k">await</span> <span class="n">_asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="k">default</span><span class="p">))</span>
-  <span class="p">{</span>
-    <span class="k">await</span> <span class="n">Button</span><span class="p">.</span><span class="n">Dispatcher</span><span class="p">.</span><span class="nf">InvokeAsync</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">Button</span><span class="p">.</span><span class="n">Tag</span> <span class="p">=</span> <span class="s">"Now this works, too!"</span><span class="p">);</span> <span class="c1">// No more exception</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>While it is not a showstopper, it is something you have to be conscious of. And
-I think that’s Max’s point; entering the async lock changes some things that
-don’t usually change.</p>
-
-<h2 id="should-the-async-lock-have-a-synchronous-locking-api-too">Should the async lock have a synchronous locking API, too?</h2>
-
-<p>Max points out that many async lock implementations also have synchronous lock
-methods. Then the async lock can be used in both synchronous and asynchronous
-contexts.</p>
-
-<p>Personally I don’t think that’s a good choice. In fact I would go so far as to
-call it an anti-pattern. I personally think that a synchronous lock should be
-used for synchronous contexts, and an asynchronous lock should be used for
-asynchronous contexts. I suspect that if you want to use one for the other then
-there are probably some things going amuck in your code. I think that if you’re
-okay with
-<a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">colored functions</a>
-then you should also be okay with colored locks.</p>
-
-<p>But I’m writing this in a country where the First Amendment gives citizens the
-right to freely express the following extension method, and where copyright law
-won’t hamper them because this whole site
-<a href="https://github.com/matthew-a-thomas/me/blob/master/LICENSE">is MIT-licensed</a>:</p>
-
-<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">ReentrantAsyncLockExtensions</span>
-<span class="p">{</span>
-    <span class="k">public</span> <span class="k">static</span> <span class="n">IDisposable</span> <span class="nf">LockSynchronously</span><span class="p">(</span><span class="k">this</span> <span class="n">ReentrantAsyncLock</span> <span class="n">asyncLock</span><span class="p">,</span> <span class="n">CancellationToken</span> <span class="n">cancellationToken</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="kt">var</span> <span class="n">mre</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ManualResetEventSlim</span><span class="p">();</span>
-        <span class="kt">var</span> <span class="n">lockResult</span> <span class="p">=</span> <span class="n">asyncLock</span><span class="p">.</span><span class="nf">LockAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">);</span>
-        <span class="kt">var</span> <span class="n">awaiter</span> <span class="p">=</span> <span class="n">lockResult</span><span class="p">.</span><span class="nf">GetAwaiter</span><span class="p">();</span>
-        <span class="n">awaiter</span><span class="p">.</span><span class="nf">OnCompleted</span><span class="p">(</span><span class="n">mre</span><span class="p">.</span><span class="n">Set</span><span class="p">);</span>
-        <span class="n">mre</span><span class="p">.</span><span class="nf">Wait</span><span class="p">(</span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span> <span class="c1">// Token has already been given to LockAsync(...) above</span>
-        <span class="kt">var</span> <span class="n">asyncDisposable</span> <span class="p">=</span> <span class="n">awaiter</span><span class="p">.</span><span class="nf">GetResult</span><span class="p">();</span>
-        <span class="k">return</span> <span class="k">new</span> <span class="nf">Disposable</span><span class="p">(()</span> <span class="p">=&gt;</span>
-        <span class="p">{</span>
-            <span class="kt">var</span> <span class="n">_</span> <span class="p">=</span> <span class="n">asyncDisposable</span><span class="p">.</span><span class="nf">DisposeAsync</span><span class="p">();</span>
-        <span class="p">});</span>
-    <span class="p">}</span>
-
-    <span class="k">sealed</span> <span class="k">class</span> <span class="nc">Disposable</span> <span class="p">:</span> <span class="n">IDisposable</span>
-    <span class="p">{</span>
-        <span class="n">Action</span><span class="p">?</span> <span class="n">_dispose</span><span class="p">;</span>
-
-        <span class="k">public</span> <span class="nf">Disposable</span><span class="p">(</span><span class="n">Action</span><span class="p">?</span> <span class="n">dispose</span><span class="p">)</span>
-        <span class="p">{</span>
-            <span class="n">_dispose</span> <span class="p">=</span> <span class="n">dispose</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="n">Interlocked</span><span class="p">.</span><span class="nf">Exchange</span><span class="p">(</span><span class="k">ref</span> <span class="n">_dispose</span><span class="p">,</span> <span class="k">null</span><span class="p">)?.</span><span class="nf">Invoke</span><span class="p">();</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>I <em>think</em> that’ll work. It takes into account some of the nuances of
-<code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code>.</p>
-
-<p>But no guarantees!</p>
-
-<p>And I don’t like it.</p>
-
-<h2 id="the-point">The point</h2>
-
-<p>I think that <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> provides all the important aspects of an
-asynchronous lock. It does sometimes require some careful thought when you use
-it, but all of the rough spots that I know of can be addressed and aren’t
-showstoppers.</p>
-
-<p>Feel free to <a href="https://www.nuget.org/packages/ReentrantAsyncLock/">try it out</a>
-and please
-<a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/issues/new">report any bugs you find</a>!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[Answering some questions about ReentrantAsyncLock]]></summary></entry></feed>
+him—Ephesians 6:7–8).</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[The future of things, and the point thereof]]></summary></entry></feed>

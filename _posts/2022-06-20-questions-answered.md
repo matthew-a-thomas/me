@@ -35,7 +35,7 @@ In summary, I think that
 correctly satisfies the need for a reentrant async lock. And while Max's
 concerns do require consideration I don't think they are showstoppers.
 
-# Is ConfigureAwait(false) a problem?
+## Is ConfigureAwait(false) a problem?
 
 When you await a `Task` in C#, you can configure it to take the code after the
 await and run it on the thread pool synchronization context instead of returning
@@ -158,7 +158,7 @@ talking about some third party function "out there" that you can't control. So
 just don't use `ConfigureAwait(false)` in the immediate guarded section and
 you'll be fine.
 
-# Can you synchronously block and wait for other tasks in the same synchronization context?
+## Can you synchronously block and wait for other tasks in the same synchronization context?
 
 I think the question is if you can do this:
 
@@ -295,7 +295,7 @@ I don't think anyone will complain about the deadlock in the synchronous
 analogy. Instead I think they'll be content to learn that the problem is their
 code :)
 
-# Can't someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?
+## Can't someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?
 
 I think the question here is if this has any effect on the performance of the
 lock:
@@ -366,7 +366,7 @@ public async Task DoSomethingAsync(CancellationToken token)
 }
 ```
 
-# What about the synchronization context from which you enter the async lock?
+## What about the synchronization context from which you enter the async lock?
 
 Max said:
 
@@ -416,7 +416,7 @@ While it is not a showstopper, it is something you have to be conscious of. And
 I think that's Max's point; entering the async lock changes some things that
 don't usually change.
 
-# Should the async lock have a synchronous locking API, too?
+## Should the async lock have a synchronous locking API, too?
 
 Max points out that many async lock implementations also have synchronous lock
 methods. Then the async lock can be used in both synchronous and asynchronous
@@ -474,7 +474,7 @@ But no guarantees!
 
 And I don't like it.
 
-# The point
+## The point
 
 I think that `ReentrantAsyncLock` provides all the important aspects of an
 asynchronous lock. It does sometimes require some careful thought when you use

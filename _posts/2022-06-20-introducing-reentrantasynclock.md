@@ -23,7 +23,7 @@ NuGet package:<br/>
 Source code:<br/>
 [https://github.com/matthew-a-thomas/cs-reentrant-async-lock](https://github.com/matthew-a-thomas/cs-reentrant-async-lock)
 
-# The NuGet package and its semantics
+## The NuGet package and its semantics
 
 The
 [ReentrantAsyncLock NuGet package](https://www.nuget.org/packages/ReentrantAsyncLock)
@@ -62,12 +62,12 @@ In the code comments above I point out the three different aspects of the lock.
 You'll also notice that the NuGet package source code has automated tests that
 assert the correctness of each of the three aspects (and more).
 
-# How does it work?
+## How does it work?
 
 It combines `ExecutionContext`/`AsyncLocal` with a special
 `SynchronizationContext` and a special awaitable type.
 
-## ExecutionContext and AsyncLocal
+### ExecutionContext and AsyncLocal
 
 If you're familiar with
 [the ExecutionContext class](https://docs.microsoft.com/en-us/dotnet/api/system.threading.executioncontext?view=net-6.0)
@@ -94,7 +94,7 @@ That method checks the `LocalScope` against
 When they match then the lock can be acquired because that's a case of
 reentrance.
 
-## SynchronizationContext
+### SynchronizationContext
 
 [The `SynchronizationContext` class](https://docs.microsoft.com/en-us/dotnet/api/system.threading.synchronizationcontext?view=net-6.0)
 is Microsoft's abstraction of a synchronization model. It is (usually) the thing
@@ -140,7 +140,7 @@ SynchronizationContext. The compiler packages up the code after the `await` into
 a continuation, and that continuation is given to the work queue. And since that
 work queue will only do one thing at a time you get mutual exclusion.
 
-## A special awaitable type
+### A special awaitable type
 
 This brings us to
 [the `AsyncLockResult` class](https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/AsyncLockResult.cs).
@@ -173,7 +173,7 @@ call it when the `CancellationToken` is canceled? Again, the answer is "with the
 `AsyncLockResult` class." It wraps the continuation in such a way that it can be
 sent to both places at once but will only get executed a single time.
 
-# The point
+## The point
 
 The
 [ReentrantAsyncLock NuGet package](https://www.nuget.org/packages/ReentrantAsyncLock)

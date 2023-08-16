@@ -2,7 +2,9 @@
 permalink: /
 description: Matt's personal website
 ---
-Welcome to my personal website. Here are my posts:
+Welcome to my personal website. [About me and this site]({% link _pages/about.md %}).
+
+Here are my posts:
 
 <ul>
 {% for post in site.posts %}
@@ -23,5 +25,3 @@ Welcome to my personal website. Here are my posts:
 </li>
 {% endfor %}
 </ul>
-
-[About me and this site]({% link _pages/about.md %}).

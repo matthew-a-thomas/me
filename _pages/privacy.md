@@ -2,15 +2,20 @@
 title: Privacy
 description: Privacy policy
 ---
-This website does not collect any information about visitors except what might
-be collected by GitHub Pages according to their
-[privacy policy](https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-privacy-statement#github-pages){:target="_blank"}.
+This website does not collect any personally identifiable information about
+visitors.
 
-In other words, I don't collect your information and I don't have access to it.
+This website uses Google Analytics. Their privacy policy is here:<br/>
+[http://www.google.com/intl/en/policies/privacy/](http://www.google.com/intl/en/policies/privacy/)
+
+This website is hosted using GitHub Pages. Their privacy policy is here:<br/>
+[https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-privacy-statement#github-pages](https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-privacy-statement#github-pages)
 
 ## Cookies
 
-This website doesn't normally use cookies.
+This website uses Google Analytics which uses cookies. Google
+[promises](https://support.google.com/analytics/answer/6004245) that it doesn't
+collect personally identifiable information.
 
 Cookies might be created to store your preferences if you interact with the
 context menu of math equations on this website. If you don't mess with that menu

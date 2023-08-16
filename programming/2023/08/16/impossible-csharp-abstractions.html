@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z2FCS7Q00N"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-Z2FCS7Q00N');
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A short list of concepts and features in C# over which you cannot abstract">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=auto">
+    
+    <title>Abstractions That Are Not Possible in C# - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <div class="alert alert-info">
+            I've updated my <a href="/privacy">privacy policy</a> to reflect the fact that I'm now using Google Analytics.
+          </div>
+          
+          
+          <h1>Abstractions That Are Not Possible in C#</h1>
+          
+          
+          <p><i>August 16, 2023&mdash;A short list of concepts and features in C# over which you cannot abstract</i></p>
+          
+          
+
+
+          <p>I love abstractions. One of my favorite things about software is finding, making, and using good abstractions.</p>
+
+<p>C# has many wonderful abstractions.</p>
+
+<p>But C# also has concepts and features over which it’s simply not possible to abstract.</p>
+
+<h2 id="ref-struct"><code class="language-plaintext highlighter-rouge">ref struct</code></h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">ref</code> keyword was introduced to enable performance optimizations. When you make a <code class="language-plaintext highlighter-rouge">ref</code> type then you’re telling the compiler that its instances can only live on the stack. They cannot live on the heap.</p>
+
+<p>This has <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct">the following consequences</a>:</p>
+<blockquote>
+  <ul>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> can’t be the element type of an array.</li>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> can’t be a declared type of a field of a class or a non-<code class="language-plaintext highlighter-rouge">ref struct</code>.</li>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> can’t implement interfaces.</li>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> can’t be boxed to System.ValueType or System.Object.</li>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> can’t be a type argument.</li>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> variable can’t be captured by a lambda expression or a local function.</li>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> variable can’t be used in an async method. However, you can use <code class="language-plaintext highlighter-rouge">ref struct</code> variables in synchronous methods, for example, in methods that return Task or Task<TResult>.</TResult></li>
+    <li>A <code class="language-plaintext highlighter-rouge">ref struct</code> variable can’t be used in iterators.</li>
+  </ul>
+</blockquote>
+
+<p>That’s a long list of things you can’t do with them!</p>
+
+<p>Let’s zoom in on the fact that they can’t implement interfaces. Which are one of the primary tools for abstraction in C#.</p>
+
+<p>Suppose you want a function that will return the sum of all the odd elements of a sequence of numbers:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="kt">int</span> <span class="nf">SumOdd</span><span class="p">(</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">sequence</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">even</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">sum</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">number</span> <span class="k">in</span> <span class="n">sequence</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">even</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">even</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="n">even</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+      <span class="n">sum</span> <span class="p">+=</span> <span class="n">number</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Because of the power of abstraction you can use that function on <code class="language-plaintext highlighter-rouge">int[]</code>, <code class="language-plaintext highlighter-rouge">List&lt;int&gt;</code>, <code class="language-plaintext highlighter-rouge">ImmutableList&lt;int&gt;</code>, <code class="language-plaintext highlighter-rouge">ArraySegment&lt;int&gt;</code>, <code class="language-plaintext highlighter-rouge">IReadOnlyCollection&lt;int&gt;</code>, and so on:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">4</span><span class="p">,</span> <span class="nf">SumOdd</span><span class="p">(</span><span class="k">new</span> <span class="kt">int</span><span class="p">[]</span> <span class="p">{</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span> <span class="p">}));</span>
+<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">4</span><span class="p">,</span> <span class="nf">SumOdd</span><span class="p">(</span><span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="p">{</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span> <span class="p">}));</span>
+</code></pre></div></div>
+
+<p>But you cannot use that function on <code class="language-plaintext highlighter-rouge">ReadOnlySpan&lt;int&gt;</code>. Instead you have to make a choice:</p>
+<ol>
+  <li>Duplicate the function with minimal changes to support <code class="language-plaintext highlighter-rouge">ReadOnlySpan&lt;int&gt;</code>
+    <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="kt">int</span> <span class="nf">SumOdd</span><span class="p">(</span><span class="n">ReadOnlySpan</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">sequence</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">even</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">sum</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="k">ref</span> <span class="k">readonly</span> <span class="kt">var</span> <span class="n">number</span> <span class="k">in</span> <span class="n">sequence</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">even</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">even</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="n">even</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+      <span class="n">sum</span> <span class="p">+=</span> <span class="n">number</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Pointlessly copy the <code class="language-plaintext highlighter-rouge">ReadOnlySpan&lt;int&gt;</code> into an array:
+    <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ReadOnlySpan</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">span</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[]</span> <span class="p">{</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span> <span class="p">};</span>
+<span class="n">Assert</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="m">4</span><span class="p">,</span> <span class="nf">SumOdd</span><span class="p">(</span><span class="n">span</span><span class="p">.</span><span class="nf">ToArray</span><span class="p">()));</span>
+</code></pre></div>    </div>
+  </li>
+  <li><em>Sometimes</em> you’ll have the <code class="language-plaintext highlighter-rouge">ReadOnlyMemory&lt;int&gt;</code> within scope from which the <code class="language-plaintext highlighter-rouge">ReadOnlySpan&lt;int&gt;</code> came. In which case you can make an adapter for <code class="language-plaintext highlighter-rouge">ReadOnlyMemory&lt;int&gt;</code>:
+    <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">sealed</span> <span class="n">record</span> <span class="n">ReadOnlyMemoryToEnumerableAdapter</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">ReadOnlyMemory</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Memory</span><span class="p">)</span> <span class="p">:</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="n">IEnumerator</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">GetEnumerator</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="p">...;</span>
+  <span class="n">IEnumerator</span> <span class="n">IEnumerable</span><span class="p">.</span><span class="nf">GetEnumerator</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="nf">GetEnumerator</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+    <p>…but now we’re no longer talking about abstracting over <code class="language-plaintext highlighter-rouge">ReadOnlySpan&lt;int&gt;</code>. Which is kind of the point</p>
+  </li>
+</ol>
+
+<p>So you cannot abstract over <code class="language-plaintext highlighter-rouge">ref struct</code>.</p>
+
+<h2 id="most-all-c-coding-by-convention-concepts">Most (all?) C# coding-by-convention concepts</h2>
+
+<p>Here are some examples of what I mean by “coding by convention”:</p>
+<ul>
+  <li><a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement"><code class="language-plaintext highlighter-rouge">foreach</code> loops</a>
+    <blockquote>
+      <p>You can use it with an instance of any type that satisfies the following conditions:</p>
+
+      <ul>
+        <li>A type has the public parameterless <code class="language-plaintext highlighter-rouge">GetEnumerator</code> method. Beginning with C# 9.0, the <code class="language-plaintext highlighter-rouge">GetEnumerator</code> method can be a type’s extension method.</li>
+        <li>The return type of the <code class="language-plaintext highlighter-rouge">GetEnumerator</code> method has the public <code class="language-plaintext highlighter-rouge">Current</code> property and the public parameterless <code class="language-plaintext highlighter-rouge">MoveNext</code> method whose return type is <code class="language-plaintext highlighter-rouge">bool</code>.</li>
+      </ul>
+    </blockquote>
+  </li>
+  <li><a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using"><code class="language-plaintext highlighter-rouge">using</code> statements</a>
+    <blockquote>
+      <p>You can also use the <code class="language-plaintext highlighter-rouge">using</code> statement and declaration with an instance of a ref struct that fits the disposable pattern. That is, it has an instance <code class="language-plaintext highlighter-rouge">Dispose</code> method, which is accessible, parameterless and has a <code class="language-plaintext highlighter-rouge">void</code> return type.</p>
+    </blockquote>
+  </li>
+  <li><a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12982-awaitable-expressions"><code class="language-plaintext highlighter-rouge">await</code> operator</a>
+    <blockquote>
+      <p>An expression <code class="language-plaintext highlighter-rouge">t</code> is awaitable if one of the following holds:</p>
+
+      <ul>
+        <li><code class="language-plaintext highlighter-rouge">t</code> is of compile-time type <code class="language-plaintext highlighter-rouge">dynamic</code></li>
+        <li><code class="language-plaintext highlighter-rouge">t</code> has an accessible instance or extension method called <code class="language-plaintext highlighter-rouge">GetAwaiter</code> with no parameters and no type parameters, and a return type <code class="language-plaintext highlighter-rouge">A</code> for which all of the following hold:
+          <ul>
+            <li><code class="language-plaintext highlighter-rouge">A</code> implements the interface <code class="language-plaintext highlighter-rouge">System.Runtime.CompilerServices.INotifyCompletion</code> (hereafter known as <code class="language-plaintext highlighter-rouge">INotifyCompletion</code> for brevity)</li>
+            <li><code class="language-plaintext highlighter-rouge">A</code> has an accessible, readable instance property <code class="language-plaintext highlighter-rouge">IsCompleted</code> of type <code class="language-plaintext highlighter-rouge">bool</code></li>
+            <li><code class="language-plaintext highlighter-rouge">A</code> has an accessible instance method <code class="language-plaintext highlighter-rouge">GetResult</code> with no parameters and no type parameters</li>
+          </ul>
+        </li>
+      </ul>
+    </blockquote>
+  </li>
+</ul>
+
+<p>There are a growing number of things like this in C# where you’ll be able to use this or that feature if you follow a bunch of rules.</p>
+
+<p>But it’s impossible to abstract over all <code class="language-plaintext highlighter-rouge">foreach</code>-able types, or all disposable types, or all awaitable types. Because with each of these features C# introduced a convention, and a convention is different than an interface. It doesn’t matter if they also introduced an interface (as is the case with <code class="language-plaintext highlighter-rouge">foreach</code> and <code class="language-plaintext highlighter-rouge">IEnumerable</code>, or with <code class="language-plaintext highlighter-rouge">using</code> and <code class="language-plaintext highlighter-rouge">IDisposable</code>)—the fact that they introduced a convention at all means there will be types which are <code class="language-plaintext highlighter-rouge">foreach</code>-able that do not implement an interface.</p>
+
+<p>It’s impossible to abstract over <em>all</em> manifestations of any of these concepts.</p>
+
+<h2 id="colored-functions">Colored functions</h2>
+
+<p>C# pioneered <code class="language-plaintext highlighter-rouge">async</code>/<code class="language-plaintext highlighter-rouge">await</code>. And so <a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">colored functions</a> are C#’s fault.</p>
+
+<p>Yes, async cancer is a real thing. I’ve experienced it. You are twelve layers deep in a project with 10,000 source code files and discover that you need to call an asynchronous function from a synchronous function. Then you have to waste the rest of the day refactoring the entire application to support async <em>from the top all the way down</em>. And you can only hope that you didn’t break all the completely unrelated things you had to modify just to support this.</p>
+
+<p>You cannot abstract over the color of a function.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2023&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-16T09:41:56-05:00</updated><id>/feed.xml</id><entry><title type="html">Things in C# Over Which You Cannot Abstract</title><link href="/programming/2023/08/16/impossible-csharp-abstractions.html" rel="alternate" type="text/html" title="Things in C# Over Which You Cannot Abstract" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/programming/2023/08/16/impossible-csharp-abstractions</id><content type="html" xml:base="/programming/2023/08/16/impossible-csharp-abstractions.html"><![CDATA[<p>I love abstractions. One of my favorite things about software is finding, making, and using good abstractions.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-16T10:11:46-05:00</updated><id>/feed.xml</id><entry><title type="html">Things in C# Over Which You Cannot Abstract</title><link href="/programming/2023/08/16/impossible-csharp-abstractions.html" rel="alternate" type="text/html" title="Things in C# Over Which You Cannot Abstract" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/programming/2023/08/16/impossible-csharp-abstractions</id><content type="html" xml:base="/programming/2023/08/16/impossible-csharp-abstractions.html"><![CDATA[<p>I love abstractions. One of my favorite things about software is finding, making, and using good abstractions.</p>
 
 <p>C# has many wonderful abstractions.</p>
 
@@ -1735,7 +1735,7 @@ raised. I’ll frame them as questions and then I’ll answer them.</p>
 correctly satisfies the need for a reentrant async lock. And while Max’s
 concerns do require consideration I don’t think they are showstoppers.</p>
 
-<h1 id="is-configureawaitfalse-a-problem">Is ConfigureAwait(false) a problem?</h1>
+<h2 id="is-configureawaitfalse-a-problem">Is ConfigureAwait(false) a problem?</h2>
 
 <p>When you await a <code class="language-plaintext highlighter-rouge">Task</code> in C#, you can configure it to take the code after the
 await and run it on the thread pool synchronization context instead of returning
@@ -1877,7 +1877,7 @@ talking about some third party function “out there” that you can’t control
 just don’t use <code class="language-plaintext highlighter-rouge">ConfigureAwait(false)</code> in the immediate guarded section and
 you’ll be fine.</p>
 
-<h1 id="can-you-synchronously-block-and-wait-for-other-tasks-in-the-same-synchronization-context">Can you synchronously block and wait for other tasks in the same synchronization context?</h1>
+<h2 id="can-you-synchronously-block-and-wait-for-other-tasks-in-the-same-synchronization-context">Can you synchronously block and wait for other tasks in the same synchronization context?</h2>
 
 <p>I think the question is if you can do this:</p>
 
@@ -2010,7 +2010,7 @@ and sometimes the other one gets it, but not both at the same time.</p>
 analogy. Instead I think they’ll be content to learn that the problem is their
 code :)</p>
 
-<h1 id="cant-someone-just-replace-synchronizationcontextcurrent-somewhere-down-the-call-chain-inside-the-guarded-section-of-an-async-lock">Can’t someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?</h1>
+<h2 id="cant-someone-just-replace-synchronizationcontextcurrent-somewhere-down-the-call-chain-inside-the-guarded-section-of-an-async-lock">Can’t someone just replace SynchronizationContext.Current somewhere down the call chain inside the guarded section of an async lock?</h2>
 
 <p>I think the question here is if this has any effect on the performance of the
 lock:</p>
@@ -2078,7 +2078,7 @@ guarded section of the async lock then you can always package them up into a
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h1 id="what-about-the-synchronization-context-from-which-you-enter-the-async-lock">What about the synchronization context from which you enter the async lock?</h1>
+<h2 id="what-about-the-synchronization-context-from-which-you-enter-the-async-lock">What about the synchronization context from which you enter the async lock?</h2>
 
 <p>Max said:</p>
 
@@ -2128,7 +2128,7 @@ can only be assigned from the thread that is running that button’s dispatcher.
 I think that’s Max’s point; entering the async lock changes some things that
 don’t usually change.</p>
 
-<h1 id="should-the-async-lock-have-a-synchronous-locking-api-too">Should the async lock have a synchronous locking API, too?</h1>
+<h2 id="should-the-async-lock-have-a-synchronous-locking-api-too">Should the async lock have a synchronous locking API, too?</h2>
 
 <p>Max points out that many async lock implementations also have synchronous lock
 methods. Then the async lock can be used in both synchronous and asynchronous
@@ -2185,7 +2185,7 @@ won’t hamper them because this whole site
 
 <p>And I don’t like it.</p>
 
-<h1 id="the-point">The point</h1>
+<h2 id="the-point">The point</h2>
 
 <p>I think that <code class="language-plaintext highlighter-rouge">ReentrantAsyncLock</code> provides all the important aspects of an
 asynchronous lock. It does sometimes require some careful thought when you use

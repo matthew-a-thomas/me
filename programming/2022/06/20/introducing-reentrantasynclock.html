@@ -110,7 +110,7 @@ the capstone of my efforts in this series.</p>
 <p>Source code:<br />
 <a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock">https://github.com/matthew-a-thomas/cs-reentrant-async-lock</a></p>
 
-<h1 id="the-nuget-package-and-its-semantics">The NuGet package and its semantics</h1>
+<h2 id="the-nuget-package-and-its-semantics">The NuGet package and its semantics</h2>
 
 <p>The
 <a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>
@@ -148,12 +148,12 @@ lets you write code like this:</p>
 <p>You’ll also notice that the NuGet package source code has automated tests that
 assert the correctness of each of the three aspects (and more).</p>
 
-<h1 id="how-does-it-work">How does it work?</h1>
+<h2 id="how-does-it-work">How does it work?</h2>
 
 <p>It combines <code class="language-plaintext highlighter-rouge">ExecutionContext</code>/<code class="language-plaintext highlighter-rouge">AsyncLocal</code> with a special
 <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> and a special awaitable type.</p>
 
-<h2 id="executioncontext-and-asynclocal">ExecutionContext and AsyncLocal</h2>
+<h3 id="executioncontext-and-asynclocal">ExecutionContext and AsyncLocal</h3>
 
 <p>If you’re familiar with
 <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.executioncontext?view=net-6.0">the ExecutionContext class</a>
@@ -180,7 +180,7 @@ That method checks the <code class="language-plaintext highlighter-rouge">LocalS
 When they match then the lock can be acquired because that’s a case of
 reentrance.</p>
 
-<h2 id="synchronizationcontext">SynchronizationContext</h2>
+<h3 id="synchronizationcontext">SynchronizationContext</h3>
 
 <p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.synchronizationcontext?view=net-6.0">The <code class="language-plaintext highlighter-rouge">SynchronizationContext</code> class</a>
 is Microsoft’s abstraction of a synchronization model. It is (usually) the thing
@@ -224,7 +224,7 @@ SynchronizationContext. The compiler packages up the code after the <code class=
 a continuation, and that continuation is given to the work queue. And since that
 work queue will only do one thing at a time you get mutual exclusion.</p>
 
-<h2 id="a-special-awaitable-type">A special awaitable type</h2>
+<h3 id="a-special-awaitable-type">A special awaitable type</h3>
 
 <p>This brings us to
 <a href="https://github.com/matthew-a-thomas/cs-reentrant-async-lock/blob/deded4441ad895428dc3716852e5fb07c74036af/ReentrantAsyncLock/AsyncLockResult.cs">the <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class</a>.
@@ -257,7 +257,7 @@ call it when the <code class="language-plaintext highlighter-rouge">Cancellation
 <code class="language-plaintext highlighter-rouge">AsyncLockResult</code> class.” It wraps the continuation in such a way that it can be
 sent to both places at once but will only get executed a single time.</p>
 
-<h1 id="the-point">The point</h1>
+<h2 id="the-point">The point</h2>
 
 <p>The
 <a href="https://www.nuget.org/packages/ReentrantAsyncLock">ReentrantAsyncLock NuGet package</a>

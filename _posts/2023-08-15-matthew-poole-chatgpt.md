@@ -1,6 +1,6 @@
 ---
 title: Matthew Poole, GPT Style
-description: An interfaith dialog between an AI English Reformed Baptist and an AI Catholic Priest
+description: An interfaith dialog between an AI English Reformed Baptist and an AI Catholic Priest leads to warm fuzzy feelings
 category: misc
 ---
 

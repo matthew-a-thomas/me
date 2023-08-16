@@ -130,7 +130,7 @@ But how does Mr. Chalk know _infallibly_ that fissiparousness doesn't exist with
 the Catholic Church says so? But we've already established that Mr. Chalk doesn't _really_ know that the Catholic Church
 is right, at least not with the same level of certainty that he requires Protestants to have of everything in scripture.
 
-And we all know that division has haunted even the Catholic Church. And even to this day.
+And we all know division has haunted even the Catholic Church. And even to this day.
 
 So why does any of this even matter? Am I wasting my time writing this? Is this just a pointless argument? Are you
 wasting your time reading it?

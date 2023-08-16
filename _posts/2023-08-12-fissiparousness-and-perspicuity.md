@@ -65,25 +65,25 @@ To quote
 [Karlo Broussard's article](https://www.catholic.com/magazine/online-edition/the-best-argument-for-sola-scriptura) (also
 on Catholic.com), these are supposedly the ways in which a person can have infallible knowledge of something:
 
-1. _We directly sense something_. For example, when I see the tree outside, I have an immediate and direct sense
-   experience of the tree and thereby infallibly know that the tree exists (a view known as direct realism).
-
-1. _A claim is reduced to a violation of a first principle_, like the principle of non-contradiction (PNC)—that is, that
-   something can’t both be and not be in the same respect at the same place and time. If a claim were to violate the
-   PNC, we would infallibly know that the claim is false because the PNC cannot be denied without presupposing its
-   validity. (See my new book The New Relativism: Unmasking the Philosophy of Today’s Woke Moralists.) When a principle
-   can’t be denied like this, that’s a sure sign it’s true.
-
-1. _A claim about reality that is itself directly confirmed by a miracle (or miracles)_. Given that miracles require
-   divine power, and God can’t confirm falsehood, miraculous confirmation would give us infallible knowledge that the
-   prophet’s claim is backed by God and thereby true.
-
-1. _A claim is definitively made by someone who has been given authority_ to speak on behalf of God, either by God
-   himself or by another whose authority is miraculously confirmed. Even though such a person might not have miraculous
-   confirmation directly associated with his claim, there is a transfer of divine authority that’s been already
-   established.
-
-1. _God reveals something to you or me directly_.
+> 1. _We directly sense something_. For example, when I see the tree outside, I have an immediate and direct sense
+>    experience of the tree and thereby infallibly know that the tree exists (a view known as direct realism).
+> 
+> 1. _A claim is reduced to a violation of a first principle_, like the principle of non-contradiction (PNC)—that is, that
+>    something can’t both be and not be in the same respect at the same place and time. If a claim were to violate the
+>    PNC, we would infallibly know that the claim is false because the PNC cannot be denied without presupposing its
+>    validity. (See my new book The New Relativism: Unmasking the Philosophy of Today’s Woke Moralists.) When a principle
+>    can’t be denied like this, that’s a sure sign it’s true.
+> 
+> 1. _A claim about reality that is itself directly confirmed by a miracle (or miracles)_. Given that miracles require
+>    divine power, and God can’t confirm falsehood, miraculous confirmation would give us infallible knowledge that the
+>    prophet’s claim is backed by God and thereby true.
+> 
+> 1. _A claim is definitively made by someone who has been given authority_ to speak on behalf of God, either by God
+>    himself or by another whose authority is miraculously confirmed. Even though such a person might not have miraculous
+>    confirmation directly associated with his claim, there is a transfer of divine authority that’s been already
+>    established.
+> 
+> 1. _God reveals something to you or me directly_.
 
 For the record, I'm not agreeing with Mr. Broussard. But he sounds like an authority in Catholicism so let's apply his
 approach to one of his fellows. Let’s now consider which of these Mr. Chalk might appeal to for having infallible

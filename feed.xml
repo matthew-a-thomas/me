@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-18T08:28:50-05:00</updated><id>/feed.xml</id><entry><title type="html">Air Spring Preload</title><link href="/misc/2023/08/18/air-spring-preload.html" rel="alternate" type="text/html" title="Air Spring Preload" /><published>2023-08-18T00:00:00-05:00</published><updated>2023-08-18T00:00:00-05:00</updated><id>/misc/2023/08/18/air-spring-preload</id><content type="html" xml:base="/misc/2023/08/18/air-spring-preload.html"><![CDATA[<p>You can make an <a href="https://en.wikipedia.org/wiki/Air_suspension">air spring</a> from an air piston like this:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-18T09:12:30-05:00</updated><id>/feed.xml</id><entry><title type="html">Air Spring Preload</title><link href="/misc/2023/08/18/air-spring-preload.html" rel="alternate" type="text/html" title="Air Spring Preload" /><published>2023-08-18T00:00:00-05:00</published><updated>2023-08-18T00:00:00-05:00</updated><id>/misc/2023/08/18/air-spring-preload</id><content type="html" xml:base="/misc/2023/08/18/air-spring-preload.html"><![CDATA[<p>You can make an <a href="https://en.wikipedia.org/wiki/Air_suspension">air spring</a> from an air piston like this:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>         load
           V
@@ -19,7 +19,7 @@
    ^ cylinder cap ^
 </code></pre></div></div>
 
-<p>As long as the air inside the piston has no where to go, it’ll be springy.</p>
+<p>As long as the air inside the piston has nowhere to go, it’ll be springy.</p>
 
 <p>What follows is a quick proof that adding preload makes the air spring stiffer.</p>
 
@@ -29,7 +29,7 @@
 
 \[P_1 \cdot V_1 = P_2 \cdot V_2\]
 
-<p>In other words, the pressure multiplied by the volume remains the same</p>
+<p>In other words, the pressure multiplied by the volume remains the same.</p>
 
 <p>Now, a force is pressure multiplied over an area:</p>
 
@@ -45,7 +45,9 @@
 
 \[\frac{F_1}{F_2} = \frac{h_2}{h_1}\]
 
-<p>Now, suppose that we preload it. Meaning add something to <em>both</em> forces, not just one of them. Using the picture above, if you increase the load then that’s increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).</p>
+<p>In other words, the ratio between the forces equals the inverse ratio between the heights.</p>
+
+<p>Now, suppose that we preload it. Meaning add something to <em>both</em> forces, not just one of them. Using the picture above, if you increase the load on top then that’s increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).</p>
 
 \[F = \alpha + G\]
 
@@ -59,7 +61,7 @@
 
 \[\frac{\partial}{\partial \alpha} \frac{\alpha + G_1}{\alpha + G_2} = \frac{G_2 - G_1}{(G_2 + \alpha)^2}\]
 
-<p>See the \(\alpha\) (squared) in the denominator? That means it goes to zero as \(\alpha\) (the preload) increases.</p>
+<p>See the \(\alpha\) (squared) in the denominator? That means the rate of change of that ratio goes to zero as \(\alpha\) (the preload) increases.</p>
 
 <p>In other words, an air spring gets stiffer when you add preload.</p>
 

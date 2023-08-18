@@ -26,7 +26,7 @@ You can make an [air spring](https://en.wikipedia.org/wiki/Air_suspension) from 
    ^ cylinder cap ^
 ```
 
-As long as the air inside the piston has no where to go, it'll be springy.
+As long as the air inside the piston has nowhere to go, it'll be springy.
 
 What follows is a quick proof that adding preload makes the air spring stiffer.
 
@@ -36,7 +36,7 @@ According to gas laws, an isothermic (meaning thermal equilibrium) air spring ob
 
 $$ P_1 \cdot V_1 = P_2 \cdot V_2 $$
 
-In other words, the pressure multiplied by the volume remains the same
+In other words, the pressure multiplied by the volume remains the same.
 
 Now, a force is pressure multiplied over an area:
 
@@ -52,7 +52,9 @@ $$ F_1 \cdot h_1 = F_2 \cdot h_2 $$
 
 $$ \frac{F_1}{F_2} = \frac{h_2}{h_1} $$
 
-Now, suppose that we preload it. Meaning add something to _both_ forces, not just one of them. Using the picture above, if you increase the load then that's increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).
+In other words, the ratio between the forces equals the inverse ratio between the heights.
+
+Now, suppose that we preload it. Meaning add something to _both_ forces, not just one of them. Using the picture above, if you increase the load on top then that's increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).
 
 $$ F = \alpha + G $$
 
@@ -66,7 +68,7 @@ Take the partial derivative of the left side:
 
 $$ \frac{\partial}{\partial \alpha} \frac{\alpha + G_1}{\alpha + G_2} = \frac{G_2 - G_1}{(G_2 + \alpha)^2} $$
 
-See the $$ \alpha $$ (squared) in the denominator? That means it goes to zero as $$ \alpha $$ (the preload) increases.
+See the $$ \alpha $$ (squared) in the denominator? That means the rate of change of that ratio goes to zero as $$ \alpha $$ (the preload) increases.
 
 In other words, an air spring gets stiffer when you add preload.
 

@@ -1,97 +1,85 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-16T12:41:00-05:00</updated><id>/feed.xml</id><entry><title type="html">Papal Infallibility</title><link href="/catholicism/2023/08/16/papal-infallibility.html" rel="alternate" type="text/html" title="Papal Infallibility" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/catholicism/2023/08/16/papal-infallibility</id><content type="html" xml:base="/catholicism/2023/08/16/papal-infallibility.html"><![CDATA[<p>Catholic Answers has published a tract titled <a href="https://www.catholic.com/tract/papal-infallibility"><em>Papal Infallibility</em></a>. It contains a certification by an official censor that it’s free of doctrinal or moral errors, so it seems pretty legit.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-18T08:28:50-05:00</updated><id>/feed.xml</id><entry><title type="html">Air Spring Preload</title><link href="/misc/2023/08/18/air-spring-preload.html" rel="alternate" type="text/html" title="Air Spring Preload" /><published>2023-08-18T00:00:00-05:00</published><updated>2023-08-18T00:00:00-05:00</updated><id>/misc/2023/08/18/air-spring-preload</id><content type="html" xml:base="/misc/2023/08/18/air-spring-preload.html"><![CDATA[<p>You can make an <a href="https://en.wikipedia.org/wiki/Air_suspension">air spring</a> from an air piston like this:</p>
 
-<p>I’d like to ask some questions as I think critically about it. Perhaps I’ll flesh this post out with additional research as I have time. But for now there will probably only be questions.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>         load
+          V
+          |
+          |
+|         |         |
+|         |         |
+| shaft &gt; | &lt; shaft | &lt;
+|         |         | &lt;
+|---------+---------| &lt; barrel
+|                   | &lt;
+|    ^ piston ^     | &lt;
+|                   |
+|      * air *      |
+|                   |
++-------------------+
 
-<blockquote>
-  <p>Vatican II explained the doctrine of infallibility as follows: “Although the individual bishops do not enjoy the prerogative of infallibility, they can nevertheless proclaim Christ’s doctrine infallibly. This is so, even when they are dispersed around the world, provided that while maintaining the bond of unity among themselves and with Peter’s successor, and while teaching authentically on a matter of faith or morals, they concur in a single viewpoint as the one which must be held conclusively. This authority is even more clearly verified when, gathered together in an ecumenical council, they are teachers and judges of faith and morals for the universal Church. Their definitions must then be adhered to with the submission of faith” (<em>Lumen Gentium</em> 25).</p>
-</blockquote>
+   ^ cylinder cap ^
+</code></pre></div></div>
 
-<p>I’m struggling to understand this. I <em>think</em> this is what is being said:</p>
-<ol>
-  <li>Individual bishops are fallible</li>
-  <li>Nevertheless, they are able to do one thing infallibly: proclaim doctrine
-    <ul>
-      <li><em>If</em> they remain joined to the pope</li>
-      <li><em>If</em> their teaching accords with the doctrine in question</li>
-    </ul>
-  </li>
-</ol>
+<p>As long as the air inside the piston has no where to go, it’ll be springy.</p>
 
-<p>It’s that last bullet point that I don’t understand. How can a person know if a bishop’s teaching accords with the doctrine in question? I think that judgment could only be made with certainty if the pope and a general council meet and agree? But then who can bring that infallible judgment down so that it is infallibly within reach of the lay person? Would it not have to be a bishop, which simply raises the question again? Because how can a person know if that bishop’s teaching on that infallible judgment, is itself in accord with that infallible judgment?</p>
+<p>What follows is a quick proof that adding preload makes the air spring stiffer.</p>
 
-<p>Otherwise it seems that people have to just <em>assume</em> that a bishop’s teaching accords, and then <em>assume</em> that his teaching is infallible in that instance. So infallibility is reduced to a mere assumption?</p>
+<h2 id="proof">Proof</h2>
 
-<blockquote>
-  <p>Infallibility belongs in a special way to the pope as head of the bishops (Matt. 16:17–19; John 21:15–17). As Vatican II remarked, it is a charism the pope “enjoys in virtue of his office, when, as the supreme shepherd and teacher of all the faithful, who confirms his brethren in their faith (Luke 22:32), he proclaims by a definitive act some doctrine of faith or morals. Therefore his definitions, of themselves, and not from the consent of the Church, are justly held irreformable, for they are pronounced with the assistance of the Holy Spirit, an assistance promised to him in blessed Peter.”</p>
-</blockquote>
+<p>According to gas laws, an isothermic (meaning thermal equilibrium) air spring obeys this principle:</p>
 
-<p>How solemnly, or in what form, must the pope make proclamation? And again, how can a person know infallibly that the pope has followed the proper procedure? Or what the pope has said?</p>
+\[P_1 \cdot V_1 = P_2 \cdot V_2\]
 
-<blockquote>
-  <p>An infallible pronouncement—whether made by the pope alone or by an ecumenical council—usually is made only when some doctrine has been called into question. Most doctrines have never been doubted by the large majority of Catholics.</p>
-</blockquote>
+<p>In other words, the pressure multiplied by the volume remains the same</p>
 
-<p>I think this is an appeal to purity (No True Scotsman). A Catholic is one who never calls anything significant into question, until he does. At which point he’s no longer Catholic? so it’s still true that nothing has been doubted by the large majority of Catholics. Otherwise a falsifying example would be the Reformation, when a <em>very</em> significant number of Catholics began doubting many <em>major</em> doctrines.</p>
+<p>Now, a force is pressure multiplied over an area:</p>
 
-<blockquote>
-  <p>Some ask how popes can be infallible if some of them lived scandalously. This objection, of course, illustrates the common confusion between infallibility and impeccability. There is no guarantee that popes won’t sin or give bad example.</p>
-</blockquote>
+\[F = P \cdot A\]
 
-<p><a href="https://en.wikipedia.org/wiki/Pope_John_XII">Pope John XII</a> is a popular example of a pope living scandalously. He was excommunicated, declared to be apostate, and died shamefully. Indeed, if any kind of infallibility is present in the papacy, then this guy is proof that it comes with absolutely no guarantee of impeccability.</p>
+\[P = \frac{F}{A}\]
 
-<p>But I have a question about this. Above, Catholic Answers said a bishop is infallible while “maintaining the bond of unity […] with Peter’s successor”. Surely Pope John XII was not maintaining that bond. So in his case he possessed the gift of infallibility by nature of his office (he was pope), while simultaneously he did not “enjoy the prerogative of infallibility” due to his sins? If so, then to me that feels like the fallacy of division (I think that’s the name for it?)—the doctrine arises out of a study of generalities, but then is used to overrule any contradicting specifics.</p>
+<p>Which means,</p>
 
-<blockquote>
-  <p>Other people wonder how infallibility could exist if some popes disagreed with others. This, too, shows an inaccurate understanding of infallibility, which applies only to solemn, official teachings on faith and morals, not to disciplinary decisions or even to unofficial comments on faith and morals. A pope’s private theological opinions are not infallible; only what he solemnly defines is considered to be infallible teaching.</p>
-</blockquote>
+\[\frac{F_1}{A_1} \cdot V_1 = \frac{F_2}{A_2} \cdot V_2\]
 
-<p>How solemnly? How “officially”?</p>
+\[F_1 \cdot h_1 = F_2 \cdot h_2\]
 
-<p>How can a person know <em>infallibly</em> that threshold has been reached? If you cannot know it infallibly, then you cannot know that the solemn official teaching is infallible, and so infallibility is an assumption or a courtesy.</p>
+\[\frac{F_1}{F_2} = \frac{h_2}{h_1}\]
 
-<p>I believe it’s Catholic teaching that popes may err in matters of fact. Therefore isn’t it possible that a pope may err in saying “I solemnly and officially teach this”? Therefore you cannot know it is infallible without already knowing it’s infallible.</p>
+<p>Now, suppose that we preload it. Meaning add something to <em>both</em> forces, not just one of them. Using the picture above, if you increase the load then that’s increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).</p>
 
-<p>Are there not examples of solemn, official teachings on faith and morals within the history of the Catholic Church which disagree with each other? I’ve heard allegations that there are.</p>
+\[F = \alpha + G\]
 
-<p>If they do not disagree, how do you know that infallibly? Wouldn’t certainty on the matter require the intervention of a bishop, and infallible knowledge of it would require the pope with a council. But then how would you know infallibly whether the pope and the council are in agreement, unless you already assume that they agree. In which case isn’t it meaningless to say they must agree, because it’s question begging to state they must agree and to mean the determination of their agreement is a presumption.</p>
+\[\frac{\alpha + G_1}{\alpha + G_2} = \frac{h_2}{h_1}\]
 
-<blockquote>
-  <p>As a biblical example of papal fallibility, Fundamentalists like to point to Peter’s conduct at Antioch, where he refused to eat with Gentile Christians in order not to offend certain Jews from Palestine (Gal. 2:11–16). For this Paul rebuked him. Did this demonstrate papal infallibility was non-existent? Not at all. Peter’s actions had to do with matters of discipline, not with issues of faith or morals. Furthermore, the problem was Peter’s actions, not his teaching. Paul acknowledged that Peter very well knew the correct teaching (Gal. 2:12–13).</p>
-</blockquote>
+<p>“Stiffness” can be understood in terms of the change in that ratio \(\frac{h_2}{h_1}\). The smaller the change, the stiffer it is.</p>
 
-<p>So Peter’s actions had nothing to do with issues of faith or morals? That’s absurd. He was leading people astray (Gal 2:13), which is certainly an issue of both faith and morals.</p>
+<p>So let’s pretend that the forces and heights are constant. What effect does the preload have on the rate of change of that ratio?</p>
 
-<p>So Peter’s actions have no teaching role whatsoever? That’s also absurd.</p>
+<p>Take the partial derivative of the left side:</p>
 
-<blockquote>
-  <p>Fundamentalists must also acknowledge that Peter did have some kind of infallibility—they cannot deny that he wrote two infallible epistles of the New Testament while under protection against writing error. So, if his behavior at Antioch was not incompatible with this kind of infallibility, neither is bad behavior contrary to papal infallibility in general.</p>
-</blockquote>
+\[\frac{\partial}{\partial \alpha} \frac{\alpha + G_1}{\alpha + G_2} = \frac{G_2 - G_1}{(G_2 + \alpha)^2}\]
 
-<p>I agree that Peter had some kind of infallibility with respect to authoring his scriptures. So yes, Peter’s misconduct did not nullify the epistles he wrote. I even have to admit that Solomon’s misconduct did not nullify Proverbs or Song of Songs.</p>
+<p>See the \(\alpha\) (squared) in the denominator? That means it goes to zero as \(\alpha\) (the preload) increases.</p>
 
-<p>But I think Pope John XII could rightly be called a slave of the devil without any offense to Catholics. So isn’t it an entirely different thing to say the popes are the rock and foundation of the church, helping to preserve her from the gates of hell, when at least one pope is himself a slave of hell? How can a hellish foundation save from hell? And then how can infallibility be derived from implications of <em>that</em>? That certainly requires additional explanation, to say the least.</p>
+<p>In other words, an air spring gets stiffer when you add preload.</p>
 
-<h2 id="in-summary">In summary</h2>
+<p>Just like any spring.</p>
 
-<p>I think I’m left wondering these things:</p>
+<h2 id="applications">Applications</h2>
 
-<ol>
-  <li>What is the function of the Catholic doctrine of infallibility?</li>
-  <li>It seems people can never have complete certainty of things which are supposedly infallible
-    <ol>
-      <li>How then is infallibility any better than an assumption or courtesy?</li>
-      <li>How do Catholics resolve the facts of fallible knowledge of infallibility, and fallible usages of it?</li>
-      <li>Similarly, how certain must a Catholic be of the infallibility of something in order to perform the functions of it?</li>
-    </ol>
-  </li>
-  <li>I think I’ve detected a couple instances of question begging, and one or two other fallacies
-    <ul>
-      <li>How can this doctrine be established without logical fallacies?</li>
-    </ul>
-  </li>
-</ol>
+<p>There are multiple applications of this.</p>
 
-<p>I think some of these questions will be easy to answer with additional research.</p>]]></content><author><name></name></author><category term="catholicism" /><summary type="html"><![CDATA[Questions that arise from a Catholic Answers tract]]></summary></entry><entry><title type="html">Things in C# Over Which You Cannot Abstract</title><link href="/programming/2023/08/16/impossible-csharp-abstractions.html" rel="alternate" type="text/html" title="Things in C# Over Which You Cannot Abstract" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/programming/2023/08/16/impossible-csharp-abstractions</id><content type="html" xml:base="/programming/2023/08/16/impossible-csharp-abstractions.html"><![CDATA[<p>I love abstractions. One of my favorite things about software is finding, making, and using good abstractions.</p>
+<h3 id="compressed-gas-springs">Compressed gas springs</h3>
+
+<p>There are multiple ways to add preload. One way is to put a weight on top like my example above. But another way is to enclose the top of the air piston and fill that space with <em>compressed</em> air. Then you get a compressed gas spring.</p>
+
+<h3 id="make-an-air-piston-less-slingshot-y">Make an air piston less slingshot-y</h3>
+
+<p>Suppose you replaced all the hydraulic cylinders in your excavator with air pistons. You have to work <em>really</em> hard to lift a heavy rock by pumping a ton of very compressed air into the air pistons. Then as the rock begins to lift it slips and falls out of the bucket. Guess what happens to all that compressed air? It decompresses by violently slingshotting the bucket off of your excavator and sending it into orbit. I hope you have insurance.</p>
+
+<p>That’s a silly example. But there are real life usages of air cylinders that move loads, and sometimes loads shift.</p>
+
+<p>How can you make it less like a slingshot? Add preload.</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[Adding preload makes an air spring stiffer, just like any spring]]></summary></entry><entry><title type="html">Things in C# Over Which You Cannot Abstract</title><link href="/programming/2023/08/16/impossible-csharp-abstractions.html" rel="alternate" type="text/html" title="Things in C# Over Which You Cannot Abstract" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/programming/2023/08/16/impossible-csharp-abstractions</id><content type="html" xml:base="/programming/2023/08/16/impossible-csharp-abstractions.html"><![CDATA[<p>I love abstractions. One of my favorite things about software is finding, making, and using good abstractions.</p>
 
 <p>C# has many wonderful abstractions.</p>
 
@@ -237,7 +225,100 @@
 
 <p>Yes, async cancer is a real thing. I’ve experienced it. You are twelve layers deep in a project with 10,000 source code files and discover that you need to call an asynchronous function from a synchronous function. Then you have to waste the rest of the day refactoring the entire application to support async <em>from the top all the way down</em>. And you can only hope that you didn’t break all the completely unrelated things you had to modify just to support this.</p>
 
-<p>You cannot abstract over the color of a function.</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[A short list of concepts and features in C# over which you cannot abstract]]></summary></entry><entry><title type="html">Matthew Poole, GPT Style</title><link href="/misc/2023/08/15/matthew-poole-chatgpt.html" rel="alternate" type="text/html" title="Matthew Poole, GPT Style" /><published>2023-08-15T00:00:00-05:00</published><updated>2023-08-15T00:00:00-05:00</updated><id>/misc/2023/08/15/matthew-poole-chatgpt</id><content type="html" xml:base="/misc/2023/08/15/matthew-poole-chatgpt.html"><![CDATA[<p>I’ve been reading a book written by Matthew Poole, a 17th century English Reformed Baptist, called <em>A Dialogue Between a Priest and a Protestant</em>. I thought it would be fun to make GPT-4 pretend to be him while talking with another instance of itself pretending to be a 17th century Roman Catholic priest.</p>
+<p>You cannot abstract over the color of a function.</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[A short list of concepts and features in C# over which you cannot abstract]]></summary></entry><entry><title type="html">Papal Infallibility</title><link href="/catholicism/2023/08/16/papal-infallibility.html" rel="alternate" type="text/html" title="Papal Infallibility" /><published>2023-08-16T00:00:00-05:00</published><updated>2023-08-16T00:00:00-05:00</updated><id>/catholicism/2023/08/16/papal-infallibility</id><content type="html" xml:base="/catholicism/2023/08/16/papal-infallibility.html"><![CDATA[<p>Catholic Answers has published a tract titled <a href="https://www.catholic.com/tract/papal-infallibility"><em>Papal Infallibility</em></a>. It contains a certification by an official censor that it’s free of doctrinal or moral errors, so it seems pretty legit.</p>
+
+<p>I’d like to ask some questions as I think critically about it. Perhaps I’ll flesh this post out with additional research as I have time. But for now there will probably only be questions.</p>
+
+<blockquote>
+  <p>Vatican II explained the doctrine of infallibility as follows: “Although the individual bishops do not enjoy the prerogative of infallibility, they can nevertheless proclaim Christ’s doctrine infallibly. This is so, even when they are dispersed around the world, provided that while maintaining the bond of unity among themselves and with Peter’s successor, and while teaching authentically on a matter of faith or morals, they concur in a single viewpoint as the one which must be held conclusively. This authority is even more clearly verified when, gathered together in an ecumenical council, they are teachers and judges of faith and morals for the universal Church. Their definitions must then be adhered to with the submission of faith” (<em>Lumen Gentium</em> 25).</p>
+</blockquote>
+
+<p>I’m struggling to understand this. I <em>think</em> this is what is being said:</p>
+<ol>
+  <li>Individual bishops are fallible</li>
+  <li>Nevertheless, they are able to do one thing infallibly: proclaim doctrine
+    <ul>
+      <li><em>If</em> they remain joined to the pope</li>
+      <li><em>If</em> their teaching accords with the doctrine in question</li>
+    </ul>
+  </li>
+</ol>
+
+<p>It’s that last bullet point that I don’t understand. How can a person know if a bishop’s teaching accords with the doctrine in question? I think that judgment could only be made with certainty if the pope and a general council meet and agree? But then who can bring that infallible judgment down so that it is infallibly within reach of the lay person? Would it not have to be a bishop, which simply raises the question again? Because how can a person know if that bishop’s teaching on that infallible judgment, is itself in accord with that infallible judgment?</p>
+
+<p>Otherwise it seems that people have to just <em>assume</em> that a bishop’s teaching accords, and then <em>assume</em> that his teaching is infallible in that instance. So infallibility is reduced to a mere assumption?</p>
+
+<blockquote>
+  <p>Infallibility belongs in a special way to the pope as head of the bishops (Matt. 16:17–19; John 21:15–17). As Vatican II remarked, it is a charism the pope “enjoys in virtue of his office, when, as the supreme shepherd and teacher of all the faithful, who confirms his brethren in their faith (Luke 22:32), he proclaims by a definitive act some doctrine of faith or morals. Therefore his definitions, of themselves, and not from the consent of the Church, are justly held irreformable, for they are pronounced with the assistance of the Holy Spirit, an assistance promised to him in blessed Peter.”</p>
+</blockquote>
+
+<p>How solemnly, or in what form, must the pope make proclamation? And again, how can a person know infallibly that the pope has followed the proper procedure? Or what the pope has said?</p>
+
+<blockquote>
+  <p>An infallible pronouncement—whether made by the pope alone or by an ecumenical council—usually is made only when some doctrine has been called into question. Most doctrines have never been doubted by the large majority of Catholics.</p>
+</blockquote>
+
+<p>I think this is an appeal to purity (No True Scotsman). A Catholic is one who never calls anything significant into question, until he does. At which point he’s no longer Catholic? so it’s still true that nothing has been doubted by the large majority of Catholics. Otherwise a falsifying example would be the Reformation, when a <em>very</em> significant number of Catholics began doubting many <em>major</em> doctrines.</p>
+
+<blockquote>
+  <p>Some ask how popes can be infallible if some of them lived scandalously. This objection, of course, illustrates the common confusion between infallibility and impeccability. There is no guarantee that popes won’t sin or give bad example.</p>
+</blockquote>
+
+<p><a href="https://en.wikipedia.org/wiki/Pope_John_XII">Pope John XII</a> is a popular example of a pope living scandalously. He was excommunicated, declared to be apostate, and died shamefully. Indeed, if any kind of infallibility is present in the papacy, then this guy is proof that it comes with absolutely no guarantee of impeccability.</p>
+
+<p>But I have a question about this. Above, Catholic Answers said a bishop is infallible while “maintaining the bond of unity […] with Peter’s successor”. Surely Pope John XII was not maintaining that bond. So in his case he possessed the gift of infallibility by nature of his office (he was pope), while simultaneously he did not “enjoy the prerogative of infallibility” due to his sins? If so, then to me that feels like the fallacy of division (I think that’s the name for it?)—the doctrine arises out of a study of generalities, but then is used to overrule any contradicting specifics.</p>
+
+<blockquote>
+  <p>Other people wonder how infallibility could exist if some popes disagreed with others. This, too, shows an inaccurate understanding of infallibility, which applies only to solemn, official teachings on faith and morals, not to disciplinary decisions or even to unofficial comments on faith and morals. A pope’s private theological opinions are not infallible; only what he solemnly defines is considered to be infallible teaching.</p>
+</blockquote>
+
+<p>How solemnly? How “officially”?</p>
+
+<p>How can a person know <em>infallibly</em> that threshold has been reached? If you cannot know it infallibly, then you cannot know that the solemn official teaching is infallible, and so infallibility is an assumption or a courtesy.</p>
+
+<p>I believe it’s Catholic teaching that popes may err in matters of fact. Therefore isn’t it possible that a pope may err in saying “I solemnly and officially teach this”? Therefore you cannot know it is infallible without already knowing it’s infallible.</p>
+
+<p>Are there not examples of solemn, official teachings on faith and morals within the history of the Catholic Church which disagree with each other? I’ve heard allegations that there are.</p>
+
+<p>If they do not disagree, how do you know that infallibly? Wouldn’t certainty on the matter require the intervention of a bishop, and infallible knowledge of it would require the pope with a council. But then how would you know infallibly whether the pope and the council are in agreement, unless you already assume that they agree. In which case isn’t it meaningless to say they must agree, because it’s question begging to state they must agree and to mean the determination of their agreement is a presumption.</p>
+
+<blockquote>
+  <p>As a biblical example of papal fallibility, Fundamentalists like to point to Peter’s conduct at Antioch, where he refused to eat with Gentile Christians in order not to offend certain Jews from Palestine (Gal. 2:11–16). For this Paul rebuked him. Did this demonstrate papal infallibility was non-existent? Not at all. Peter’s actions had to do with matters of discipline, not with issues of faith or morals. Furthermore, the problem was Peter’s actions, not his teaching. Paul acknowledged that Peter very well knew the correct teaching (Gal. 2:12–13).</p>
+</blockquote>
+
+<p>So Peter’s actions had nothing to do with issues of faith or morals? That’s absurd. He was leading people astray (Gal 2:13), which is certainly an issue of both faith and morals.</p>
+
+<p>So Peter’s actions have no teaching role whatsoever? That’s also absurd.</p>
+
+<blockquote>
+  <p>Fundamentalists must also acknowledge that Peter did have some kind of infallibility—they cannot deny that he wrote two infallible epistles of the New Testament while under protection against writing error. So, if his behavior at Antioch was not incompatible with this kind of infallibility, neither is bad behavior contrary to papal infallibility in general.</p>
+</blockquote>
+
+<p>I agree that Peter had some kind of infallibility with respect to authoring his scriptures. So yes, Peter’s misconduct did not nullify the epistles he wrote. I even have to admit that Solomon’s misconduct did not nullify Proverbs or Song of Songs.</p>
+
+<p>But I think Pope John XII could rightly be called a slave of the devil without any offense to Catholics. So isn’t it an entirely different thing to say the popes are the rock and foundation of the church, helping to preserve her from the gates of hell, when at least one pope is himself a slave of hell? How can a hellish foundation save from hell? And then how can infallibility be derived from implications of <em>that</em>? That certainly requires additional explanation, to say the least.</p>
+
+<h2 id="in-summary">In summary</h2>
+
+<p>I think I’m left wondering these things:</p>
+
+<ol>
+  <li>What is the function of the Catholic doctrine of infallibility?</li>
+  <li>It seems people can never have complete certainty of things which are supposedly infallible
+    <ol>
+      <li>How then is infallibility any better than an assumption or courtesy?</li>
+      <li>How do Catholics resolve the facts of fallible knowledge of infallibility, and fallible usages of it?</li>
+      <li>Similarly, how certain must a Catholic be of the infallibility of something in order to perform the functions of it?</li>
+    </ol>
+  </li>
+  <li>I think I’ve detected a couple instances of question begging, and one or two other fallacies
+    <ul>
+      <li>How can this doctrine be established without logical fallacies?</li>
+    </ul>
+  </li>
+</ol>
+
+<p>I think some of these questions will be easy to answer with additional research.</p>]]></content><author><name></name></author><category term="catholicism" /><summary type="html"><![CDATA[Questions that arise from a Catholic Answers tract]]></summary></entry><entry><title type="html">Matthew Poole, GPT Style</title><link href="/misc/2023/08/15/matthew-poole-chatgpt.html" rel="alternate" type="text/html" title="Matthew Poole, GPT Style" /><published>2023-08-15T00:00:00-05:00</published><updated>2023-08-15T00:00:00-05:00</updated><id>/misc/2023/08/15/matthew-poole-chatgpt</id><content type="html" xml:base="/misc/2023/08/15/matthew-poole-chatgpt.html"><![CDATA[<p>I’ve been reading a book written by Matthew Poole, a 17th century English Reformed Baptist, called <em>A Dialogue Between a Priest and a Protestant</em>. I thought it would be fun to make GPT-4 pretend to be him while talking with another instance of itself pretending to be a 17th century Roman Catholic priest.</p>
 
 <table>
   <thead>
@@ -1605,196 +1686,4 @@ use them to categorize types and reveal intent.</p>
   <li>They can be easy to extend correctly</li>
 </ul>
 
-<p>Use them! Use libraries that use them!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[At least, not necessarily]]></summary></entry><entry><title type="html">The Vanity of Modern Cosmology</title><link href="/misc/2022/08/30/vanity-modern-cosmology.html" rel="alternate" type="text/html" title="The Vanity of Modern Cosmology" /><published>2022-08-30T00:00:00-05:00</published><updated>2022-08-30T00:00:00-05:00</updated><id>/misc/2022/08/30/vanity-modern-cosmology</id><content type="html" xml:base="/misc/2022/08/30/vanity-modern-cosmology.html"><![CDATA[<p><a href="https://www.google.com/search?q=cosmology+definition">Google says</a> that
-“cosmology” is:</p>
-
-<blockquote>
-  <p><em>noun</em></p>
-
-  <p>the science of the origin and development of the universe. Modern astronomy is
-  dominated by the Big Bang theory, which brings together observational
-  astronomy and particle physics.</p>
-  <ul>
-    <li>an account or theory of the origin of the universe.</li>
-  </ul>
-</blockquote>
-
-<p>Wikipedia has an article titled
-“<a href="https://en.wikipedia.org/wiki/Timeline_of_the_far_future">Timeline of the far future</a>”.
-The article spans an unfathomable stretch of time from the near present all the
-way out to \(10^{10^{10^{56}}}\) years in the future. As of this writing it
-cites 209 references from a broad range of sources, including many who are
-highly regarded by the scientific community. In its own words:</p>
-
-<blockquote>
-  <p>While the future cannot be predicted with certainty, present understanding in
-  various scientific fields allows for the prediction of some far-future events,
-  if only in the broadest outline. These fields include astrophysics, which
-  studies how planets and stars form, interact, and die; particle physics, which
-  has revealed how matter behaves at the smallest scales; evolutionary biology,
-  which predicts how life will evolve over time; plate tectonics, which shows
-  how continents shift over millennia; and sociology, which examines how human
-  societies and cultures evolve.</p>
-</blockquote>
-
-<p>The article draws on a wide range of people from a wide range of fields.</p>
-
-<p>I don’t think it’s a stretch to say that article presents a sketch of modern
-cosmology.</p>
-
-<h2 id="the-future-and-its-impact">The future and its impact</h2>
-
-<p>What does the future hold?</p>
-
-<p>You probably have a good idea of how tomorrow is going to pan out. For most
-people it’ll be very unsurprising. You’ll wake up, eat breakfast, go to work,
-and so on. Tomorrow you’ll eat lunch because you won’t want to be hungry before
-suppertime rolls around.</p>
-
-<p>Later this week or perhaps later this month you’ll have a bill to pay. If you
-don’t pay that bill then you’ll be sent to collections. And so you’ll go to
-work and will earn your paycheck. And you have other things that you’ll want to
-do in the future, so you make plans to spend your paycheck on those things too.</p>
-
-<p>You probably do a great many things because <em>you foresee something in the
-future</em>. In a word, future events drive, control, motivate, and govern your
-actions now.</p>
-
-<h2 id="the-oughtness-of-the-future">The oughtness of the future</h2>
-
-<p>What ought you do today? It depends a lot on what the future will bring.</p>
-
-<p>Is it going to rain this afternoon? Then you ought to bring an umbrella with you
-when you go out.</p>
-
-<p>How many market cycles have you lived through and afterward thought “I
-ought to have distributed my investments in a different manner”?</p>
-
-<p>Are you working hard on a large project now because you believe it will be
-important in the future? In that case you attribute value to your present work
-because you anticipate that the outcome of your work will be valuable in the
-future.</p>
-
-<h2 id="the-future-of-modern-cosmology">The future of modern cosmology</h2>
-
-<p>These are the most distant events anticipated by the Wikipedia article I linked
-to above:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Years in the future</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>\(10^{10^{76}}\)</td>
-      <td>Beyond this point, it is almost certain that the universe will be an almost pure vacuum, with all baryonic matter having decayed into subatomic particles, until it reaches its final energy state, assuming it does not happen before this time.</td>
-    </tr>
-    <tr>
-      <td>\(10^{10^{120}}\)</td>
-      <td>Highest estimate for the time it takes for the universe to reach its final energy state.</td>
-    </tr>
-    <tr>
-      <td>\(10^{10^{10^{56}}}\)</td>
-      <td>Around this vast timeframe, quantum tunnelling in any isolated patch of the universe could generate new inflationary events, resulting in new Big Bangs giving birth to new universes.</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>To put it crassly, modern cosmology says everything is going to fizzle away into
-nothing.</p>
-
-<p>And then it’ll start over again. These “new inflationary events” aren’t one-off
-events; it’s cyclical.</p>
-
-<h2 id="vanity-of-vanities">Vanity of vanities</h2>
-
-<p>Have you ever read Ecclesiastes? Here’s how
-<a href="https://www.esv.org/Ecclesiastes+1/">chapter one</a> starts:</p>
-
-<blockquote>
-  <p>Vanity of vanities, says the Preacher,<br />
-	  vanity of vanities! All is vanity.<br />
-	What does man gain by all the toil<br />
-	  at which he toils under the sun?<br />
-	A generation goes, and a generation comes,<br />
-  but the earth remains forever.<br />
-	The sun rises, and the sun goes down,<br />
-	  and hastens to the place where it rises.<br />
-	The wind blows to the south<br />
-	  and goes around to the north;<br />
-	around and around goes the wind,<br />
-	  and on its circuits the wind returns.<br />
-	All streams run to the sea,<br />
-	  but the sea is not full;<br />
-	to the place where the streams flow,<br />
-	  there they flow again.<br />
-	All things are full of weariness;<br />
-	  a man cannot utter it;<br />
-	the eye is not satisfied with seeing,<br />
-	  nor the ear filled with hearing.<br />
-	What has been is what will be,<br />
-	  and what has been done is what will be done,<br />
-	  and there is nothing new under the sun.<br />
-	Is there a thing of which it is said,<br />
-	  “See, this is new”?<br />
-	It has been already<br />
-	  in the ages before us.<br />
-	There is no remembrance of former things,<br />
-	  nor will there be any remembrance<br />
-	of later things yet to be<br />
-	  among those who come after.<br /></p>
-</blockquote>
-
-<p>Ecclesiastes is basically an apologetic against the worldviews that were
-competing against ancient Hebrew thought at that time. Those worldviews thought
-that history was cyclical, and Solomon’s book makes it very clear how pointless
-such a history would be. On the other hand, history in the eyes of the Hebrew
-Bible is linear with a definite beginning and certain goal.</p>
-
-<p>Modern cosmology falls squarely in the sights of Ecclesiastes.</p>
-
-<h2 id="the-vanity-of-modern-cosmology">The vanity of modern cosmology</h2>
-
-<p>Not only are you supposed to believe that nobody will ever remember or care
-about anything you do. You’re also supposed to believe that the same thing is
-going to happen to someone else somewhere else. Over and over again forever.</p>
-
-<p>Why should you go to work tomorrow? According to modern cosmology your work is
-going to fizzle away and be forgotten. And then eventually someone else
-somewhere else is going to do whatever you are going to do tomorrow, whether you
-do it or not. So why not just stay home?</p>
-
-<p>On the one hand you can get away with whatever you want because nobody is
-watching, or if they are their opinion doesn’t really matter in the grand scheme
-of things because they’re destined to be just a fizzled out nothing.</p>
-
-<p>But on the other hand there is no glory in anything you do, because you also are
-destined to be just a fizzled out nothing.</p>
-
-<p>To put it simply, there is no “oughtness” to modern cosmology.</p>
-
-<h2 id="the-weight-and-consequence-of-biblical-cosmology">The weight and consequence of Biblical cosmology</h2>
-
-<p>In sharp contrast, the Bible is very clear that history has a date of
-manufacture. That was a few thousand years ago when God started saying things.</p>
-
-<p>And it is also clear that history is on a very intentional trajectory leading
-through a series of intentional events planned and executed by a sovereign and
-wise God.</p>
-
-<p>For example, the Day of Judgment is coming when “the heavens will pass away with
-a roar, and the heavenly bodies will be burned up and dissolved, and the earth
-and the works that are done on it will be exposed” (2 Peter 3:10).</p>
-
-<p>There is a God who made you. Therefore you are accountable to him. Furthermore
-he has fixed a Day of Judgment and has gone to great lengths to make two things
-clear: you are a sinner who is not able to make it through that Day; and there
-is a savior who is able to bring you through unscathed.</p>
-
-<p>Not only <em>ought</em> you to go to work (because God said so in 2 Thessalonians
-3:6–12)—it’s possible for your work tomorrow to be eternally
-significant (because God will reward whatever service is rendered to
-him—Ephesians 6:7–8).</p>]]></content><author><name></name></author><category term="misc" /><summary type="html"><![CDATA[The future of things, and the point thereof]]></summary></entry></feed>
+<p>Use them! Use libraries that use them!</p>]]></content><author><name></name></author><category term="programming" /><summary type="html"><![CDATA[At least, not necessarily]]></summary></entry></feed>

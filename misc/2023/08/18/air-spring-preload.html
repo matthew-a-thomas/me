@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z2FCS7Q00N"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-Z2FCS7Q00N');
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Adding preload makes an air spring stiffer, just like any spring">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=auto">
+    
+    <title>Air Spring Preload - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <div class="alert alert-info">
+            I've updated my <a href="/privacy">privacy policy</a> to reflect the fact that I'm now using Google Analytics.
+          </div>
+          
+          
+          <h1>Air Spring Preload</h1>
+          
+          
+          <p><i>August 18, 2023&mdash;Adding preload makes an air spring stiffer, just like any spring</i></p>
+          
+          
+
+
+          <p>You can make an <a href="https://en.wikipedia.org/wiki/Air_suspension">air spring</a> from an air piston like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>         load
+          V
+          |
+          |
+|         |         |
+|         |         |
+| shaft &gt; | &lt; shaft | &lt;
+|         |         | &lt;
+|---------+---------| &lt; barrel
+|                   | &lt;
+|    ^ piston ^     | &lt;
+|                   |
+|      * air *      |
+|                   |
++-------------------+
+
+   ^ cylinder cap ^
+</code></pre></div></div>
+
+<p>As long as the air inside the piston has no where to go, it’ll be springy.</p>
+
+<p>What follows is a quick proof that adding preload makes the air spring stiffer.</p>
+
+<h2 id="proof">Proof</h2>
+
+<p>According to gas laws, an isothermic (meaning thermal equilibrium) air spring obeys this principle:</p>
+
+\[P_1 \cdot V_1 = P_2 \cdot V_2\]
+
+<p>In other words, the pressure multiplied by the volume remains the same</p>
+
+<p>Now, a force is pressure multiplied over an area:</p>
+
+\[F = P \cdot A\]
+
+\[P = \frac{F}{A}\]
+
+<p>Which means,</p>
+
+\[\frac{F_1}{A_1} \cdot V_1 = \frac{F_2}{A_2} \cdot V_2\]
+
+\[F_1 \cdot h_1 = F_2 \cdot h_2\]
+
+\[\frac{F_1}{F_2} = \frac{h_2}{h_1}\]
+
+<p>Now, suppose that we preload it. Meaning add something to <em>both</em> forces, not just one of them. Using the picture above, if you increase the load then that’s increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).</p>
+
+\[F = \alpha + G\]
+
+\[\frac{\alpha + G_1}{\alpha + G_2} = \frac{h_2}{h_1}\]
+
+<p>“Stiffness” can be understood in terms of the change in that ratio \(\frac{h_2}{h_1}\). The smaller the change, the stiffer it is.</p>
+
+<p>So let’s pretend that the forces and heights are constant. What effect does the preload have on the rate of change of that ratio?</p>
+
+<p>Take the partial derivative of the left side:</p>
+
+\[\frac{\partial}{\partial \alpha} \frac{\alpha + G_1}{\alpha + G_2} = \frac{G_2 - G_1}{(G_2 + \alpha)^2}\]
+
+<p>See the \(\alpha\) (squared) in the denominator? That means it goes to zero as \(\alpha\) (the preload) increases.</p>
+
+<p>In other words, an air spring gets stiffer when you add preload.</p>
+
+<p>Just like any spring.</p>
+
+<h2 id="applications">Applications</h2>
+
+<p>There are multiple applications of this.</p>
+
+<h3 id="compressed-gas-springs">Compressed gas springs</h3>
+
+<p>There are multiple ways to add preload. One way is to put a weight on top like my example above. But another way is to enclose the top of the air piston and fill that space with <em>compressed</em> air. Then you get a compressed gas spring.</p>
+
+<h3 id="make-an-air-piston-less-slingshot-y">Make an air piston less slingshot-y</h3>
+
+<p>Suppose you replaced all the hydraulic cylinders in your excavator with air pistons. You have to work <em>really</em> hard to lift a heavy rock by pumping a ton of very compressed air into the air pistons. Then as the rock begins to lift it slips and falls out of the bucket. Guess what happens to all that compressed air? It decompresses by violently slingshotting the bucket off of your excavator and sending it into orbit. I hope you have insurance.</p>
+
+<p>That’s a silly example. But there are real life usages of air cylinders that move loads, and sometimes loads shift.</p>
+
+<p>How can you make it less like a slingshot? Add preload.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2023&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

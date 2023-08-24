@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z2FCS7Q00N"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-Z2FCS7Q00N');
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A toy file format for simple songs">
+
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=auto">
+    
+    <title>Custom Music Notation - Matthew A. Thomas</title>
+  </head>
+  <body class="text-justify">
+    <div class="container">
+      <div class="list-group list-group-flush">
+        <div class="list-group-item sticky-top">
+          <h3 class="text-center">
+  <a class="text-body" href="/" id="title">
+    Matthew A. Thomas
+  </a>
+</h3>
+        </div>
+        <div class="list-group-item">
+          
+          <div class="alert alert-info">
+            I've updated my <a href="/privacy">privacy policy</a> to reflect the fact that I'm now using Google Analytics.
+          </div>
+          
+          
+          <h1>Custom Music Notation</h1>
+          
+          
+          <p><i>August 23, 2023&mdash;A toy file format for simple songs</i></p>
+          
+          
+
+
+          <p>I made a toy file format for simple songs. Here’s what <a href="https://hymnary.org/media/fetch/96169"><em>Amazing Grace</em></a> looks like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> -               A 3 1
+
+ -  1 4      1 4  2 1 1         1 4
+       2        2                  2
+G- 4 1  4   4 1        4  11   4 1  A
+ #
+ -       2               3  1
+  2       42            2    42
+R
+</code></pre></div></div>
+
+<p>You read it from left to right. The first column tells where G4 is (G4 is the second line from the bottom in the treble clef), and also tells where the “rest” line is. The second column is for the key signature: “b” means the notes on that line are flat; “#” means they are sharp. <em>Amazing Grace</em> is in the key of G major so all the lines for “F”s are sharp. Then a single number is in each of the following columns.</p>
+
+<p>You use the number “1” for the shortest note in the song. <em>Amazing Grace</em> has eighth notes (but not sixteenth notes) so for it “1” means “eighth note”, “2” means “quarter note”, and so on. The number has to fit in a single column but 1–9 is a pretty limited range, so actually it’s a base 26 number (A = 10, B = 11, and so on).</p>
+
+<p>Maybe later I’ll post my code for parsing this format into C# data objects, and for determining the frequency and duration of each note. I’m currently using that code to generate stepper motor commands to make a stepper motor sing songs for me.</p>
+
+<p>I find this format easy to author (once you get the hang of it) and not too bad to parse… perfect for toy projects.</p>
+
+        </div>
+        <div class="list-group-item">
+          <footer class="font-italic" style="font-size: 0.8em;">
+  <p>
+    &copy; Matthew A. Thomas 2023&mdash;<a href="/about">About</a>&mdash;<a href="/privacy">Privacy Policy</a>
+  </p>
+</footer>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
+  </body>
+</html>
+<!-- View the source code here: https://github.com/matthew-a-thomas/me -->

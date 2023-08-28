@@ -60,7 +60,7 @@ R
 
 <p>You read it from left to right. The first column tells where G4 is (G4 is the second line from the bottom in the treble clef), and also tells where the “rest” line is. The second column is for the key signature: “b” means the notes on that line are flat; “#” means they are sharp. <em>Amazing Grace</em> is in the key of G major so all the lines for “F”s are sharp. Then a single number is in each of the following columns.</p>
 
-<p>You use the number “1” for the shortest note in the song. <em>Amazing Grace</em> has eighth notes (but not sixteenth notes) so for it “1” means “eighth note”, “2” means “quarter note”, and so on. The number has to fit in a single column but 1–9 is a pretty limited range, so actually it’s a base 26 number (A = 10, B = 11, and so on).</p>
+<p>You use the number “1” for the shortest note in the song. <em>Amazing Grace</em> has eighth notes (but not sixteenth notes) so for it “1” means “eighth note”, “2” means “quarter note”, and so on. The number has to fit in a single column but 1–9 is a pretty limited range, so actually it’s a base 36 number (A = 10, B = 11, and so on).</p>
 
 <p>Maybe later I’ll post my code for parsing this format into C# data objects, and for determining the frequency and duration of each note. I’m currently using that code to generate stepper motor commands to make a stepper motor sing songs for me.</p>
 

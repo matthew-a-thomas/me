@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-30T21:52:08-05:00</updated><id>/feed.xml</id><entry><title type="html">Jump Starting with Vacuum</title><link href="/misc/2023/08/30/jump-starting-with-vacuum.html" rel="alternate" type="text/html" title="Jump Starting with Vacuum" /><published>2023-08-30T00:00:00-05:00</published><updated>2023-08-30T00:00:00-05:00</updated><id>/misc/2023/08/30/jump-starting-with-vacuum</id><content type="html" xml:base="/misc/2023/08/30/jump-starting-with-vacuum.html"><![CDATA[<p>In theory it would not be possible to jump start a car by hooking a vacuum to its exhaust pipe, no matter how strong the vacuum is.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-08-30T22:04:18-05:00</updated><id>/feed.xml</id><entry><title type="html">Jump Starting with Vacuum</title><link href="/misc/2023/08/30/jump-starting-with-vacuum.html" rel="alternate" type="text/html" title="Jump Starting with Vacuum" /><published>2023-08-30T00:00:00-05:00</published><updated>2023-08-30T00:00:00-05:00</updated><id>/misc/2023/08/30/jump-starting-with-vacuum</id><content type="html" xml:base="/misc/2023/08/30/jump-starting-with-vacuum.html"><![CDATA[<p>In theory it would not be possible to jump start a car by hooking a vacuum to its exhaust pipe, no matter how strong the vacuum is.</p>
 
 <p>(Assuming a normal four-stroke engine that would otherwise idle fine.)</p>
 
@@ -76,7 +76,7 @@ R
 
 <p>In other words, the ratio between the forces equals the inverse ratio between the heights.</p>
 
-<p>Now, suppose that we preload it. Meaning add something to <em>both</em> forces, not just one of them. Using the picture above, if you increase the load on top then that’s increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).</p>
+<p>Now, suppose that we preload it. Meaning add something to <em>both</em> forces, not just one of them. Using the picture above, if you increase the load on top then that’s increasing one force, and that will be greeted by an equally opposing force (from squashed air).</p>
 
 \[F = \alpha + G\]
 

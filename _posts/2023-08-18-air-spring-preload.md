@@ -54,7 +54,7 @@ $$ \frac{F_1}{F_2} = \frac{h_2}{h_1} $$
 
 In other words, the ratio between the forces equals the inverse ratio between the heights.
 
-Now, suppose that we preload it. Meaning add something to _both_ forces, not just one of them. Using the picture above, if you increase the load on top then that's increasing one force, and that will be greeting by an equally opposing force (as the air gets squashed).
+Now, suppose that we preload it. Meaning add something to _both_ forces, not just one of them. Using the picture above, if you increase the load on top then that's increasing one force, and that will be greeted by an equally opposing force (from squashed air).
 
 $$ F = \alpha + G $$
 

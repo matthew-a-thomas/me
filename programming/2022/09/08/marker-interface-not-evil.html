@@ -32,11 +32,6 @@
         </div>
         <div class="list-group-item">
           
-          <div class="alert alert-info">
-            I've updated my <a href="/privacy">privacy policy</a> to reflect the fact that I'm now using Google Analytics.
-          </div>
-          
-          
           <h1>Marker Interfaces Are Not Evil</h1>
           
           
@@ -88,7 +83,7 @@ is close to the top.</p>
 
     <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">(</span><span class="n">IReportModel</span> <span class="n">model</span><span class="p">,</span> <span class="n">ReportRenderer</span> <span class="n">generalRenderer</span><span class="p">)</span>
     <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">model</span> <span class="k">is</span> <span class="n">not</span> <span class="n">T</span> <span class="n">asT</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">model</span> <span class="k">is</span> <span class="k">not</span> <span class="n">T</span> <span class="n">asT</span><span class="p">)</span>
             <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Mismatched types"</span><span class="p">);</span>
         <span class="k">return</span> <span class="nf">Render</span><span class="p">(</span><span class="n">asT</span><span class="p">,</span> <span class="n">generalRenderer</span><span class="p">);</span>
     <span class="p">}</span>
@@ -232,8 +227,8 @@ doesn’t require reflection or type casting:</p>
 
 <span class="k">public</span> <span class="k">class</span> <span class="nc">TableReportModel</span> <span class="p">:</span> <span class="n">IReportModel</span>
 <span class="p">{</span>
-    <span class="k">public</span> <span class="n">StringReportModel</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
-    <span class="k">public</span> <span class="n">IReportModel</span><span class="p">[][]</span> <span class="n">Rows</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">StringReportModel</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">init</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">IReportModel</span><span class="p">[][]</span> <span class="n">Rows</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">init</span><span class="p">;</span> <span class="p">}</span>
 
     <span class="k">public</span> <span class="n">Report</span> <span class="nf">Render</span><span class="p">()</span>
     <span class="p">{</span>
@@ -293,8 +288,8 @@ much responsibility. Here’s one way to refactor that:</p>
 
 <span class="k">public</span> <span class="k">class</span> <span class="nc">TableReportModel</span>
 <span class="p">{</span>
-    <span class="k">public</span> <span class="n">StringReportModel</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
-    <span class="k">public</span> <span class="p">???[][]</span> <span class="n">Rows</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="n">init</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">StringReportModel</span> <span class="n">Title</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">init</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="p">???[][]</span> <span class="n">Rows</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">init</span><span class="p">;</span> <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="k">public</span> <span class="k">class</span> <span class="nc">TableReportModelRenderer</span> <span class="p">:</span> <span class="n">IReportModelRenderer</span><span class="p">&lt;</span><span class="n">TableReportModel</span><span class="p">&gt;</span>
@@ -417,9 +412,8 @@ use them to categorize types and reveal intent.</p>
       </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" crossorigin="anonymous"></script>
   </body>
 </html>

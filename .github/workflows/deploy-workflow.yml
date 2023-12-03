@@ -10,19 +10,22 @@ jobs:
     name: deploy
     runs-on: ubuntu-latest
     container:
-      image: jekyll/jekyll:4
+      image: ruby
     steps:
       - name: Checkout ungenerated site
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       - name: Checkout generated site to '_site' directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: 'gh-pages'
           path: '_site'
       - name: Install dependencies
         run: |
+          echo 'export GEM_HOME="$HOME/gems"' >> "$GITHUB_ENV"
+          echo 'export PATH="$HOME/gems/bin:$PATH"' >> "$GITHUB_ENV"
+          gem install jekyll bundler
           bundle install
       - name: Build website
         run: |

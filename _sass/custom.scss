@@ -4,7 +4,7 @@ $font-family-base: 'Merriweather', serif;
 $font-weight-normal: 300;
 $headings-font-family: 'Raleway', sans-serif;
 $headings-font-weight: 700;
-@import "../../_sass/bootstrap/bootstrap";
+@import "../submodules/bootstrap/scss/bootstrap";
 b, strong {
   font-weight: 700;
 }

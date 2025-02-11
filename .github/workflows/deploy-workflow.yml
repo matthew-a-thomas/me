@@ -30,7 +30,7 @@ jobs:
       - name: Build website
         run: |
           mkdir .jekyll-cache
-          jekyll build
+          bundle exec jekyll build
       - name: Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

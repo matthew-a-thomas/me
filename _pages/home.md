@@ -20,7 +20,7 @@ Here are my posts:
     {% endfor %}
     <br/>
     &mdash;{{ post.description }}<br/>
-    <i>{{ post.date | date: '%B %d, %Y' }}{% if post.category %} ({{ post.category }}){% endif %}</i>
+    <i>{{ post.date | date: '%B %d, %Y' }}{% if post.category %} (<a href="/categories/{{ post.category }}">{{ post.category }}</a>){% endif %}</i>
   </p>
 </li>
 {% endfor %}

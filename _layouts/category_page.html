@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&family=Raleway:wght@700&display=auto">
     
-    <title>{% if page.url != "/" %}{{ page.title }} - {% endif %}{{ site.organization }}</title>
+    <title>{{ page.category | capitalize }} - {{ site.organization }}</title>
   </head>
   <body class="text-justify">
     <div class="container{% if page.wide %}-fluid{% endif %}">
@@ -27,14 +27,24 @@
           {% include header.html %}
         </div>
         <div class="list-group-item">
-          {% if page.url != "/" %}
-          <h1>{{ page.title }}</h1>
-          {% endif %}
-          {% if page.collection == "posts" %}
-          <p><i>{{ page.date | date: '%B %d, %Y' }}&mdash;{{ page.description }}{% if page.category %} (<a href="/categories/{{ page.category }}">{{ page.category }}</a>){% endif %}</i></p>
-          {% endif %}
-          {% include series.html %}
-          {{ content }}
+          <h1>{{ page.category | capitalize }}</h1>
+          <ul>{% for post in page.linked_docs %}
+            <li>
+              <p>
+                <b><a href="{{ post.url }}">{{ post.title }}</a></b>
+                {% for series in site.series %}
+                {% for path in series.paths %}
+                {% if post.path == path %}
+                (<i>Series: <b>{{ series.content | strip_html }}</b></i>)
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+                <br/>
+                &mdash;{{ post.description }}<br/>
+                <i>{{ post.date | date: '%B %d, %Y' }}</i>
+              </p>
+            </li>{% endfor %}
+          </ul>
         </div>
         <div class="list-group-item">
           {% include footer.html %}

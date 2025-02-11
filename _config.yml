@@ -35,6 +35,11 @@ defaults:
       path: ""
     values:
       layout: "default"
+  - scope:
+      type: categories
+    values:
+      layout: category_page
+      permalink: /categories/:category/
 
 exclude:
   - README.md

@@ -13,8 +13,3 @@ you.
 You can email me:
 
 [me@matthewathomas.com](email:me@matthewathomas.com){:target="_blank"}
-
-## Feedback
-
-Feel free to email me (email address above) or start
-[a discussion on GitHub](https://github.com/matthew-a-thomas/me/discussions){:target="_blank"}.

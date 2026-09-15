@@ -1,8 +1,27 @@
 ---
 title: Matthew Poole, GPT Style
-description: An interfaith dialog between an AI English Reformed Baptist and an AI Catholic Priest leads to warm fuzzy feelings
+description: An interfaith dialog between an AI 17th century Presbyterian and an AI 17th century Catholic Priest leads to warm fuzzy feelings
 category: misc
 ---
+
+<div class="alert alert-warning">
+{% markdown %}
+## Update September 15, 2026
+
+This article contains a serious error in fact! The subtitle used to read:
+
+> An interfaith dialog between an AI English **Reformed Baptist** and an AI Catholic Priest leads to warm fuzzy feelings
+
+I don't know where I got the idea that Matthew Poole was a Reformed Baptist. [He was in fact a Presbyterian](https://en.wikisource.org/wiki/Dictionary_of_National_Biography,_1885-1900/Poole,_Matthew):
+
+> Poole was a _jure divino_ presbyterian, and an authorised defender of the views on ordination of the London provincial assembly
+
+I've updated the subtitle accordingly. But the error remains in the system prompts below and the ensuing "debate" (if that's what you want to call it).
+
+I nearly pulled this entire article, but I'd rather leave this as a historical marker of what AI was (is?) like. And I think The Point at the end still applies even today.
+
+{% endmarkdown %}
+</div>
 
 I've been reading a book written by Matthew Poole, a 17th century English Reformed Baptist, called _A Dialogue Between a Priest and a Protestant_. I thought it would be fun to make GPT-4 pretend to be him while talking with another instance of itself pretending to be a 17th century Roman Catholic priest.
 

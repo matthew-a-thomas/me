@@ -89,7 +89,7 @@ But you cannot use that function on `ReadOnlySpan<int>`. Instead you have to mak
    ```csharp
    public sealed record ReadOnlyMemoryToEnumerableAdapter<T>(ReadOnlyMemory<T> Memory) : IEnumerable<T>
    {
-     public IEnumerator<int> GetEnumerator() => ...;
+     public IEnumerator<T> GetEnumerator() => ...;
      IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
    }
    ```

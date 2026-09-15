@@ -63,7 +63,7 @@ recursion is sort of like that. But at the same time there's something lacking
 in my attempts to describe God's knowledge recursively. I think it has to do
 with the difference between having an algorithm that can recursively compute
 something&mdash;want to know if a number is prime? Easy, just find out if it's
-evenly divided by a number other than the number 1&mdash;versus already having
+evenly divided by a number other than the number 1 and itself&mdash;versus already having
 the answer. God already knows what _all_ the prime numbers are. It's not that
 God has some procedure he has to follow in order to arrive at his knowledge
 (such as "write down 'God knows that. And that. And that' forever). No, God

@@ -12,4 +12,4 @@ you.
 
 You can email me:
 
-[me@matthewathomas.com](email:me@matthewathomas.com){:target="_blank"}
+[me@matthewathomas.com](mailto:me@matthewathomas.com){:target="_blank"}

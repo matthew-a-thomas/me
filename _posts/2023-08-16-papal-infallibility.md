@@ -30,7 +30,7 @@ I think this is an appeal to purity (No True Scotsman). A Catholic is one who ne
 
 > Some ask how popes can be infallible if some of them lived scandalously. This objection, of course, illustrates the common confusion between infallibility and impeccability. There is no guarantee that popes won’t sin or give bad example.
 
-[Pope John XII](https://en.wikipedia.org/wiki/Pope_John_XII) is a popular example of a pope living scandalously. He was excommunicated, declared to be apostate, and died shamefully. Indeed, if any kind of infallibility is present in the papacy, then this guy is proof that it comes with absolutely no guarantee of impeccability.
+[Pope John XII](https://en.wikipedia.org/wiki/Pope_John_XII) is a popular example of a pope living scandalously. He was deposed, declared to be apostate, and died shamefully. Indeed, if any kind of infallibility is present in the papacy, then this guy is proof that it comes with absolutely no guarantee of impeccability.
 
 But I have a question about this. Above, Catholic Answers said a bishop is infallible while "maintaining the bond of unity [...] with Peter’s successor". Surely Pope John XII was not maintaining that bond. So in his case he possessed the gift of infallibility by nature of his office (he was pope), while simultaneously he did not "enjoy the prerogative of infallibility" due to his sins? If so, then to me that feels like the fallacy of division (I think that's the name for it?)&mdash;the doctrine arises out of a study of generalities, but then is used to overrule any contradicting specifics.
 

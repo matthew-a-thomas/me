@@ -29,4 +29,5 @@ end
 # Performance-booster for watching directories on Windows
 gem "wdm", "~> 0.2", :install_if => Gem.win_platform?
 
-gem "webrick", "~> 1"
+# logger left the Ruby standard library in 4.0
+gem "logger", "~> 1"

@@ -75,7 +75,7 @@ Did you know the original **doesn't say a single thing about Herald Angels**?! I
 > O! to All Thyself impart,  
 > Form'd in each Believing Heart.
 
-It was George Whitefield who slightly altered the words to "Hark! The Herald Angels sing" in 1758, nearly twenty years later. The meaning is roughly the same. Whitefield also removed the eighth and tenth verses. I'm sure his intentions were good.
+It was George Whitefield who slightly altered the words to "Hark! The Herald Angels sing" in 1753[^1]. The meaning is roughly the same. Whitefield also removed the eighth and tenth verses. I'm sure his intentions were good.
 
 But it was Sir David Willcocks and Reginald Jacques who totally gutted the best verses of all in 1961, more than two hundred years later.
 
@@ -112,3 +112,5 @@ This is the great prayer of every Christian through the ages.
 ## The point
 
 I think I've found my new favorite Christmas carol. Well, new to me.
+
+[^1]: Update September 15, 2026: I originally (and incorrectly) said he changed the hymn in 1758.
